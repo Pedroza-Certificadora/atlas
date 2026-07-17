@@ -76,9 +76,22 @@ Marcos Henrique Pedroza
     window.setTimeout(showRevealElements, 1200);
   }
 
+  function initializeHeader() {
+    var header = document.querySelector(".site-header");
+    if (!header) { return; }
+
+    function updateHeader() {
+      header.classList.toggle("scrolled", window.scrollY > 8);
+    }
+
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+  }
+
   function initialize() {
     document.documentElement.classList.add("js-ready");
     initializeCurrentYear();
+    initializeHeader();
     initializeMenu();
     initializeReveal();
   }
