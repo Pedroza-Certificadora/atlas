@@ -1,500 +1,588 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!--
-    Pedroza Certificadora - Projeto Atlas
-    ConcepÃ§Ã£o, Design e Desenvolvimento
-    Marcos Henrique Pedroza
-  -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="Marcos Henrique Pedroza">
-  <meta name="designer" content="Marcos Henrique Pedroza">
-  <meta name="description" content="CertificaÃ§Ã£o Digital ICP-Brasil com emissÃ£o por videoconferÃªncia, instalaÃ§Ã£o remota e suporte humano em todo o Brasil.">
-  <meta name="theme-color" content="#071a33">
-  <meta property="og:title" content="Pedroza Certificadora | Identidade digital com atendimento humano">
-  <meta property="og:description" content="EmissÃ£o, renovaÃ§Ã£o, instalaÃ§Ã£o e suporte para certificados digitais e-CPF, e-CNPJ, A1 e A3.">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="pt_BR">
-  <meta property="og:image" content="images/logo/logo-pedroza.png">
-  <title>Pedroza Certificadora | CertificaÃ§Ã£o Digital</title>
+    <meta charset="UTF-8">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/responsive.css">
+    <meta
+        name="description"
+        content="Pedroza Certificadora: emissão, renovação, instalação e suporte para Certificados Digitais ICP-Brasil em todo o Brasil."
+    >
+
+    <meta name="theme-color" content="#0d3b66">    <meta name="author" content="Marcos Henrique Pedroza">    <meta name="designer" content="Marcos Henrique Pedroza">
+
+    <meta
+        property="og:title"
+        content="Pedroza Certificadora"
+    >
+
+    <meta
+        property="og:description"
+        content="Certificação Digital com segurança, agilidade e atendimento especializado."
+    >
+
+    <meta property="og:type" content="website">
+
+    <title>Pedroza Certificadora | Certificação Digital</title>
+
+    <link rel="icon" href="images/logo/logo-pedroza.png">
+
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/fixes.css">
 </head>
+
 <body>
-  <a class="skip-link" href="#conteudo">Ir para o conteÃºdo</a>
 
-  <header class="site-header" id="topo">
-    <div class="container header-inner">
-      <a class="brand" href="#inicio" aria-label="Pedroza Certificadora - PÃ¡gina inicial">
-        <img src="images/logo/logo-pedroza.png" alt="Pedroza Certificadora">
-      </a>
+<header class="header" id="topo">
+    <div class="container header-container">
 
-      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-navigation" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+        <a class="logo" href="#">
 
-      <nav class="main-navigation" id="main-navigation" aria-label="NavegaÃ§Ã£o principal">
-        <a href="#inicio">InÃ­cio</a>
-        <a href="#solucoes">Certificados</a>
-        <a href="#diferenciais">Por que a Pedroza</a>
-        <a href="#portal">Portal</a>
-        <a href="#contato">Contato</a>
-      </nav>
+    <img src="images/logo/logo-pedroza.png" alt="Pedroza Certificadora">
 
-      <div class="header-actions">
-        <a class="header-client-link" href="#portal">Ãrea do Cliente</a>
-        <a class="button button-small button-primary" href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20gostaria%20de%20emitir%20ou%20renovar%20meu%20certificado%20digital." target="_blank" rel="noopener noreferrer">
-          Falar com especialista
-        </a>
-      </div>
+    </a>
+
+        <button
+            class="header-menu-button"
+            type="button"
+            aria-label="Abrir menu"
+            aria-expanded="false"
+            aria-controls="main-menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav
+            class="header-menu"
+            id="main-menu"
+            aria-label="Navegação principal"
+        >
+            <a href="#inicio">Início</a>
+            <a href="#certificados">Certificados</a>
+            <a href="#servicos">Serviços</a>
+            <a href="#portal">Portal</a>
+            <a href="#empresa">Empresa</a>
+            <a href="#contato">Contato</a>
+        </nav>
+
+        <div class="header-actions">
+            <a
+                class="button button-secondary"
+                href="#portal"
+            >
+                Área do Cliente
+            </a>
+
+            <a
+                class="button button-whatsapp"
+                href="https://wa.me/5521991674117"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                WhatsApp
+            </a>
+        </div>
+
     </div>
-  </header>
+</header>
 
-  <main id="conteudo">
+<main>
+
     <section class="hero" id="inicio">
-      <div class="hero-orb hero-orb-one" aria-hidden="true"></div>
-      <div class="hero-orb hero-orb-two" aria-hidden="true"></div>
+        <div class="container hero-container">
 
-      <div class="container hero-layout">
-        <div class="hero-content reveal">
-          <span class="eyebrow">
-            <span class="eyebrow-dot"></span>
-            CertificaÃ§Ã£o Digital ICP-Brasil
-          </span>
+            <div class="hero-content reveal">
 
-          <h1>
-            Sua identidade digital,
-            <span>segura e pronta para avanÃ§ar.</span>
-          </h1>
+                <span class="badge">
+                    Certificação Digital ICP-Brasil
+                </span>
 
-          <p class="hero-lead">
-            EmissÃ£o, renovaÃ§Ã£o, instalaÃ§Ã£o e suporte para certificados digitais,
-            com atendimento humano, videoconferÃªncia e acompanhamento em todas as etapas.
-          </p>
+                <h1 class="hero-title">
+                    Segurança digital para pessoas, profissionais e empresas.
+                </h1>
 
-          <div class="hero-actions">
-            <a class="button button-primary button-large" href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20atendimento%20para%20certificado%20digital." target="_blank" rel="noopener noreferrer">
-              Emitir meu certificado
-              <span aria-hidden="true">â†’</span>
-            </a>
-            <a class="button button-ghost button-large" href="#solucoes">
-              Conhecer soluÃ§Ãµes
-            </a>
-          </div>
+                <p class="hero-description">
+                    Emissão, renovação, instalação e suporte para Certificados
+                    Digitais, com atendimento humano, videoconferência e
+                    acompanhamento em todas as etapas.
+                </p>
 
-          <ul class="trust-list" aria-label="Diferenciais do atendimento">
-            <li>
-              <span class="check-icon" aria-hidden="true">âœ“</span>
-              Atendimento nacional
-            </li>
-            <li>
-              <span class="check-icon" aria-hidden="true">âœ“</span>
-              EmissÃ£o por vÃ­deo
-            </li>
-            <li>
-              <span class="check-icon" aria-hidden="true">âœ“</span>
-              Suporte de verdade
-            </li>
-          </ul>
-        </div>
+                <div class="hero-actions">
+                    <a
+                        class="button button-primary"
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Emitir certificado
+                    </a>
 
-        <div class="hero-visual reveal" aria-label="Jornada de atendimento Pedroza Certificadora">
-          <div class="security-ring security-ring-one" aria-hidden="true"></div>
-          <div class="security-ring security-ring-two" aria-hidden="true"></div>
+                    <a
+                        class="button button-secondary"
+                        href="#servicos"
+                    >
+                        Conhecer serviços
+                    </a>
+                </div>
 
-          <article class="hero-dashboard">
-            <div class="dashboard-top">
-              <div>
-                <span class="dashboard-label">Atendimento inteligente</span>
-                <h2>Como podemos ajudar?</h2>
-              </div>
-              <span class="status-pill">
-                <span></span>
-                DisponÃ­vel
-              </span>
+                <div class="hero-highlights">
+                    <span>Atendimento em todo o Brasil</span>
+                    <span>Emissão por videoconferência</span>
+                    <span>Suporte especializado</span>
+                </div>
+
             </div>
 
-            <div class="dashboard-options">
-              <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20emitir%20um%20certificado%20digital." target="_blank" rel="noopener noreferrer">
-                <span class="option-icon" aria-hidden="true">ID</span>
-                <span>
-                  <strong>Emitir certificado</strong>
-                  <small>e-CPF, e-CNPJ, A1 e A3</small>
-                </span>
-                <em aria-hidden="true">â†—</em>
-              </a>
+            <aside class="hero-panel reveal">
 
-              <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20renovar%20meu%20certificado%20digital." target="_blank" rel="noopener noreferrer">
-                <span class="option-icon" aria-hidden="true">RN</span>
-                <span>
-                  <strong>Renovar certificado</strong>
-                  <small>Processo simples e orientado</small>
-                </span>
-                <em aria-hidden="true">â†—</em>
-              </a>
+                <div class="hero-panel-header">
+                    <div>
+                        <span class="section-label">
+                            Atendimento inteligente
+                        </span>
 
-              <a href="#diferenciais">
-                <span class="option-icon" aria-hidden="true">PC</span>
-                <span>
-                  <strong>InstalaÃ§Ã£o assistida</strong>
-                  <small>ConfiguraÃ§Ã£o remota completa</small>
-                </span>
-                <em aria-hidden="true">â†“</em>
-              </a>
+                        <h2>Como podemos ajudar?</h2>
+                    </div>
 
-              <a href="#contato">
-                <span class="option-icon" aria-hidden="true">SP</span>
-                <span>
-                  <strong>Suporte especializado</strong>
-                  <small>Ajuda antes, durante e depois</small>
-                </span>
-                <em aria-hidden="true">â†“</em>
-              </a>
-            </div>
+                    <span class="status-badge">
+                        Disponível
+                    </span>
+                </div>
 
-            <div class="dashboard-footer">
-              <div class="shield-mark" aria-hidden="true">âœ“</div>
-              <p>
-                <strong>Ambiente seguro</strong>
-                <span>Processo acompanhado por agentes capacitados.</span>
-              </p>
-            </div>
-          </article>
+                <div class="hero-services-grid">
 
-          <div class="floating-card floating-card-top" aria-hidden="true">
-            <span>100+</span>
-            <small>certificados emitidos</small>
-          </div>
+                    <a
+                        class="service-shortcut"
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <span class="service-shortcut-icon">🔐</span>
+                        <strong>Emitir certificado</strong>
+                        <small>e-CPF, e-CNPJ, A1 e A3</small>
+                    </a>
 
-          <div class="floating-card floating-card-bottom" aria-hidden="true">
-            <span>Brasil</span>
-            <small>atendimento por vÃ­deo</small>
-          </div>
+                    <a
+                        class="service-shortcut"
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <span class="service-shortcut-icon">🔄</span>
+                        <strong>Renovar certificado</strong>
+                        <small>Renovação simples e orientada</small>
+                    </a>
+
+                    <a
+                        class="service-shortcut"
+                        href="#servicos"
+                    >
+                        <span class="service-shortcut-icon">💻</span>
+                        <strong>Instalação remota</strong>
+                        <small>Configuração com suporte técnico</small>
+                    </a>
+
+                    <a
+                        class="service-shortcut"
+                        href="#contato"
+                    >
+                        <span class="service-shortcut-icon">💬</span>
+                        <strong>Suporte humano</strong>
+                        <small>Atendimento em todas as etapas</small>
+                    </a>
+
+                </div>
+
+            </aside>
+
         </div>
-      </div>
-
-      <div class="container credibility-strip reveal">
-        <p>Uma jornada simples, humana e segura</p>
-        <div>
-          <span>ICP-Brasil</span>
-          <span>VideoconferÃªncia</span>
-          <span>InstalaÃ§Ã£o remota</span>
-          <span>Suporte especializado</span>
-        </div>
-      </div>
     </section>
 
-    <section class="section solutions-section" id="solucoes">
-      <div class="container">
-        <div class="section-heading section-heading-centered reveal">
-          <span class="section-kicker">SoluÃ§Ãµes digitais</span>
-          <h2>O certificado certo para cada momento</h2>
-          <p>
-            OrientaÃ§Ã£o clara para vocÃª escolher com seguranÃ§a, emitir com agilidade
-            e usar seu certificado sem complicaÃ§Ã£o.
-          </p>
-        </div>
+    <section class="numbers-section">
+        <div class="container numbers-grid">
 
-        <div class="solutions-grid">
-          <article class="solution-card featured reveal">
-            <div class="card-topline">
-              <span class="solution-icon">PF</span>
-              <span class="card-tag">Pessoa fÃ­sica</span>
-            </div>
-            <h3>e-CPF</h3>
-            <p>
-              Para assinaturas eletrÃ´nicas, serviÃ§os pÃºblicos, profissionais liberais
-              e acesso seguro a plataformas digitais.
-            </p>
-            <ul>
-              <li>Profissionais e autÃ´nomos</li>
-              <li>DeclaraÃ§Ãµes e procuraÃ§Ãµes</li>
-              <li>Assinatura com validade jurÃ­dica</li>
-            </ul>
-            <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20e-CPF." target="_blank" rel="noopener noreferrer">
-              Solicitar e-CPF <span>â†’</span>
-            </a>
-          </article>
-
-          <article class="solution-card reveal">
-            <div class="card-topline">
-              <span class="solution-icon">PJ</span>
-              <span class="card-tag">Empresas</span>
-            </div>
-            <h3>e-CNPJ</h3>
-            <p>
-              Para emissÃ£o fiscal, obrigaÃ§Ãµes empresariais, procuraÃ§Ãµes e acesso
-              aos principais serviÃ§os governamentais.
-            </p>
-            <ul>
-              <li>Empresas de todos os portes</li>
-              <li>Documentos e obrigaÃ§Ãµes fiscais</li>
-              <li>Acesso seguro em nome da empresa</li>
-            </ul>
-            <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20e-CNPJ." target="_blank" rel="noopener noreferrer">
-              Solicitar e-CNPJ <span>â†’</span>
-            </a>
-          </article>
-
-          <article class="solution-card reveal">
-            <div class="card-topline">
-              <span class="solution-icon">A1</span>
-              <span class="card-tag">Arquivo digital</span>
-            </div>
-            <h3>Certificado A1</h3>
-            <p>
-              Instalado no computador ou servidor, ideal para integraÃ§Ãµes,
-              sistemas e rotinas que exigem praticidade.
-            </p>
-            <ul>
-              <li>Validade de 1 ano</li>
-              <li>Possibilidade de backup seguro</li>
-              <li>Uso Ã¡gil em sistemas empresariais</li>
-            </ul>
-            <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20certificado%20A1." target="_blank" rel="noopener noreferrer">
-              Conhecer o A1 <span>â†’</span>
-            </a>
-          </article>
-
-          <article class="solution-card reveal">
-            <div class="card-topline">
-              <span class="solution-icon">A3</span>
-              <span class="card-tag">Token ou cartÃ£o</span>
-            </div>
-            <h3>Certificado A3</h3>
-            <p>
-              Armazenado em mÃ­dia criptogrÃ¡fica, oferecendo mobilidade,
-              controle fÃ­sico e seguranÃ§a no uso.
-            </p>
-            <ul>
-              <li>Uso em token ou cartÃ£o</li>
-              <li>Controle direto pelo titular</li>
-              <li>Mobilidade entre equipamentos</li>
-            </ul>
-            <a href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20certificado%20A3." target="_blank" rel="noopener noreferrer">
-              Conhecer o A3 <span>â†’</span>
-            </a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="metrics-section" aria-label="Indicadores Pedroza Certificadora">
-      <div class="container metrics-grid">
-        <article class="metric reveal">
-          <strong data-counter="100" data-suffix="+">100+</strong>
-          <span>certificados emitidos</span>
-        </article>
-        <article class="metric reveal">
-          <strong>Brasil</strong>
-          <span>atendimento remoto nacional</span>
-        </article>
-        <article class="metric reveal">
-          <strong>15 min</strong>
-          <span>emissÃµes elegÃ­veis com agilidade</span>
-        </article>
-        <article class="metric reveal">
-          <strong>Completo</strong>
-          <span>emissÃ£o, instalaÃ§Ã£o e suporte</span>
-        </article>
-      </div>
-    </section>
-
-    <section class="section why-section" id="diferenciais">
-      <div class="container why-layout">
-        <div class="why-intro reveal">
-          <span class="section-kicker">Por que escolher a Pedroza</span>
-          <h2>Tecnologia quando precisa. Pessoas sempre.</h2>
-          <p>
-            CertificaÃ§Ã£o digital nÃ£o precisa ser complicada. Nossa equipe cuida
-            de cada detalhe para que vocÃª avance com seguranÃ§a e tranquilidade.
-          </p>
-
-          <div class="why-quote">
-            <span aria-hidden="true">â€œ</span>
-            <p>Atendimento prÃ³ximo, processo transparente e suporte atÃ© tudo funcionar.</p>
-          </div>
-        </div>
-
-        <div class="benefits-grid">
-          <article class="benefit-card reveal">
-            <span class="benefit-number">01</span>
-            <div>
-              <h3>Atendimento humano</h3>
-              <p>VocÃª fala com pessoas preparadas, sem ficar preso a respostas automÃ¡ticas.</p>
-            </div>
-          </article>
-
-          <article class="benefit-card reveal">
-            <span class="benefit-number">02</span>
-            <div>
-              <h3>EmissÃ£o por videoconferÃªncia</h3>
-              <p>FaÃ§a seu processo de onde estiver, com orientaÃ§Ã£o em cada etapa.</p>
-            </div>
-          </article>
-
-          <article class="benefit-card reveal">
-            <span class="benefit-number">03</span>
-            <div>
-              <h3>InstalaÃ§Ã£o remota</h3>
-              <p>Receba ajuda na configuraÃ§Ã£o para comeÃ§ar a usar seu certificado corretamente.</p>
-            </div>
-          </article>
-
-          <article class="benefit-card reveal">
-            <span class="benefit-number">04</span>
-            <div>
-              <h3>Suporte pÃ³s-emissÃ£o</h3>
-              <p>Continuamos disponÃ­veis para orientar acessos, utilizaÃ§Ã£o e dÃºvidas tÃ©cnicas.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section portal-section" id="portal">
-      <div class="container">
-        <div class="portal-shell reveal">
-          <div class="portal-copy">
-            <span class="section-kicker section-kicker-light">Portal Pedroza</span>
-            <h2>Um ecossistema de identidade digital em evoluÃ§Ã£o.</h2>
-            <p>
-              Estamos construindo um ambiente completo para reunir serviÃ§os,
-              conhecimento, documentos e suporte em um Ãºnico lugar.
-            </p>
-            <a class="button button-light" href="#contato">
-              Conhecer o portal
-              <span aria-hidden="true">â†’</span>
-            </a>
-          </div>
-
-          <div class="portal-modules">
-            <article>
-              <span class="module-icon">DL</span>
-              <div>
-                <strong>Downloads</strong>
-                <small>Drivers, instaladores e utilitÃ¡rios.</small>
-              </div>
-              <em>Em breve</em>
+            <article class="number-item reveal">
+                <strong>Brasil</strong>
+                <span>Atendimento remoto nacional</span>
             </article>
 
-            <article>
-              <span class="module-icon">TR</span>
-              <div>
-                <strong>Tutoriais</strong>
-                <small>Passos claros para usar seu certificado.</small>
-              </div>
-              <em>Em breve</em>
+            <article class="number-item reveal">
+                <strong>ICP-Brasil</strong>
+                <span>Certificação digital segura</span>
             </article>
 
-            <article>
-              <span class="module-icon">FAQ</span>
-              <div>
-                <strong>Central de ajuda</strong>
-                <small>Respostas para as principais dÃºvidas.</small>
-              </div>
-              <em>Em breve</em>
+            <article class="number-item reveal">
+                <strong>Humano</strong>
+                <span>Atendimento personalizado</span>
             </article>
 
-            <article>
-              <span class="module-icon">AC</span>
-              <div>
-                <strong>Ãrea do Cliente</strong>
-                <small>Consultas e serviÃ§os personalizados.</small>
-              </div>
-              <em>Em breve</em>
+            <article class="number-item reveal">
+                <strong>Completo</strong>
+                <span>Emissão, instalação e suporte</span>
             </article>
-          </div>
+
         </div>
-      </div>
     </section>
 
-    <section class="section contact-section" id="contato">
-      <div class="container contact-shell reveal">
-        <div>
-          <span class="section-kicker">Atendimento especializado</span>
-          <h2>Pronto para emitir ou renovar?</h2>
-          <p>
-            Conte o que vocÃª precisa. Nossa equipe orienta o certificado adequado
-            e acompanha o processo atÃ© a conclusÃ£o.
-          </p>
-        </div>
+    <section class="section" id="certificados">
+        <div class="container">
 
-        <div class="contact-actions">
-          <a class="button button-primary button-large" href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20atendimento%20para%20certificado%20digital." target="_blank" rel="noopener noreferrer">
-            Iniciar atendimento
-            <span aria-hidden="true">â†’</span>
-          </a>
-          <small>Atendimento para todo o Brasil</small>
+            <div class="section-heading reveal">
+                <span class="section-label">
+                    Certificados digitais
+                </span>
+
+                <h2>A solução adequada para cada necessidade</h2>
+
+                <p>
+                    Conte com orientação especializada para escolher,
+                    emitir, renovar e utilizar seu Certificado Digital.
+                </p>
+            </div>
+
+            <div class="cards-grid">
+
+                <article class="card reveal">
+                    <span class="card-icon">👤</span>
+                    <h3>e-CPF</h3>
+
+                    <p>
+                        Para pessoas físicas, profissionais liberais,
+                        assinaturas eletrônicas e acesso a serviços digitais.
+                    </p>
+
+                    <a
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Solicitar atendimento
+                    </a>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">🏢</span>
+                    <h3>e-CNPJ</h3>
+
+                    <p>
+                        Para empresas, emissão de documentos fiscais,
+                        obrigações e acesso a serviços governamentais.
+                    </p>
+
+                    <a
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Solicitar atendimento
+                    </a>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">☁️</span>
+                    <h3>Certificado A1</h3>
+
+                    <p>
+                        Arquivo digital instalado no computador,
+                        indicado para sistemas e rotinas empresariais.
+                    </p>
+
+                    <a
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Solicitar atendimento
+                    </a>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">🔑</span>
+                    <h3>Certificado A3</h3>
+
+                    <p>
+                        Certificado armazenado em token ou cartão,
+                        com mobilidade, controle e segurança.
+                    </p>
+
+                    <a
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Solicitar atendimento
+                    </a>
+                </article>
+
+            </div>
+
         </div>
-      </div>
     </section>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container footer-main">
-      <div class="footer-brand">
-        <a href="#inicio" aria-label="Voltar ao inÃ­cio">
-          <img src="images/logo/logo-pedroza.png" alt="Pedroza Certificadora">
-        </a>
-        <p>
-          CertificaÃ§Ã£o Digital com seguranÃ§a, tecnologia e atendimento humano
-          em todas as etapas.
-        </p>
-        <div class="footer-social">
-          <a href="https://www.instagram.com/pedrozacertificadora" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://wa.me/5521991674117" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <section class="section section-light" id="servicos">
+        <div class="container">
+
+            <div class="section-heading reveal">
+                <span class="section-label">
+                    Serviços especializados
+                </span>
+
+                <h2>Muito além da emissão do certificado</h2>
+
+                <p>
+                    A Pedroza Certificadora acompanha você antes,
+                    durante e depois da emissão.
+                </p>
+            </div>
+
+            <div class="cards-grid">
+
+                <article class="card reveal">
+                    <span class="card-icon">🔄</span>
+                    <h3>Renovação</h3>
+                    <p>
+                        Renove seu certificado com acompanhamento completo
+                        e orientação durante todo o processo.
+                    </p>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">🎥</span>
+                    <h3>Videoconferência</h3>
+                    <p>
+                        Atendimento remoto e seguro para clientes em todo
+                        o território nacional.
+                    </p>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">🖥️</span>
+                    <h3>Instalação</h3>
+                    <p>
+                        Configuração assistida em computador, token ou cartão,
+                        conforme o modelo adquirido.
+                    </p>
+                </article>
+
+                <article class="card reveal">
+                    <span class="card-icon">🛠️</span>
+                    <h3>Suporte</h3>
+                    <p>
+                        Ajuda especializada para acesso, utilização,
+                        instalação e validação do certificado.
+                    </p>
+                </article>
+
+            </div>
+
         </div>
-      </div>
+    </section>
 
-      <div class="footer-column">
-        <strong>Certificados</strong>
-        <a href="#solucoes">e-CPF</a>
-        <a href="#solucoes">e-CNPJ</a>
-        <a href="#solucoes">Certificado A1</a>
-        <a href="#solucoes">Certificado A3</a>
-      </div>
+    <section class="section" id="portal">
+        <div class="container">
 
-      <div class="footer-column">
-        <strong>Atendimento</strong>
-        <a href="#diferenciais">VideoconferÃªncia</a>
-        <a href="#diferenciais">InstalaÃ§Ã£o remota</a>
-        <a href="#diferenciais">RenovaÃ§Ã£o</a>
-        <a href="#contato">Suporte</a>
-      </div>
+            <div class="section-heading reveal">
+                <span class="section-label">
+                    Portal Pedroza Certificadora
+                </span>
 
-      <div class="footer-column">
-        <strong>Portal</strong>
-        <a href="#portal">Ãrea do Cliente</a>
-        <a href="#portal">Downloads</a>
-        <a href="#portal">Tutoriais</a>
-        <a href="#portal">Perguntas frequentes</a>
-      </div>
+                <h2>Informação, suporte e serviços em um só lugar</h2>
+
+                <p>
+                    Uma estrutura preparada para receber downloads,
+                    tutoriais, perguntas frequentes e serviços exclusivos.
+                </p>
+            </div>
+
+            <div class="portal-grid">
+
+                <a class="portal-card reveal" href="#">
+                    <span>📥</span>
+                    <strong>Downloads</strong>
+                    <small>Drivers, instaladores e utilitários.</small>
+                    <em>Em desenvolvimento</em>
+                </a>
+
+                <a class="portal-card reveal" href="#">
+                    <span>📚</span>
+                    <strong>Tutoriais</strong>
+                    <small>Orientações claras e passo a passo.</small>
+                    <em>Em desenvolvimento</em>
+                </a>
+
+                <a class="portal-card reveal" href="#">
+                    <span>❓</span>
+                    <strong>Perguntas frequentes</strong>
+                    <small>Respostas para as principais dúvidas.</small>
+                    <em>Em desenvolvimento</em>
+                </a>
+
+                <a class="portal-card reveal" href="#">
+                    <span>🔐</span>
+                    <strong>Área do Cliente</strong>
+                    <small>Espaço exclusivo para clientes.</small>
+                    <em>Em desenvolvimento</em>
+                </a>
+
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section section-dark" id="empresa">
+        <div class="container company-container reveal">
+
+            <div>
+                <span class="section-label section-label-light">
+                    Pedroza Certificadora
+                </span>
+
+                <h2>
+                    Tecnologia, segurança e atendimento de verdade
+                </h2>
+            </div>
+
+            <p>
+                Atuamos com Certificação Digital ICP-Brasil,
+                atendimento personalizado e compromisso com a segurança
+                da identidade digital de nossos clientes.
+            </p>
+
+        </div>
+    </section>
+
+    <section class="section" id="contato">
+        <div class="container contact-box reveal">
+
+            <div>
+                <span class="section-label">
+                    Atendimento
+                </span>
+
+                <h2>
+                    Precisa emitir ou renovar seu certificado?
+                </h2>
+
+                <p>
+                    Fale com nossa equipe e receba orientação personalizada.
+                </p>
+            </div>
+
+            <a
+                class="button button-whatsapp"
+                href="https://wa.me/5521991674117"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Iniciar atendimento
+            </a>
+
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+
+    <div class="container footer-grid">
+
+        <div class="footer-brand">
+
+            <div class="footer-logo-box">
+                <img
+                    src="images/logo/logo-pedroza.png"
+                    alt="Pedroza Certificadora"
+                >
+            </div>
+
+            <p>
+                Certificação Digital, segurança,
+                tecnologia e suporte especializado.
+            </p>
+
+        </div>
+
+        <div class="footer-column">
+            <strong>Certificados</strong>
+            <a href="#certificados">e-CPF</a>
+            <a href="#certificados">e-CNPJ</a>
+            <a href="#certificados">A1</a>
+            <a href="#certificados">A3</a>
+        </div>
+
+        <div class="footer-column">
+            <strong>Serviços</strong>
+            <a href="#servicos">Renovação</a>
+            <a href="#servicos">Videoconferência</a>
+            <a href="#servicos">Instalação</a>
+            <a href="#servicos">Suporte</a>
+        </div>
+
+        <div class="footer-column">
+            <strong>Portal</strong>
+            <a href="#portal">Downloads</a>
+            <a href="#portal">Tutoriais</a>
+            <a href="#portal">FAQ</a>
+            <a href="#portal">Área do Cliente</a>
+        </div>
+
     </div>
 
     <div class="container footer-bottom">
-      <span>Â© <span id="current-year">2026</span> Pedroza Certificadora. Todos os direitos reservados.</span>
-      <span class="footer-signature">
-        ConcepÃ§Ã£o, design e desenvolvimento<br>
-        <strong>Marcos Henrique Pedroza</strong>
-      </span>
+
+        <span>
+            © <span id="current-year">2026</span> Pedroza Certificadora
+        </span>        <span class="footer-credit">Concepção, design e desenvolvimento por Marcos Henrique Pedroza</span>
+
+        <div>
+            <a
+                href="https://www.instagram.com/pedrozacertificadora"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Instagram
+            </a>
+
+            <a
+                href="https://wa.me/5521991674117"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                WhatsApp
+            </a>
+        </div>
+
     </div>
-  </footer>
 
-  <a class="whatsapp-floating" href="https://wa.me/5521991674117?text=Ol%C3%A1%2C%20quero%20atendimento%20para%20certificado%20digital." target="_blank" rel="noopener noreferrer" aria-label="Falar com a Pedroza Certificadora pelo WhatsApp">
-    <span aria-hidden="true">WA</span>
-  </a>
+</footer>
 
-  <script src="js/app.js" defer></script>
+<a
+    class="whatsapp-floating"
+    href="https://wa.me/5521991674117"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Falar com a Pedroza Certificadora pelo WhatsApp"
+>
+    <span>💬</span>
+    WhatsApp
+</a>
+
+<script src="js/menu.js"></script>
+<script src="js/scroll.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/app.js"></script>
+
 </body>
 </html>
+
+
