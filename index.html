@@ -2,191 +2,822 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ATLAS | Pedroza Certificadora</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Pedroza Certificadora: emissão, renovação e suporte para Certificados Digitais ICP-Brasil com atendimento em todo o Brasil."
+    >
+
+    <title>Pedroza Certificadora | Certificação Digital</title>
 
     <style>
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial, Helvetica, sans-serif;
+        :root {
+            --azul-principal: #0d3b66;
+            --azul-secundario: #174f88;
+            --azul-claro: #eaf2fa;
+            --verde: #41b94e;
+            --verde-escuro: #31923c;
+            --branco: #ffffff;
+            --cinza-fundo: #f5f7fa;
+            --cinza-texto: #536273;
+            --texto-principal: #18324d;
+            --borda: #dfe7ef;
+            --sombra: 0 18px 45px rgba(13, 59, 102, 0.10);
         }
 
-        body{
-            background:#f5f7fb;
-            color:#23395d;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        header{
-            background:#0d3b66;
-            color:white;
-            padding:25px;
-            text-align:center;
+        html {
+            scroll-behavior: smooth;
         }
 
-        header h1{
-            font-size:42px;
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--cinza-fundo);
+            color: var(--texto-principal);
+            line-height: 1.6;
         }
 
-        header p{
-            margin-top:10px;
-            font-size:20px;
+        a {
+            color: inherit;
         }
 
-        nav{
-            background:#133c78;
-            display:flex;
-            justify-content:center;
-            flex-wrap:wrap;
+        .container {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto;
         }
 
-        nav a{
-            color:white;
-            text-decoration:none;
-            padding:18px 25px;
-            transition:.3s;
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--borda);
+            backdrop-filter: blur(14px);
         }
 
-        nav a:hover{
-            background:#1e5fa8;
+        .topo {
+            min-height: 82px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
         }
 
-        .hero{
-            max-width:1200px;
-            margin:auto;
-            padding:80px 30px;
-            text-align:center;
+        .marca {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
         }
 
-        .hero h2{
-            font-size:46px;
-            margin-bottom:25px;
+        .marca-simbolo {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                var(--azul-principal),
+                var(--azul-secundario)
+            );
+            color: var(--branco);
+            font-size: 23px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(13, 59, 102, 0.22);
         }
 
-        .hero p{
-            font-size:22px;
-            line-height:1.7;
-            color:#555;
+        .marca-texto strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.1;
         }
 
-        .botao{
-            display:inline-block;
-            margin-top:40px;
-            padding:18px 40px;
-            background:#2cb34a;
-            color:white;
-            text-decoration:none;
-            border-radius:10px;
-            font-size:20px;
+        .marca-texto span {
+            color: var(--cinza-texto);
+            font-size: 12px;
         }
 
-        .cards{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-            gap:25px;
-            max-width:1200px;
-            margin:auto;
-            padding:40px;
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
 
-        .card{
-            background:white;
-            border-radius:15px;
-            padding:30px;
-            box-shadow:0 10px 30px rgba(0,0,0,.08);
+        nav a {
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s ease;
         }
 
-        .card h3{
-            margin-bottom:15px;
+        nav a:hover {
+            color: var(--azul-secundario);
         }
 
-        footer{
-            background:#0d3b66;
-            color:white;
-            text-align:center;
-            padding:30px;
-            margin-top:50px;
+        .botao {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 50px;
+            padding: 0 24px;
+            border: 0;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
         }
 
+        .botao:hover {
+            transform: translateY(-2px);
+        }
+
+        .botao-verde {
+            color: var(--branco);
+            background: var(--verde);
+            box-shadow: 0 12px 26px rgba(65, 185, 78, 0.24);
+        }
+
+        .botao-verde:hover {
+            background: var(--verde-escuro);
+        }
+
+        .botao-claro {
+            color: var(--azul-principal);
+            background: var(--branco);
+            border: 1px solid var(--borda);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 105px 0 90px;
+            background:
+                radial-gradient(
+                    circle at 85% 15%,
+                    rgba(65, 185, 78, 0.14),
+                    transparent 26%
+                ),
+                radial-gradient(
+                    circle at 15% 20%,
+                    rgba(23, 79, 136, 0.15),
+                    transparent 30%
+                ),
+                linear-gradient(180deg, #ffffff 0%, #f2f7fc 100%);
+        }
+
+        .hero-conteudo {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            gap: 65px;
+        }
+
+        .selo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            color: var(--azul-principal);
+            background: var(--azul-claro);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hero h1 {
+            max-width: 720px;
+            font-size: clamp(42px, 6vw, 72px);
+            line-height: 1.05;
+            letter-spacing: -2.5px;
+        }
+
+        .hero h1 span {
+            color: var(--azul-secundario);
+        }
+
+        .hero p {
+            max-width: 680px;
+            margin-top: 25px;
+            color: var(--cinza-texto);
+            font-size: 19px;
+        }
+
+        .acoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 34px;
+        }
+
+        .destaques {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 38px;
+            color: var(--cinza-texto);
+            font-size: 14px;
+        }
+
+        .destaques span {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .painel {
+            position: relative;
+            padding: 28px;
+            border: 1px solid rgba(223, 231, 239, 0.9);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: var(--sombra);
+        }
+
+        .painel-topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .painel-topo strong {
+            font-size: 18px;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            color: var(--verde-escuro);
+            background: #e9f8eb;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .atalhos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .atalho {
+            min-height: 126px;
+            padding: 20px;
+            border: 1px solid var(--borda);
+            border-radius: 17px;
+            background: var(--branco);
+        }
+
+        .atalho-icone {
+            margin-bottom: 14px;
+            font-size: 25px;
+        }
+
+        .atalho strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .atalho p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        section {
+            padding: 82px 0;
+        }
+
+        .titulo-secao {
+            max-width: 720px;
+            margin: 0 auto 45px;
+            text-align: center;
+        }
+
+        .titulo-secao span {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: var(--azul-secundario);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .titulo-secao h2 {
+            font-size: clamp(30px, 4vw, 44px);
+            line-height: 1.15;
+        }
+
+        .titulo-secao p {
+            margin-top: 16px;
+            color: var(--cinza-texto);
+        }
+
+        .grade-servicos {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            padding: 28px;
+            border: 1px solid var(--borda);
+            border-radius: 20px;
+            background: var(--branco);
+            box-shadow: 0 10px 30px rgba(13, 59, 102, 0.05);
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--sombra);
+        }
+
+        .card-icone {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            background: var(--azul-claro);
+            font-size: 25px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .card p {
+            color: var(--cinza-texto);
+            font-size: 14px;
+        }
+
+        .diferenciais {
+            background: var(--branco);
+        }
+
+        .grade-diferenciais {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+        }
+
+        .diferencial {
+            padding: 26px;
+            text-align: center;
+        }
+
+        .diferencial-icone {
+            margin-bottom: 14px;
+            font-size: 34px;
+        }
+
+        .diferencial h3 {
+            margin-bottom: 8px;
+        }
+
+        .diferencial p {
+            color: var(--cinza-texto);
+            font-size: 14px;
+        }
+
+        .chamada {
+            padding: 74px 0;
+        }
+
+        .chamada-conteudo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 35px;
+            padding: 48px;
+            border-radius: 26px;
+            color: var(--branco);
+            background:
+                radial-gradient(
+                    circle at 85% 20%,
+                    rgba(65, 185, 78, 0.35),
+                    transparent 32%
+                ),
+                linear-gradient(
+                    135deg,
+                    var(--azul-principal),
+                    #092b4c
+                );
+            box-shadow: var(--sombra);
+        }
+
+        .chamada h2 {
+            max-width: 650px;
+            font-size: clamp(29px, 4vw, 43px);
+            line-height: 1.15;
+        }
+
+        .chamada p {
+            max-width: 650px;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        footer {
+            padding: 46px 0;
+            color: rgba(255, 255, 255, 0.78);
+            background: #082844;
+        }
+
+        .rodape {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .rodape strong {
+            display: block;
+            color: var(--branco);
+            font-size: 18px;
+        }
+
+        .rodape-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .rodape-links a {
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        @media (max-width: 960px) {
+            nav {
+                display: none;
+            }
+
+            .hero-conteudo {
+                grid-template-columns: 1fr;
+            }
+
+            .painel {
+                max-width: 650px;
+            }
+
+            .grade-servicos,
+            .grade-diferenciais {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chamada-conteudo {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .container {
+                width: min(100% - 26px, 1180px);
+            }
+
+            .topo {
+                min-height: 70px;
+            }
+
+            .marca-texto span {
+                display: none;
+            }
+
+            .topo > .botao {
+                min-height: 43px;
+                padding: 0 15px;
+                font-size: 13px;
+            }
+
+            .hero {
+                padding: 72px 0 64px;
+            }
+
+            .hero h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .hero p {
+                font-size: 17px;
+            }
+
+            .acoes {
+                flex-direction: column;
+            }
+
+            .acoes .botao {
+                width: 100%;
+            }
+
+            .atalhos,
+            .grade-servicos,
+            .grade-diferenciais {
+                grid-template-columns: 1fr;
+            }
+
+            .chamada-conteudo {
+                padding: 34px 24px;
+            }
+
+            .rodape {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
     </style>
-
 </head>
 
 <body>
 
 <header>
+    <div class="container topo">
+        <a class="marca" href="#inicio">
+            <div class="marca-simbolo">P</div>
 
-<h1>ATLAS</h1>
+            <div class="marca-texto">
+                <strong>Pedroza Certificadora</strong>
+                <span>Identidade Digital com segurança e suporte</span>
+            </div>
+        </a>
 
-<p>Portal Inteligente de Identidade Digital</p>
+        <nav aria-label="Navegação principal">
+            <a href="#inicio">Início</a>
+            <a href="#certificados">Certificados</a>
+            <a href="#diferenciais">Diferenciais</a>
+            <a href="#contato">Contato</a>
+        </nav>
 
+        <a
+            class="botao botao-verde"
+            href="https://wa.me/5521991674117"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Falar no WhatsApp
+        </a>
+    </div>
 </header>
 
-<nav>
+<main>
+    <section class="hero" id="inicio">
+        <div class="container hero-conteudo">
+            <div>
+                <div class="selo">
+                    ✓ Certificação Digital ICP-Brasil
+                </div>
 
-<a href="#">Home</a>
+                <h1>
+                    <span>Pedroza Certificadora.</span><br>
+                    Sua identidade digital, simplificada.
+                </h1>
 
-<a href="#">Certificados</a>
+                <p>
+                    Emissão, renovação e suporte para Certificados
+                    Digitais, com atendimento humano, segurança,
+                    agilidade e videoconferência para todo o Brasil.
+                </p>
 
-<a href="#">Serviços</a>
+                <div class="acoes">
+                    <a
+                        class="botao botao-verde"
+                        href="https://wa.me/5521991674117"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Solicitar certificado
+                    </a>
 
-<a href="#">Documentação</a>
+                    <a
+                        class="botao botao-claro"
+                        href="#certificados"
+                    >
+                        Conhecer serviços
+                    </a>
+                </div>
 
-<a href="#">Downloads</a>
+                <div class="destaques">
+                    <span>✓ Atendimento nacional</span>
+                    <span>✓ Emissão por videoconferência</span>
+                    <span>✓ Suporte especializado</span>
+                </div>
+            </div>
 
-<a href="#">Contato</a>
+            <aside class="painel" aria-label="Principais serviços">
+                <div class="painel-topo">
+                    <strong>Como podemos ajudar?</strong>
+                    <span class="status">Atendimento disponível</span>
+                </div>
 
-</nav>
+                <div class="atalhos">
+                    <article class="atalho">
+                        <div class="atalho-icone">🔐</div>
+                        <strong>Emitir certificado</strong>
+                        <p>e-CPF, e-CNPJ, A1 e A3.</p>
+                    </article>
 
-<section class="hero">
+                    <article class="atalho">
+                        <div class="atalho-icone">🔄</div>
+                        <strong>Renovar certificado</strong>
+                        <p>Renovação rápida e orientada.</p>
+                    </article>
 
-<h2>Bem-vindo ao Atlas</h2>
+                    <article class="atalho">
+                        <div class="atalho-icone">💻</div>
+                        <strong>Instalação remota</strong>
+                        <p>Auxílio na instalação e configuração.</p>
+                    </article>
 
-<p>
+                    <article class="atalho">
+                        <div class="atalho-icone">💬</div>
+                        <strong>Suporte humano</strong>
+                        <p>Orientação em todas as etapas.</p>
+                    </article>
+                </div>
+            </aside>
+        </div>
+    </section>
 
-O portal inteligente da Pedroza Certificadora para quem utiliza
-Certificado Digital, reunindo tecnologia, conhecimento, suporte e
-serviços em um único lugar.
+    <section id="certificados">
+        <div class="container">
+            <div class="titulo-secao">
+                <span>Nossos serviços</span>
 
-</p>
+                <h2>
+                    Certificação digital com orientação do início ao fim
+                </h2>
 
-<a class="botao" href="#">Conheça o Projeto</a>
+                <p>
+                    Encontre a solução adequada para sua necessidade,
+                    com atendimento personalizado e suporte especializado.
+                </p>
+            </div>
 
-</section>
+            <div class="grade-servicos">
+                <article class="card">
+                    <div class="card-icone">👤</div>
+                    <h3>e-CPF</h3>
+                    <p>
+                        Certificado digital para pessoas físicas,
+                        profissionais liberais e acesso a serviços digitais.
+                    </p>
+                </article>
 
-<section class="cards">
+                <article class="card">
+                    <div class="card-icone">🏢</div>
+                    <h3>e-CNPJ</h3>
+                    <p>
+                        Identidade digital para empresas, emissão de notas,
+                        obrigações fiscais e serviços governamentais.
+                    </p>
+                </article>
 
-<div class="card">
-<h3>🔐 Certificados</h3>
-<p>e-CPF, e-CNPJ, A1, A3 e Renovação.</p>
-</div>
+                <article class="card">
+                    <div class="card-icone">☁️</div>
+                    <h3>Certificado A1</h3>
+                    <p>
+                        Arquivo digital instalado no computador,
+                        com validade de um ano e facilidade de utilização.
+                    </p>
+                </article>
 
-<div class="card">
-<h3>📚 Conhecimento</h3>
-<p>Guias completos sobre ICP-Brasil e Certificados Digitais.</p>
-</div>
+                <article class="card">
+                    <div class="card-icone">🔑</div>
+                    <h3>Certificado A3</h3>
+                    <p>
+                        Certificado armazenado em token ou cartão,
+                        indicado para quem busca mobilidade e segurança.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
 
-<div class="card">
-<h3>🛠 Serviços</h3>
-<p>Ferramentas úteis para empresas, contadores e profissionais.</p>
-</div>
+    <section class="diferenciais" id="diferenciais">
+        <div class="container">
+            <div class="titulo-secao">
+                <span>Por que escolher a Pedroza?</span>
 
-<div class="card">
-<h3>💬 Suporte</h3>
-<p>Atendimento especializado da Pedroza Certificadora.</p>
-</div>
+                <h2>
+                    Tecnologia, confiança e atendimento de verdade
+                </h2>
+            </div>
 
-</section>
+            <div class="grade-diferenciais">
+                <article class="diferencial">
+                    <div class="diferencial-icone">⚡</div>
+                    <h3>Agilidade</h3>
+                    <p>
+                        Processo simples, rápido e acompanhado por nossa equipe.
+                    </p>
+                </article>
+
+                <article class="diferencial">
+                    <div class="diferencial-icone">🤝</div>
+                    <h3>Atendimento humano</h3>
+                    <p>
+                        Pessoas reais para orientar e resolver suas dúvidas.
+                    </p>
+                </article>
+
+                <article class="diferencial">
+                    <div class="diferencial-icone">🛡️</div>
+                    <h3>Segurança</h3>
+                    <p>
+                        Certificados no padrão ICP-Brasil e orientação segura.
+                    </p>
+                </article>
+
+                <article class="diferencial">
+                    <div class="diferencial-icone">🇧🇷</div>
+                    <h3>Todo o Brasil</h3>
+                    <p>
+                        Atendimento remoto por videoconferência em nível nacional.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="chamada" id="contato">
+        <div class="container">
+            <div class="chamada-conteudo">
+                <div>
+                    <h2>
+                        Precisa emitir ou renovar seu Certificado Digital?
+                    </h2>
+
+                    <p>
+                        Fale com a Pedroza Certificadora e receba orientação
+                        personalizada para escolher a opção adequada.
+                    </p>
+                </div>
+
+                <a
+                    class="botao botao-verde"
+                    href="https://wa.me/5521991674117"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Iniciar atendimento
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
 
 <footer>
+    <div class="container rodape">
+        <div>
+            <strong>Pedroza Certificadora</strong>
+            <span>
+                Certificação Digital, suporte e identidade digital.
+            </span>
+        </div>
 
-© 2026 Pedroza Certificadora • Projeto ATLAS
+        <div class="rodape-links">
+            <a
+                href="https://www.instagram.com/pedrozacertificadora"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Instagram
+            </a>
 
+            <a
+                href="https://wa.me/5521991674117"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                WhatsApp
+            </a>
+        </div>
+
+        <span>© 2026 Pedroza Certificadora</span>
+    </div>
 </footer>
 
 </body>
-
 </html>
