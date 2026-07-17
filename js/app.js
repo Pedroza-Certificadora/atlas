@@ -1,17 +1,2 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-    const yearElement = document.getElementById("current-year");
-
-    if (yearElement) {
-        yearElement.textContent = new Date().getFullYear();
-    }
-
-    const developmentLinks = document.querySelectorAll(
-        '.portal-card[href="#"]'
-    );
-
-    developmentLinks.forEach((link) => {
-        link.addEventListener("click", (event) => {
-            event.preventDefault();
-        });
-    });
-});
+"use strict";
+document.addEventListener("DOMContentLoaded",function(){var y=document.getElementById("ano-atual");if(y)y.textContent=String(new Date().getFullYear());var b=document.querySelector(".menu-toggle"),n=document.querySelector(".main-nav");if(b&&n){b.addEventListener("click",function(){var o=n.classList.toggle("open");b.setAttribute("aria-expanded",String(o))});n.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){n.classList.remove("open");b.setAttribute("aria-expanded","false")})})}var items=document.querySelectorAll(".reveal");if("IntersectionObserver" in window){var ob=new IntersectionObserver(function(entries,obs){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:.12});items.forEach(function(i){ob.observe(i)})}else{items.forEach(function(i){i.classList.add("visible")})}});
