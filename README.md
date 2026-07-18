@@ -27,7 +27,7 @@ Facilitar a vida de quem utiliza Certificado Digital, reunindo informação, ser
 
 ## 📅 Status
 
-🟢 Sprint 3.5 — Atlas Lead Capture System v1.0 em pré-homologação
+🟡 Sprint 3.7 — Atlas Visual Refinement System v1.0 em pré-homologação
 
 ## Sprint 3.5
 
@@ -38,6 +38,15 @@ Facilitar a vida de quem utiliza Certificado Digital, reunindo informação, ser
 - Retomada temporária somente no navegador
 - Eventos locais preparados para integração futura com métricas
 - Política de Privacidade dedicada
+
+## Sprint 3.7
+
+- Novos SVGs oficiais no cabeçalho e no rodapé
+- Header Glass Premium
+- Card institucional no rodapé
+- Profundidade elegante dos logos via CSS
+- Hero e animações desktop refinados
+- Responsividade visual revisada
 
 ---
 
