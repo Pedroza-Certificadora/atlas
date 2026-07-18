@@ -1,0 +1,36 @@
+/*
+  Atlas Motion Experience System v1.0
+  Sprint 3.6 - Pedroza Certificadora
+  Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
+*/
+:root{--motion-fast:160ms;--motion-base:280ms;--motion-slow:650ms;--motion-ease:cubic-bezier(.22,1,.36,1)}
+html.motion-ready .motion-reveal{opacity:0;transform:translate3d(0,18px,0);transition:opacity var(--motion-slow) var(--motion-ease),transform var(--motion-slow) var(--motion-ease);transition-delay:var(--motion-delay,0ms);will-change:opacity,transform}
+html.motion-ready .motion-reveal.motion-visible{opacity:1;transform:none;will-change:auto}
+.button,.quick-actions button,.lead-submit,.chat-back,.chat-input button,.atlas-launcher,.service-card,.proof-grid article,.trust-grid article,.future-grid>div,.partner-card{transition:transform var(--motion-fast) ease,box-shadow var(--motion-base) ease,border-color var(--motion-fast) ease,filter var(--motion-fast) ease,background-color var(--motion-fast) ease}
+.button:active,.quick-actions button:active,.lead-submit:active,.chat-back:active,.chat-input button:active,.atlas-launcher:active{transform:translateY(1px) scale(.985)}
+.button:focus-visible,.quick-actions button:focus-visible,.lead-submit:focus-visible,.chat-back:focus-visible,.chat-input button:focus-visible,.atlas-launcher:focus-visible,.chat-close:focus-visible,.chat-minimize:focus-visible{outline:3px solid rgba(22,200,255,.62);outline-offset:3px}
+.service-card:hover,.future-grid>div:hover,.partner-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,30,75,.11)}
+.proof-grid article:hover,.trust-grid article:hover{transform:translateY(-2px)}
+.hero-glow-one{animation:atlasGlowOne 12s ease-in-out infinite alternate}.hero-glow-two{animation:atlasGlowTwo 15s ease-in-out infinite alternate}.hero-art img{animation:atlasHeroFloat 9s ease-in-out infinite}.emission-seal{animation:atlasSealPulse 3.6s ease-in-out infinite}
+.atlas-launcher{animation:atlasLauncherAura 4.2s ease-in-out infinite}.atlas-launcher:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(0,142,255,.58)}
+.atlas-chat{transform-origin:calc(100% - 36px) 100%;transition:opacity var(--motion-base) var(--motion-ease),transform var(--motion-base) var(--motion-ease),visibility 0s linear var(--motion-base)}
+.atlas-chat:not(.open){opacity:0;transform:translate3d(0,12px,0) scale(.975);visibility:hidden;pointer-events:none}.atlas-chat.open{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s}
+.atlas-chat.motion-closing{opacity:0;transform:translate3d(0,8px,0) scale(.985)}
+.chat-message.motion-message-enter,.quick-actions.motion-options-enter,.lead-form.motion-form-enter,.lead-summary.motion-summary-enter{animation:atlasContentIn var(--motion-base) var(--motion-ease) both}
+.quick-actions button{animation:atlasOptionIn 340ms var(--motion-ease) both;animation-delay:calc(var(--option-index,0) * 45ms)}
+.atlas-progress{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:9px 14px 7px;border-bottom:1px solid rgba(89,137,205,.2);background:rgba(3,18,48,.72)}
+.atlas-progress-step{position:relative;height:4px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.16)}
+.atlas-progress-step:before{position:absolute;inset:0;content:"";background:linear-gradient(90deg,#0878ff,#16c8ff);transform:scaleX(0);transform-origin:left;transition:transform 320ms var(--motion-ease)}
+.atlas-progress-step.is-complete:before,.atlas-progress-step.is-current:before{transform:scaleX(1)}
+.atlas-progress-step.is-current{box-shadow:0 0 10px rgba(22,200,255,.5)}
+.atlas-progress-label{grid-column:1/-1;margin-top:1px;color:#cfe2ff;font-size:9px;text-align:right}
+.lead-form .field-invalid input,.lead-form .field-invalid select,.lead-form input.field-invalid,.lead-form select.field-invalid{border-color:#dc3545!important;box-shadow:0 0 0 3px rgba(220,53,69,.12);animation:atlasFieldShake 260ms ease}
+.lead-form .field-valid input,.lead-form .field-valid select,.lead-form input.field-valid,.lead-form select.field-valid{border-color:#00a94f!important;box-shadow:0 0 0 3px rgba(0,169,79,.1)}
+.lead-consent.field-invalid{padding:8px;border:1px solid #dc3545;border-radius:6px;background:rgba(220,53,69,.06)}
+.lead-error:not([hidden]){animation:atlasErrorIn 240ms var(--motion-ease) both}
+.lead-submit.is-preparing{pointer-events:none;filter:saturate(.8);position:relative}.lead-submit.is-preparing:after{width:14px;height:14px;margin-left:8px;border:2px solid rgba(255,255,255,.55);border-top-color:#fff;border-radius:50%;content:"";animation:atlasSpin .65s linear infinite}
+.atlas-success-burst{animation:atlasSuccess 520ms var(--motion-ease) both}
+@keyframes atlasGlowOne{to{transform:translate3d(35px,-18px,0) scale(1.08);opacity:.24}}@keyframes atlasGlowTwo{to{transform:translate3d(-28px,24px,0) scale(.94);opacity:.22}}@keyframes atlasHeroFloat{50%{transform:translate3d(0,-5px,0) scale(1.004)}}@keyframes atlasSealPulse{50%{filter:drop-shadow(0 4px 18px rgba(0,120,255,.65));transform:rotate(-7deg) scale(1.025)}}@keyframes atlasLauncherAura{50%{box-shadow:0 0 32px rgba(0,142,255,.57)}}@keyframes atlasContentIn{from{opacity:0;transform:translate3d(0,9px,0)}to{opacity:1;transform:none}}@keyframes atlasOptionIn{from{opacity:0;transform:translate3d(0,7px,0)}to{opacity:1;transform:none}}@keyframes atlasFieldShake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}@keyframes atlasErrorIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}@keyframes atlasSpin{to{transform:rotate(360deg)}}@keyframes atlasSuccess{0%{transform:scale(.985)}55%{transform:scale(1.015)}100%{transform:none}}
+@media (hover:none){.service-card:hover,.future-grid>div:hover,.partner-card:hover,.proof-grid article:hover,.trust-grid article:hover{transform:none}}
+@media (max-width:700px){html.motion-ready .motion-reveal{transform:translate3d(0,12px,0)}.hero-art img{animation-duration:12s}.atlas-progress{padding-inline:12px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;transition-delay:0ms!important}.motion-reveal{opacity:1!important;transform:none!important}.atlas-chat:not(.open){transform:none!important}.atlas-progress-step:before{transition:none!important}}
