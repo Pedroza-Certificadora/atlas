@@ -2,7 +2,7 @@
 
 ## Status
 
-Versão em pré-homologação visual.
+Versão 3.7.1 em pré-homologação visual.
 
 ## Base preservada
 
@@ -14,10 +14,10 @@ Versão em pré-homologação visual.
 
 - SVG transparente oficial integrado ao cabeçalho.
 - SVG institucional oficial integrado ao rodapé.
-- Header Glass Premium com desfoque, saturação e borda luminosa discreta.
+- Header Glass Premium claro, adequado ao contraste do SVG oficial.
 - Profundidade do logo criada exclusivamente por CSS.
 - Card institucional de vidro no rodapé.
-- Hero refinado em contraste, iluminação, tipografia e transição com a arte.
+- Hero refinado com máscara real de transparência na transição central da arte.
 - Animações desktop suavizadas.
 - CSS legado específico dos logos removido.
 - Responsividade revisada para desktop, tablet e celular.
