@@ -2,7 +2,7 @@
 
 ## Status
 
-Versão 3.7.3 em pré-homologação visual.
+Versão 3.7.4 em pré-homologação visual.
 
 ## Base preservada
 
@@ -21,6 +21,7 @@ Versão 3.7.3 em pré-homologação visual.
 - Arte ampliada para preencher integralmente o Hero.
 - Branco interno do SVG neutralizado sobre uma base Glass uniforme.
 - Fundo branco do logo Pedroza Contadores restaurado sem mover o card.
+- Placa branca interna do SVG do cabeçalho removida, preservando integralmente a marca.
 - Animações desktop suavizadas.
 - CSS legado específico dos logos removido.
 - Responsividade revisada para desktop, tablet e celular.
