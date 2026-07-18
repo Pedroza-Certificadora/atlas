@@ -34,7 +34,9 @@
         }
       });
     },{threshold:.08,rootMargin:"0px 0px -4% 0px"});
-    targets.forEach(function(el){io.observe(el);});
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){targets.forEach(function(el){io.observe(el);});});
+    });
     setTimeout(function(){targets.forEach(function(el){el.classList.add("motion-visible");});},1800);
   }
 

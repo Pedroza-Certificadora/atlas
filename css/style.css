@@ -129,6 +129,10 @@
   .brand{width:218px;height:72px}
   .brand img{width:218px;height:72px}
   .main-nav{top:76px}
+  .main-nav a{color:#f7fbff;text-shadow:0 1px 2px rgba(0,0,0,.35);font-weight:700}
+  .main-nav a:hover,.main-nav a:focus-visible,.main-nav a.active{color:#fff;background:rgba(22,132,255,.16)}
+  .main-nav a:focus-visible{outline:3px solid #56d9ff;outline-offset:-3px;border-radius:6px}
+  .menu-toggle:focus-visible{outline:3px solid #56d9ff;outline-offset:3px}
   .hero,.hero-inner{min-height:630px}
 }
 @media(max-width:640px){
