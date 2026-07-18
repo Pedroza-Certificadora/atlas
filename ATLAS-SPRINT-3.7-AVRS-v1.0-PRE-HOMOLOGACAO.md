@@ -2,7 +2,7 @@
 
 ## Status
 
-Versão 3.7.1 em pré-homologação visual.
+Versão 3.7.2 em pré-homologação visual.
 
 ## Base preservada
 
@@ -18,6 +18,8 @@ Versão 3.7.1 em pré-homologação visual.
 - Profundidade do logo criada exclusivamente por CSS.
 - Card institucional de vidro no rodapé.
 - Hero refinado com máscara real de transparência na transição central da arte.
+- Arte do Hero ampliada e reposicionada para preencher melhor o centro.
+- Branco interno do SVG do cabeçalho neutralizado sobre o Glass translúcido.
 - Animações desktop suavizadas.
 - CSS legado específico dos logos removido.
 - Responsividade revisada para desktop, tablet e celular.
