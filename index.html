@@ -8,7 +8,7 @@
   <meta name="description" content="Certificado digital rápido, seguro e sem sair de casa. Atendimento humano por videoconferência em todo o Brasil.">
   <meta name="theme-color" content="#020b1f">
   <title>Pedroza Certificadora | Certificado Digital</title>
-  <link rel="stylesheet" href="css/style.css?v=3.3.1">
+  <link rel="stylesheet" href="css/style.css?v=3.4.0">
 </head>
 <body>
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -75,11 +75,11 @@
         <div class="services-block">
           <h2 class="section-kicker">Nossos serviços</h2>
           <div class="service-grid">
-            <article class="service-card"><span class="service-icon">♟</span><h3>e-CPF</h3><p>Ideal para pessoas físicas com validade jurídica em todo o Brasil.</p><a href="#contato">Saiba mais →</a></article>
-            <article class="service-card"><span class="service-icon">▥</span><h3>e-CNPJ</h3><p>Para empresas que precisam de agilidade e segurança nas operações.</p><a href="#contato">Saiba mais →</a></article>
-            <article class="service-card"><span class="service-icon badge">A1</span><h3>Certificado A1</h3><p>Instalado no computador com validade de até 1 ano.</p><a href="#contato">Saiba mais →</a></article>
-            <article class="service-card"><span class="service-icon badge">A3</span><h3>Certificado A3</h3><p>Em token ou cartão com validade de até 3 anos.</p><a href="#contato">Saiba mais →</a></article>
-            <article class="service-card"><span class="service-icon">↻</span><h3>Renovação</h3><p>Renove seu certificado com rapidez e sem burocracia.</p><a href="#contato">Saiba mais →</a></article>
+            <article class="service-card"><span class="service-icon">♟</span><h3>e-CPF</h3><p>Ideal para pessoas físicas com validade jurídica em todo o Brasil.</p><a class="acs-action" href="https://wa.me/5521991674117?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20e-CPF." data-acs="e-CPF" target="_blank" rel="noopener">Saiba mais →</a></article>
+            <article class="service-card"><span class="service-icon">▥</span><h3>e-CNPJ</h3><p>Para empresas que precisam de agilidade e segurança nas operações.</p><a class="acs-action" href="https://wa.me/5521991674117?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20e-CNPJ." data-acs="e-CNPJ" target="_blank" rel="noopener">Saiba mais →</a></article>
+            <article class="service-card"><span class="service-icon badge">A1</span><h3>Certificado A1</h3><p>Instalado no computador com validade de até 1 ano.</p><a class="acs-action" href="https://wa.me/5521991674117?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20certificado%20A1." data-acs="A1" target="_blank" rel="noopener">Saiba mais →</a></article>
+            <article class="service-card"><span class="service-icon badge">A3</span><h3>Certificado A3</h3><p>Em token ou cartão com validade de até 3 anos.</p><a class="acs-action" href="https://wa.me/5521991674117?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20certificado%20A3." data-acs="A3" target="_blank" rel="noopener">Saiba mais →</a></article>
+            <article class="service-card"><span class="service-icon">↻</span><h3>Renovação</h3><p>Renove seu certificado com rapidez e sem burocracia.</p><a class="acs-action" href="https://wa.me/5521991674117?text=Olá!%20Quero%20renovar%20meu%20certificado%20digital." data-acs="Renovação" target="_blank" rel="noopener">Saiba mais →</a></article>
           </div>
         </div>
         <div class="process-block" id="como-funciona">
@@ -128,10 +128,10 @@
   <button class="atlas-launcher" type="button" aria-expanded="false" aria-controls="atlas-chat"><span class="atlas-face">●‿●</span><span class="atlas-label"><b>ATLAS</b><small>Assistente Inteligente</small></span></button>
   <aside class="atlas-chat" id="atlas-chat" aria-label="Atlas, assistente virtual" aria-hidden="true">
     <header><span class="atlas-face">●‿●</span><div><b>ATLAS</b><small>Assistente Inteligente</small></div><button type="button" class="chat-minimize" aria-label="Minimizar chat">−</button><button type="button" class="chat-close" aria-label="Fechar chat">×</button></header>
-    <div class="chat-body"><div class="chat-message"><span class="mini-avatar">●‿●</span><p>Olá! 👋<br><strong>Eu sou o Atlas</strong>, assistente virtual da Pedroza Certificadora.<br>Como posso te ajudar hoje?</p></div><div class="quick-actions"><button>Qual certificado eu preciso?</button><button>Quais documentos são necessários?</button><button>Como funciona a emissão por vídeo?</button><button>Meu certificado venceu. E agora?</button></div></div>
+    <div class="chat-body" aria-live="polite"><div class="chat-message"><span class="mini-avatar">●‿●</span><p id="atlas-message">Olá! 👋<br><strong>Eu sou o Atlas</strong>, assistente virtual da Pedroza Certificadora.<br>Como posso te ajudar hoje?</p></div><div class="quick-actions" id="atlas-actions"><button type="button" data-flow="escolher">Qual certificado eu preciso?</button><button type="button" data-flow="documentos">Quais documentos são necessários?</button><button type="button" data-flow="video">Como funciona a emissão por vídeo?</button><button type="button" data-flow="renovacao">Meu certificado venceu. E agora?</button></div><button class="chat-back" id="atlas-back" type="button" hidden>← Voltar ao início</button></div>
     <form class="chat-input"><label class="sr-only" for="chat-text">Digite sua mensagem</label><input id="chat-text" type="text" placeholder="Digite sua mensagem..."><button type="submit" aria-label="Enviar mensagem">➤</button></form><footer>Powered by <strong>Atlas IA</strong></footer>
   </aside>
 
-  <script src="js/app.js?v=3.3.0"></script>
+  <script src="js/app.js?v=3.4.0"></script>
 </body>
 </html>

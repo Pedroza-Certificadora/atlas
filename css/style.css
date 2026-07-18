@@ -13,9 +13,12 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
 
 /* ADS v1.0 — tratamento oficial de contraste das marcas */
-.brand{height:54px;padding:5px 10px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:9px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+.brand{height:54px;padding:3px 7px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:8px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
 .brand img{width:100%;height:100%;max-height:none;object-fit:contain}
-.footer-brand img{width:215px;padding:6px 10px;background:#fff;border:1px solid rgba(255,255,255,.75);border-radius:8px;box-shadow:0 5px 16px rgba(0,0,0,.2)}
-.partner-card img{width:100%;height:72px;padding:7px;background:#fff;border:1px solid rgba(255,255,255,.75);border-radius:7px;object-fit:contain}
+.footer-brand img{width:215px;padding:3px 7px;background:#fff;border:1px solid rgba(255,255,255,.75);border-radius:7px;box-shadow:0 5px 16px rgba(0,0,0,.2)}
+.partner-card img{width:auto;max-width:100%;height:68px;padding:3px 5px;background:#fff;border:1px solid rgba(255,255,255,.75);border-radius:6px;object-fit:contain}
 @media(max-width:980px){.brand{height:50px}}
-@media(max-width:640px){.brand{height:46px;padding:4px 8px}.footer-brand img{width:205px}}
+@media(max-width:640px){.brand{height:46px;padding:2px 6px}.footer-brand img{width:205px}}
+
+/* ACS v1.0 — jornada de conversão, preservando o layout ADS */
+.quick-actions button{transition:border-color .18s,background .18s,transform .18s}.quick-actions button:hover,.quick-actions button:focus-visible{background:#eaf4ff;border-color:#0878ff;transform:translateY(-1px);outline:none}.chat-back{width:100%;margin-top:9px;padding:6px;color:#4f6078;background:transparent;border:0;font-size:9px}.chat-back:hover,.chat-back:focus-visible{color:#0757b8;text-decoration:underline;outline:none}.chat-message p a{display:inline-flex;margin-top:8px;padding:6px 10px;color:#fff;background:linear-gradient(135deg,#00a940,#00c45a);border-radius:14px;font-size:9px;font-weight:800}.service-card .acs-action:focus-visible{outline:2px solid #0878ff;outline-offset:3px;border-radius:3px}
