@@ -1,140 +1,40 @@
 /* Concepção, design e desenvolvimento: Marcos Henrique Pedroza */
+/* Sprint 3.5 — Atlas Lead Capture System v1.0 */
 (function(){
-  "use strict";
-
-  var WHATSAPP="https://wa.me/5521991674117?text=";
-  var menuButton=document.querySelector(".menu-toggle");
-  var navigation=document.getElementById("menu-principal");
-  var launcher=document.querySelector(".atlas-launcher");
-  var chat=document.getElementById("atlas-chat");
-  var closeButton=document.querySelector(".chat-close");
-  var minimizeButton=document.querySelector(".chat-minimize");
-  var message=document.getElementById("atlas-message");
-  var actions=document.getElementById("atlas-actions");
-  var backButton=document.getElementById("atlas-back");
-  var chatInput=document.getElementById("chat-text");
-
-  var home={
-    text:"Olá! 👋<br><strong>Eu sou o Atlas</strong>, assistente virtual da Pedroza Certificadora.<br>Como posso te ajudar hoje?",
-    choices:[
-      ["Qual certificado eu preciso?","escolher"],
-      ["Quais documentos são necessários?","documentos"],
-      ["Como funciona a emissão por vídeo?","video"],
-      ["Meu certificado venceu. E agora?","renovacao"]
-    ]
-  };
-
-  var flows={
-    escolher:{text:"Vamos descobrir juntos. O certificado será usado por uma <strong>pessoa física</strong> ou por uma <strong>empresa</strong>?",choices:[["Pessoa física — e-CPF","ecpf"],["Empresa — e-CNPJ","ecnpj"],["Ainda tenho dúvida","especialista"]]},
-    ecpf:{text:"Para pessoa física, o mais indicado é o <strong>e-CPF</strong>. Agora escolha onde prefere armazená-lo:",choices:[["No computador — A1","ecpf-a1"],["Token ou cartão — A3","ecpf-a3"],["Quero orientação","especialista"]]},
-    ecnpj:{text:"Para a empresa, o mais indicado é o <strong>e-CNPJ</strong>. Agora escolha onde prefere armazená-lo:",choices:[["No computador — A1","ecnpj-a1"],["Token ou cartão — A3","ecnpj-a3"],["Quero orientação","especialista"]]},
-    documentos:{text:"Os documentos variam conforme o titular. Para qual certificado você deseja a lista inicial?",choices:[["Documentos para e-CPF","docs-ecpf"],["Documentos para e-CNPJ","docs-ecnpj"],["Falar com um especialista","especialista"]]},
-    "docs-ecpf":{text:"Para o <strong>e-CPF</strong>, tenha em mãos documento oficial com foto e CPF. Nossa equipe confirma a lista definitiva conforme o seu caso.",choices:[["Enviar documentos pelo WhatsApp","wa-docs-ecpf"],["Também quero saber sobre e-CNPJ","docs-ecnpj"]]},
-    "docs-ecnpj":{text:"Para o <strong>e-CNPJ</strong>, normalmente são verificados os documentos do responsável e os dados constitutivos da empresa. Nossa equipe confirma a lista conforme a natureza jurídica.",choices:[["Enviar documentos pelo WhatsApp","wa-docs-ecnpj"],["Também quero saber sobre e-CPF","docs-ecpf"]]},
-    video:{text:"A emissão é feita por <strong>videoconferência</strong>. Após a conferência dos dados, você recebe a orientação para emitir e instalar o certificado — normalmente em até 15 minutos após a validação.",choices:[["Quero iniciar minha emissão","wa-video"],["Escolher meu certificado","escolher"]]},
-    renovacao:{text:"Se o certificado venceu ou está próximo do vencimento, nós verificamos a forma mais rápida de renovar. O atendimento também pode ser feito por vídeo.",choices:[["Solicitar renovação","wa-renovacao"],["Meu certificado ainda funciona","wa-suporte"]]},
-    especialista:{text:"Sem problema. Um especialista da Pedroza Certificadora vai analisar sua necessidade e indicar a opção correta.",choices:[["Falar agora no WhatsApp","wa-especialista"]]}
-  };
-
-  var whatsappMessages={
-    "ecpf-a1":"Olá! O Atlas me orientou e quero emitir um e-CPF A1.",
-    "ecpf-a3":"Olá! O Atlas me orientou e quero emitir um e-CPF A3.",
-    "ecnpj-a1":"Olá! O Atlas me orientou e quero emitir um e-CNPJ A1.",
-    "ecnpj-a3":"Olá! O Atlas me orientou e quero emitir um e-CNPJ A3.",
-    "wa-docs-ecpf":"Olá! Quero confirmar e enviar os documentos necessários para emitir um e-CPF.",
-    "wa-docs-ecnpj":"Olá! Quero confirmar e enviar os documentos necessários para emitir um e-CNPJ.",
-    "wa-video":"Olá! Vi como funciona a emissão por vídeo e quero iniciar meu atendimento.",
-    "wa-renovacao":"Olá! Meu certificado venceu ou está próximo do vencimento e quero solicitar a renovação.",
-    "wa-suporte":"Olá! Preciso de suporte com meu certificado digital atual.",
-    "wa-especialista":"Olá! Conversei com o Atlas e preciso de ajuda para escolher o certificado ideal."
-  };
-
-  function track(action,label){
-    try{
-      var history=JSON.parse(localStorage.getItem("atlas_acs_events")||"[]");
-      history.push({action:action,label:label,at:new Date().toISOString()});
-      localStorage.setItem("atlas_acs_events",JSON.stringify(history.slice(-50)));
-    }catch(error){}
-    if(typeof window.gtag==="function")window.gtag("event",action,{event_category:"ACS",event_label:label});
-  }
-
-  function openWhatsApp(text,label){
-    track("whatsapp_click",label);
-    window.open(WHATSAPP+encodeURIComponent(text),"_blank","noopener");
-  }
-
-  function renderFlow(flowName){
-    var flow=flowName==="home"?home:flows[flowName];
-    if(!flow||!message||!actions)return;
-    message.innerHTML=flow.text;
-    actions.innerHTML="";
-    flow.choices.forEach(function(choice){
-      var button=document.createElement("button");
-      button.type="button";
-      button.textContent=choice[0];
-      button.dataset.flow=choice[1];
-      actions.appendChild(button);
-    });
-    if(backButton)backButton.hidden=flowName==="home";
-    track("atlas_step",flowName);
-  }
-
-  function handleFlow(flowName){
-    if(whatsappMessages[flowName]){openWhatsApp(whatsappMessages[flowName],flowName);return;}
-    renderFlow(flowName);
-  }
-
-  function closeMenu(){
-    if(!menuButton||!navigation)return;
-    menuButton.setAttribute("aria-expanded","false");
-    menuButton.setAttribute("aria-label","Abrir menu");
-    navigation.classList.remove("open");
-  }
-
-  if(menuButton&&navigation){
-    menuButton.addEventListener("click",function(){
-      var opening=menuButton.getAttribute("aria-expanded")!=="true";
-      menuButton.setAttribute("aria-expanded",String(opening));
-      menuButton.setAttribute("aria-label",opening?"Fechar menu":"Abrir menu");
-      navigation.classList.toggle("open",opening);
-    });
-    navigation.querySelectorAll("a").forEach(function(link){link.addEventListener("click",closeMenu);});
-  }
-
-  function setChat(open){
-    if(!chat||!launcher)return;
-    chat.classList.toggle("open",open);
-    chat.setAttribute("aria-hidden",String(!open));
-    launcher.setAttribute("aria-expanded",String(open));
-    launcher.hidden=open;
-    document.body.classList.toggle("chat-open",open);
-    if(open){track("atlas_open","launcher");window.setTimeout(function(){if(chatInput)chatInput.focus();},250);}
-  }
-
-  if(launcher)launcher.addEventListener("click",function(){setChat(true);});
-  if(closeButton)closeButton.addEventListener("click",function(){setChat(false);});
-  if(minimizeButton)minimizeButton.addEventListener("click",function(){setChat(false);});
-  if(backButton)backButton.addEventListener("click",function(){renderFlow("home");});
-  if(actions)actions.addEventListener("click",function(event){var button=event.target.closest("button[data-flow]");if(button)handleFlow(button.dataset.flow);});
-
-  if(chat){
-    chat.querySelector("form").addEventListener("submit",function(event){
-      event.preventDefault();
-      var typed=chatInput?chatInput.value.trim():"";
-      if(!typed)return;
-      openWhatsApp("Olá! Digitei esta mensagem no Atlas: "+typed,"mensagem_livre");
-      chatInput.value="";
-    });
-  }
-
-  document.querySelectorAll(".acs-action").forEach(function(link){link.addEventListener("click",function(){track("service_click",link.dataset.acs||link.textContent.trim());});});
-  document.querySelectorAll('a[href*="wa.me/5521991674117"]').forEach(function(link){if(!link.classList.contains("acs-action"))link.addEventListener("click",function(){track("whatsapp_click",link.textContent.trim()||"cta");});});
-
-  var year=document.getElementById("ano-atual");if(year)year.textContent=String(new Date().getFullYear());
-  var reveals=document.querySelectorAll(".reveal");
-  if("IntersectionObserver" in window){
-    var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target);}});},{threshold:.08});
-    reveals.forEach(function(item){observer.observe(item);});
-    window.setTimeout(function(){reveals.forEach(function(item){item.classList.add("visible");});},1200);
-  }else{reveals.forEach(function(item){item.classList.add("visible");});}
+"use strict";
+var WA="https://wa.me/5521991674117?text=",DRAFT="atlas_alcs_draft_v1",EVENTS="atlas_alcs_events_v1",SOURCE="atlas_alcs_source_v1";
+var menu=document.querySelector(".menu-toggle"),nav=document.getElementById("menu-principal"),launcher=document.querySelector(".atlas-launcher"),chat=document.getElementById("atlas-chat"),close=document.querySelector(".chat-close"),minimize=document.querySelector(".chat-minimize"),message=document.getElementById("atlas-message"),actions=document.getElementById("atlas-actions"),back=document.getElementById("atlas-back"),input=document.getElementById("chat-text");
+var state={profile:"",certificate:"",intent:"",source:getSource()};
+var home={text:"Olá! 👋<br><strong>Eu sou o Atlas</strong>, assistente virtual da Pedroza Certificadora.<br>Como posso te ajudar hoje?",choices:[["Qual certificado eu preciso?","escolher"],["Quais documentos são necessários?","documentos"],["Como funciona a emissão por vídeo?","video"],["Meu certificado venceu. E agora?","renovacao"]]};
+var flows={
+escolher:{text:"Vamos descobrir juntos. O certificado será usado por uma <strong>pessoa física</strong> ou por uma <strong>empresa</strong>?",choices:[["Pessoa física — e-CPF","ecpf"],["Empresa — e-CNPJ","ecnpj"],["Ainda tenho dúvida","especialista"]]},
+ecpf:{text:"Para pessoa física, o mais indicado é o <strong>e-CPF</strong>. Agora escolha onde prefere armazená-lo:",choices:[["No computador — A1","ecpf-a1"],["Token ou cartão — A3","ecpf-a3"],["Quero orientação","especialista"]]},
+ecnpj:{text:"Para a empresa, o mais indicado é o <strong>e-CNPJ</strong>. Agora escolha onde prefere armazená-lo:",choices:[["No computador — A1","ecnpj-a1"],["Token ou cartão — A3","ecnpj-a3"],["Quero orientação","especialista"]]},
+documentos:{text:"Os documentos variam conforme o titular. Para qual certificado você deseja a lista inicial?",choices:[["Documentos para e-CPF","docs-ecpf"],["Documentos para e-CNPJ","docs-ecnpj"],["Falar com um especialista","especialista"]]},
+"docs-ecpf":{text:"Para o <strong>e-CPF</strong>, tenha em mãos documento oficial com foto e CPF. Nossa equipe confirma a lista definitiva conforme o seu caso.",choices:[["Organizar meu atendimento","lead-docs-ecpf"],["Também quero saber sobre e-CNPJ","docs-ecnpj"]]},
+"docs-ecnpj":{text:"Para o <strong>e-CNPJ</strong>, normalmente são verificados os documentos do responsável e os dados constitutivos da empresa. Nossa equipe confirma a lista conforme a natureza jurídica.",choices:[["Organizar meu atendimento","lead-docs-ecnpj"],["Também quero saber sobre e-CPF","docs-ecpf"]]},
+video:{text:"A emissão é feita por <strong>videoconferência</strong>. Após a conferência dos dados, você recebe a orientação para emitir e instalar o certificado — normalmente em até 15 minutos após a validação.",choices:[["Quero iniciar minha emissão","lead-video"],["Escolher meu certificado","escolher"]]},
+renovacao:{text:"Se o certificado venceu ou está próximo do vencimento, nós verificamos a forma mais rápida de renovar. O atendimento também pode ser feito por vídeo.",choices:[["Solicitar renovação","lead-renovacao"],["Meu certificado ainda funciona","lead-suporte"]]},
+especialista:{text:"Sem problema. Um especialista da Pedroza Certificadora vai analisar sua necessidade e indicar a opção correta.",choices:[["Organizar meu atendimento","lead-especialista"]]}
+};
+var presets={"ecpf-a1":{profile:"Pessoa física",certificate:"e-CPF A1",intent:"Emissão"},"ecpf-a3":{profile:"Pessoa física",certificate:"e-CPF A3",intent:"Emissão"},"ecnpj-a1":{profile:"Empresa",certificate:"e-CNPJ A1",intent:"Emissão"},"ecnpj-a3":{profile:"Empresa",certificate:"e-CNPJ A3",intent:"Emissão"},"lead-docs-ecpf":{profile:"Pessoa física",certificate:"e-CPF",intent:"Documentação"},"lead-docs-ecnpj":{profile:"Empresa",certificate:"e-CNPJ",intent:"Documentação"},"lead-video":{intent:"Emissão por vídeo"},"lead-renovacao":{certificate:"Renovação",intent:"Renovação"},"lead-suporte":{intent:"Suporte"},"lead-especialista":{intent:"Orientação"}};
+function parse(v,f){try{return JSON.parse(v)||f;}catch(e){return f;}}
+function getSource(){var p=new URLSearchParams(location.search),saved=parse(localStorage.getItem(SOURCE),null),hasCampaign=p.has("utm_source")||p.has("utm_campaign")||p.has("utm_medium");if(saved&&!hasCampaign)return saved;var s=p.get("utm_source")||"",r=document.referrer.toLowerCase();if(!s){if(r.indexOf("google.")>-1)s="Google";else if(r.indexOf("instagram.")>-1)s="Instagram";else if(r.indexOf("pedroza.com.br")>-1)s="Pedroza Contadores";else if(r)s="Indicação/outro site";else s="Acesso direto";}var o={source:s,campaign:p.get("utm_campaign")||"",medium:p.get("utm_medium")||"",content:p.get("utm_content")||"",term:p.get("utm_term")||"",capturedAt:new Date().toISOString()};try{localStorage.setItem(SOURCE,JSON.stringify(o));}catch(e){}return o;}
+function track(action,label,data){try{var h=parse(localStorage.getItem(EVENTS),[]);h.push({action:action,label:label||"",data:data||{},at:new Date().toISOString()});localStorage.setItem(EVENTS,JSON.stringify(h.slice(-100)));}catch(e){}if(typeof window.gtag==="function")window.gtag("event",action,{event_category:"ALCS",event_label:label||"",atlas_source:state.source.source});}
+function openWA(text,label){track("whatsapp_reached",label,{certificate:state.certificate,source:state.source.source});window.open(WA+encodeURIComponent(text),"_blank","noopener");}
+function renderFlow(name){var flow=name==="home"?home:flows[name];if(!flow||!message||!actions)return;chat.classList.remove("lead-mode");message.innerHTML=flow.text;actions.innerHTML="";flow.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.textContent=c[0];b.dataset.flow=c[1];actions.appendChild(b);});if(back)back.hidden=name==="home";track(name==="home"?"atlas_home":"journey_started",name);}
+function handleFlow(name){if(name==="ecpf"){state.profile="Pessoa física";state.certificate="e-CPF";}if(name==="ecnpj"){state.profile="Empresa";state.certificate="e-CNPJ";}if(presets[name]){Object.assign(state,presets[name]);renderLead();return;}renderFlow(name);}
+function esc(v){return String(v||"").replace(/[&<>'"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c];});}
+function draft(){return parse(localStorage.getItem(DRAFT),{});}
+function save(form){var d=Object.fromEntries(new FormData(form).entries());delete d.consent;d.profile=state.profile||d.profile;d.certificate=state.certificate||d.certificate;d.intent=state.intent;d.updatedAt=new Date().toISOString();try{localStorage.setItem(DRAFT,JSON.stringify(d));}catch(e){}}
+function options(list,current){return list.map(function(v){return '<option value="'+esc(v)+'"'+(v===current?' selected':'')+'>'+esc(v)+'</option>';}).join("");}
+function renderLead(){var d=draft(),profile=state.profile||d.profile||"",certificate=state.certificate||d.certificate||"";chat.classList.add("lead-mode");message.innerHTML="<strong>Posso organizar seu atendimento para nossa equipe?</strong><br>Confira as escolhas e informe apenas os dados essenciais.";actions.innerHTML='<p class="lead-resume"'+(d.updatedAt?'':' hidden')+'>Encontramos respostas salvas neste aparelho. Você pode continuar de onde parou.</p><form class="lead-form" id="atlas-lead-form" novalidate><label>Nome completo<input name="name" autocomplete="name" maxlength="90" required value="'+esc(d.name)+'"></label><label>Perfil<select name="profile" required><option value="">Selecione</option>'+options(["Pessoa física","Empresa"],profile)+'</select></label><label>Certificado pretendido<select name="certificate" required><option value="">Selecione</option>'+options(["e-CPF","e-CPF A1","e-CPF A3","e-CNPJ","e-CNPJ A1","e-CNPJ A3","A1","A3","Renovação","Ainda não sei"],certificate)+'</select></label><label>Telefone/WhatsApp<input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="(21) 99999-9999" required value="'+esc(d.phone)+'"></label><div class="lead-row"><label>Cidade<input name="city" autocomplete="address-level2" maxlength="60" required value="'+esc(d.city)+'"></label><label>Estado<select name="stateCode" required><option value="">UF</option>'+options(["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"],d.stateCode||"")+'</select></label></div><label>Urgência<select name="urgency" required><option value="">Selecione</option>'+options(["Emitir hoje","Nesta semana","Apenas pesquisando"],d.urgency||"")+'</select></label><label>Melhor horário<select name="schedule" required><option value="">Selecione</option>'+options(["Agora","Manhã — 08h às 12h","Tarde — 12h às 18h","Após 18h"],d.schedule||"")+'</select></label><label class="lead-consent"><input name="consent" type="checkbox" required><span>Autorizo o uso dos dados informados exclusivamente para atendimento e emissão do certificado digital. <a href="politica-de-privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label><p class="lead-error" id="lead-error" hidden></p><button class="lead-submit" type="submit">Organizar atendimento</button><p class="lead-note">Não solicitamos CPF, CNPJ, documentos ou imagens nesta etapa.</p></form>';if(back)back.hidden=false;var form=document.getElementById("atlas-lead-form");form.addEventListener("input",function(){save(form);});form.addEventListener("submit",submitLead);track("lead_form_opened",certificate||"não definido");}
+function submitLead(e){e.preventDefault();var form=e.currentTarget,error=document.getElementById("lead-error");if(!form.checkValidity()){error.textContent="Revise os campos obrigatórios e aceite o consentimento para continuar.";error.hidden=false;form.reportValidity();track("lead_validation_error","required");return;}var d=Object.fromEntries(new FormData(form).entries()),digits=d.phone.replace(/\D/g,"");if(digits.length<10||digits.length>13){error.textContent="Informe um telefone/WhatsApp válido com DDD.";error.hidden=false;form.elements.phone.focus();track("lead_validation_error","phone");return;}state.profile=d.profile;state.certificate=d.certificate;var source=state.source.source+(state.source.campaign?" / campanha "+state.source.campaign:"");var summary=["Novo atendimento pelo Atlas","","Nome: "+d.name,"Perfil: "+d.profile,"Certificado: "+d.certificate,"Cidade: "+d.city+"/"+d.stateCode,"WhatsApp: "+d.phone,"Urgência: "+d.urgency,"Melhor horário: "+d.schedule,"Interesse: "+(state.intent||"Atendimento"),"Origem: "+source].join("\n");try{localStorage.removeItem(DRAFT);sessionStorage.setItem("atlas_alcs_completed","1");}catch(ignore){}track("lead_completed",d.certificate,{profile:d.profile,urgency:d.urgency,source:state.source.source});message.innerHTML="<strong>Atendimento organizado!</strong><br>Confira o resumo e envie para nossa equipe no WhatsApp.";actions.innerHTML='<div class="lead-summary">'+esc(summary)+'</div><button type="button" class="lead-submit" id="send-summary">Enviar resumo pelo WhatsApp</button><p class="lead-note">Os dados só serão enviados quando você tocar no botão acima.</p>';document.getElementById("send-summary").addEventListener("click",function(){openWA(summary,"lead_summary");});}
+function closeMenu(){if(!menu||!nav)return;menu.setAttribute("aria-expanded","false");menu.setAttribute("aria-label","Abrir menu");nav.classList.remove("open");}
+if(menu&&nav){menu.addEventListener("click",function(){var opening=menu.getAttribute("aria-expanded")!=="true";menu.setAttribute("aria-expanded",String(opening));menu.setAttribute("aria-label",opening?"Fechar menu":"Abrir menu");nav.classList.toggle("open",opening);});nav.querySelectorAll("a").forEach(function(a){a.addEventListener("click",closeMenu);});}
+function setChat(open){if(!chat||!launcher)return;chat.classList.toggle("open",open);chat.setAttribute("aria-hidden",String(!open));launcher.setAttribute("aria-expanded",String(open));launcher.hidden=open;document.body.classList.toggle("chat-open",open);if(open)track("atlas_open","launcher",{source:state.source.source});}
+if(launcher)launcher.addEventListener("click",function(){setChat(true);});if(close)close.addEventListener("click",function(){setChat(false);});if(minimize)minimize.addEventListener("click",function(){setChat(false);});if(back)back.addEventListener("click",function(){renderFlow("home");});if(actions)actions.addEventListener("click",function(e){var b=e.target.closest("button[data-flow]");if(b)handleFlow(b.dataset.flow);});
+if(chat)chat.querySelector("form.chat-input").addEventListener("submit",function(e){e.preventDefault();var typed=input?input.value.trim():"";if(!typed)return;state.intent="Mensagem livre: "+typed;renderLead();input.value="";});
+document.querySelectorAll(".acs-action").forEach(function(a){a.addEventListener("click",function(){track("service_click",a.dataset.acs||a.textContent.trim());});});document.querySelectorAll('a[href*="wa.me/5521991674117"]').forEach(function(a){if(!a.classList.contains("acs-action"))a.addEventListener("click",function(){track("whatsapp_reached",a.textContent.trim()||"cta",{source:state.source.source});});});
+window.addEventListener("pagehide",function(){if(draft().updatedAt&&sessionStorage.getItem("atlas_alcs_completed")!=="1")track("lead_abandoned","draft_saved",{source:state.source.source});});var year=document.getElementById("ano-atual");if(year)year.textContent=String(new Date().getFullYear());var reveals=document.querySelectorAll(".reveal");if("IntersectionObserver" in window){var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target);}});},{threshold:.08});reveals.forEach(function(item){observer.observe(item);});window.setTimeout(function(){reveals.forEach(function(item){item.classList.add("visible");});},1200);}else reveals.forEach(function(item){item.classList.add("visible");});track("page_view","site",{source:state.source.source,campaign:state.source.campaign});
 })();

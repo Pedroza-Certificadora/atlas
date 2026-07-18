@@ -27,7 +27,17 @@ Facilitar a vida de quem utiliza Certificado Digital, reunindo informação, ser
 
 ## 📅 Status
 
-🟢 Em Planejamento
+🟢 Sprint 3.5 — Atlas Lead Capture System v1.0 em pré-homologação
+
+## Sprint 3.5
+
+- Pré-atendimento com dados mínimos e consentimento obrigatório
+- Reaproveitamento das escolhas do Atlas
+- Resumo automático para o WhatsApp
+- Origem e parâmetros UTM preservados
+- Retomada temporária somente no navegador
+- Eventos locais preparados para integração futura com métricas
+- Política de Privacidade dedicada
 
 ---
 
