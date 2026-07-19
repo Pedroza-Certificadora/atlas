@@ -14,7 +14,7 @@
   function qa(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s));}
 
   function revealTargets(){
-    return qa(".hero-copy,.hero-art,.proof-grid article,.service-card,.process-list li,.trust-grid article,.future-grid>div,.footer-grid>div,.footer-grid>.partner-card,.footer-bottom");
+    return qa(".hero-copy,.hero-art,.proof-grid article,.service-card,.process-list li,.trust-grid article,.section-heading,.useful-link-card,.document-card,.document-alert,.faq-list details,.blog-card,.security-guide,.footer-grid>div,.footer-grid>.partner-card,.footer-bottom");
   }
 
   var targets=revealTargets();

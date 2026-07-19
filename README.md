@@ -29,6 +29,14 @@ Facilitar a vida de quem utiliza Certificado Digital, reunindo informação, ser
 
 ✅ Sprint 3.8 — Atlas Quality & Stability System v1.0 homologada
 
+🧭 Sprint 3.9 — Atlas Content Expansion System v1.0 em pré-homologação
+
+- Links Úteis com acessos oficiais
+- Documentos necessários por tipo de certificado
+- Perguntas Frequentes acessíveis
+- Estrutura editorial inicial do Blog
+- Integração dos conteúdos ao menu e ao rodapé
+
 ## Sprint 3.5
 
 - Pré-atendimento com dados mínimos e consentimento obrigatório
