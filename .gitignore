@@ -1,0 +1,9 @@
+# Backups e artefatos locais não pertencem à publicação.
+backup*/
+_backups/
+*.zip
+
+# Arquivos temporários do sistema e ferramentas.
+.DS_Store
+Thumbs.db
+*.log

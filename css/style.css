@@ -101,7 +101,7 @@
 .main-nav a:after{background:linear-gradient(90deg,#0878ff,#16c8ff);box-shadow:0 0 10px rgba(22,200,255,.38)}
 .header-phone{color:#0b2548}
 .header-phone span{filter:drop-shadow(0 2px 5px rgba(0,184,79,.2))}
-.hero{min-height:405px;background-image:linear-gradient(90deg,rgba(2,8,23,.99) 0%,rgba(2,8,23,.97) 34%,rgba(2,8,23,.82) 47%,rgba(2,8,23,.36) 64%,rgba(2,8,23,.08) 82%,rgba(2,8,23,.14) 100%),url("../images/hero/atlas-hero-artwork-v1.png");background-position:center,center;background-size:100% 100%,cover;background-repeat:no-repeat}
+.hero{min-height:405px;background-image:linear-gradient(90deg,rgba(2,8,23,.99) 0%,rgba(2,8,23,.97) 34%,rgba(2,8,23,.82) 47%,rgba(2,8,23,.36) 64%,rgba(2,8,23,.08) 82%,rgba(2,8,23,.14) 100%),url("../images/hero/atlas-hero-1280.webp");background-position:center,center;background-size:100% 100%,cover;background-repeat:no-repeat}
 .hero-inner{min-height:405px}
 .hero-copy{padding-top:38px;padding-bottom:38px}
 .eyebrow{border:1px solid rgba(92,171,255,.3);background:rgba(7,72,157,.62);box-shadow:inset 0 1px rgba(255,255,255,.09);backdrop-filter:blur(8px)}
@@ -112,7 +112,9 @@
 .hero-art img{display:none}
 .site-footer{background:radial-gradient(circle at 13% 8%,rgba(10,95,205,.13),transparent 26%),linear-gradient(145deg,#020b1f,#03132e 58%,#020817)}
 .footer-institutional-card{height:100%;padding:14px 15px 13px;border:1px solid rgba(117,173,244,.24);border-radius:12px;background:linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.025));box-shadow:0 14px 32px rgba(0,5,20,.22),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(12px)}
-.footer-brand .footer-institutional-card>img{width:100%;max-width:230px;height:auto;margin:-8px auto -3px;border-radius:8px;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.25))}
+.footer-logo-panel{width:100%;max-width:190px;height:68px;display:grid;place-items:center;margin:7px auto;padding:6px 12px;overflow:hidden;background:#fff;border:1px solid rgba(255,255,255,.88);border-radius:7px;box-shadow:0 7px 18px rgba(0,0,0,.18)}
+.footer-logo-panel img{display:block;width:100%;height:100%;object-fit:contain;filter:none}
+.footer-brand .footer-institutional-card>img{display:block;width:100%;max-width:230px;height:auto;margin:-8px auto -3px;border-radius:8px;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.25))}
 .footer-brand .footer-institutional-card>p{max-width:245px;margin:6px auto;color:#dce7f7;text-align:center;line-height:1.55}
 .footer-institutional-card .socials{justify-content:center}
 .footer-institutional-card .socials a{background:rgba(255,255,255,.045);border-color:rgba(152,189,235,.5)}
@@ -142,6 +144,7 @@
   .main-nav{top:70px}
   .hero,.hero-inner{min-height:690px}
   .footer-institutional-card{padding:12px}
+  .footer-logo-panel{max-width:190px}
   .footer-brand .footer-institutional-card>img{max-width:220px}
 }
 
@@ -163,3 +166,12 @@
 @media(min-width:981px){
   .hero-art{left:0;right:0;width:100%;opacity:1!important}
 }
+
+/* Sprint 3.9.1 — conteúdo essencial visível sem depender de JavaScript. */
+.reveal{opacity:1;transform:none}
+.atlas-chat>.chat-footer{padding:6px;text-align:center;color:#8791a1;background:#edf1f5;font-size:8px}
+.lead-resume{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lead-resume[hidden]{display:none}
+.lead-resume button{padding:3px 7px;color:#0757b8;background:#fff;border:1px solid #aac7ec;border-radius:12px;font-size:8px;white-space:nowrap}
+.lead-storage-note{margin:-2px 0 0;color:#69788c;font-size:8px;line-height:1.4}
+@media(max-width:640px){.hero{background-image:linear-gradient(90deg,rgba(2,8,23,.99) 0%,rgba(2,8,23,.97) 34%,rgba(2,8,23,.82) 47%,rgba(2,8,23,.36) 64%,rgba(2,8,23,.08) 82%,rgba(2,8,23,.14) 100%),url("../images/hero/atlas-hero-768.webp")}}

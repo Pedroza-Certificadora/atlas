@@ -1,74 +1,33 @@
-# 🛰️ ATLAS
+# Atlas — Pedroza Certificadora
 
-## Portal Inteligente de Identidade Digital
+Portal público de certificação digital da Pedroza Certificadora.
 
-Desenvolvido pela **Pedroza Certificadora**.
+## Versão atual
 
----
+Sprint 3.9.1 — Correção, confiança e mensuração.
 
-## 🚀 Missão
+Principais entregas:
 
-Facilitar a vida de quem utiliza Certificado Digital, reunindo informação, serviços, suporte e tecnologia em um único lugar.
+- remoção de backups e documentos internos da publicação;
+- imagens responsivas e otimizadas;
+- canonical, sitemap, robots, favicon e metadados sociais;
+- dados estruturados da organização;
+- três artigos com URLs próprias;
+- acessibilidade aprimorada no Atlas Chat;
+- rascunho do pré-atendimento somente após autorização, com expiração em 24 horas;
+- camada de eventos preparada para integração com analytics;
+- cartão social próprio para compartilhamento do portal.
 
----
+## Estrutura
 
-## 🎯 Objetivos
+- `index.html`: portal principal;
+- `blog/`: conteúdos editoriais;
+- `css/`: identidade, layout, movimento e artigos;
+- `js/`: pré-atendimento, navegação, eventos e movimento;
+- `images/`: imagens responsivas, marcas e cartão social;
+- `politica-de-privacidade.html`: transparência do pré-atendimento;
+- `robots.txt` e `sitemap.xml`: descoberta por mecanismos de busca.
 
-- Área do Cliente
-- Hub de Serviços Digitais
-- Centro de Documentação
-- Base de Conhecimento
-- Pedroza Assist
-- Favoritos Inteligentes
-- Downloads
-- Alertas Personalizados
+## Publicação
 
----
-
-## 📅 Status
-
-✅ Sprint 3.8 — Atlas Quality & Stability System v1.0 homologada
-
-🧭 Sprint 3.9 — Atlas Content Expansion System v1.0 em pré-homologação
-
-- Links Úteis com acessos oficiais
-- Documentos necessários por tipo de certificado
-- Perguntas Frequentes acessíveis
-- Estrutura editorial inicial do Blog
-- Integração dos conteúdos ao menu e ao rodapé
-
-## Sprint 3.5
-
-- Pré-atendimento com dados mínimos e consentimento obrigatório
-- Reaproveitamento das escolhas do Atlas
-- Resumo automático para o WhatsApp
-- Origem e parâmetros UTM preservados
-- Retomada temporária somente no navegador
-- Eventos locais preparados para integração futura com métricas
-- Política de Privacidade dedicada
-
-## Sprint 3.7
-
-- Novos SVGs oficiais no cabeçalho e no rodapé
-- Header Glass Premium
-- Card institucional no rodapé
-- Profundidade elegante dos logos via CSS
-- Hero e animações desktop refinados
-- Responsividade visual revisada
-
-## Sprint 3.8
-
-- Contraste e leitura do menu móvel corrigidos
-- Foco visível e navegação por teclado revisados
-- Atlas Motion Experience System restaurado
-- `prefers-reduced-motion` preservado
-- Cache técnico atualizado para a versão 3.8.0
-- Metadados básicos de SEO e compartilhamento revisados
-- Fluxo responsivo do Atlas até o formulário homologado
-- Visual oficial da versão 3.7.4 integralmente preservado
-
----
-
-## 👨‍💻 Desenvolvido por
-
-Pedroza Certificadora
+O portal é estático e compatível com GitHub Pages. Recursos autenticados, consultas pessoais e documentos não devem ser implementados nesta camada pública; eles pertencem à futura aplicação operacional segura.

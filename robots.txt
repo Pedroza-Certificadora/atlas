@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pedroza-certificadora.github.io/atlas/sitemap.xml
