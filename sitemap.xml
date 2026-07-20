@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   <url>
-    <loc>https://pedroza-certificadora.github.io/atlas/</loc>
+    <loc>https://pedrozacertificadora.com.br/</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
   <url>
-    <loc>https://pedroza-certificadora.github.io/atlas/blog/a1-ou-a3.html</loc>
+    <loc>https://pedrozacertificadora.com.br/blog/a1-ou-a3.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
-    <loc>https://pedroza-certificadora.github.io/atlas/blog/cuidados-certificado-a1.html</loc>
+    <loc>https://pedrozacertificadora.com.br/blog/cuidados-certificado-a1.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
-    <loc>https://pedroza-certificadora.github.io/atlas/blog/emissao-videoconferencia.html</loc>
+    <loc>https://pedrozacertificadora.com.br/blog/emissao-videoconferencia.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
-    <loc>https://pedroza-certificadora.github.io/atlas/politica-de-privacidade.html</loc>
+    <loc>https://pedrozacertificadora.com.br/politica-de-privacidade.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+
 </urlset>
