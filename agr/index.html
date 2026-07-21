@@ -315,6 +315,84 @@
       </div>
     </section>
 
+
+    <!-- =================================================
+         AIMS — AMBIENTE DE PRODUTIVIDADE OPERACIONAL
+    ================================================== -->
+    <section class="aims-workspace" id="aims-workspace" aria-labelledby="aims-title">
+      <div class="container">
+        <div class="aims-heading">
+          <div>
+            <span>Atlas Intelligent Management System</span>
+            <h2 id="aims-title">Ambiente de produtividade AGR</h2>
+            <p>Checklists, anotações, mensagens e ações rápidas salvas somente neste aparelho.</p>
+          </div>
+          <span class="aims-local-badge">Dados locais</span>
+        </div>
+
+        <nav class="aims-tabs" aria-label="Ferramentas de produtividade">
+          <button type="button" class="is-active" data-aims-tab="dashboard" aria-selected="true">Dashboard</button>
+          <button type="button" data-aims-tab="checklists" aria-selected="false">Checklists</button>
+          <button type="button" data-aims-tab="notes" aria-selected="false">Anotações</button>
+          <button type="button" data-aims-tab="messages" aria-selected="false">Mensagens</button>
+        </nav>
+
+        <div class="aims-panel is-active" data-aims-panel="dashboard">
+          <div class="aims-dashboard-grid">
+            <section class="aims-card aims-actions-card" aria-labelledby="aims-actions-title">
+              <div class="aims-card-heading"><h3 id="aims-actions-title">Ações rápidas</h3><span>Mais utilizadas</span></div>
+              <div class="aims-quick-actions" id="aims-quick-actions"></div>
+            </section>
+            <section class="aims-card" aria-labelledby="aims-progress-title">
+              <div class="aims-card-heading"><h3 id="aims-progress-title">Progresso dos checklists</h3><span id="aims-progress-summary">0 de 0 etapas</span></div>
+              <div class="aims-progress-list" id="aims-progress-list"></div>
+            </section>
+            <section class="aims-card aims-resume-card" aria-labelledby="aims-resume-title">
+              <div class="aims-card-heading"><h3 id="aims-resume-title">Resumo operacional</h3><span>Atualização automática</span></div>
+              <dl class="aims-resume-grid">
+                <div><dt>Checklists ativos</dt><dd id="aims-stat-active">0</dd></div>
+                <div><dt>Etapas concluídas</dt><dd id="aims-stat-done">0</dd></div>
+                <div><dt>Mensagens copiadas</dt><dd id="aims-stat-copies">0</dd></div>
+                <div><dt>Anotação salva</dt><dd id="aims-stat-note">Não</dd></div>
+              </dl>
+            </section>
+          </div>
+        </div>
+
+        <div class="aims-panel" data-aims-panel="checklists" hidden>
+          <div class="aims-panel-toolbar">
+            <div><h3>Checklist inteligente</h3><p>Marque as etapas concluídas. O progresso é salvo automaticamente.</p></div>
+            <button type="button" class="aims-secondary-button" id="aims-reset-checklists">Limpar checklists</button>
+          </div>
+          <div class="aims-checklist-grid" id="aims-checklist-grid"></div>
+        </div>
+
+        <div class="aims-panel" data-aims-panel="notes" hidden>
+          <div class="aims-notes-layout">
+            <div>
+              <h3>Anotações rápidas</h3>
+              <p>Use este espaço para lembretes operacionais. Não registre senhas, tokens, biometria ou dados sensíveis.</p>
+            </div>
+            <div class="aims-notes-editor">
+              <label for="aims-notes">Anotação pessoal do AGR</label>
+              <textarea id="aims-notes" maxlength="3000" placeholder="Digite aqui seus lembretes operacionais..."></textarea>
+              <div class="aims-notes-status"><span id="aims-notes-count">0/3000</span><span id="aims-notes-saved" aria-live="polite">Pronto para editar</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="aims-panel" data-aims-panel="messages" hidden>
+          <div class="aims-panel-toolbar">
+            <div><h3>Modelos de mensagens</h3><p>Copie textos prontos e personalize os dados antes de enviar pelo WhatsApp.</p></div>
+            <label class="aims-message-filter">Filtrar
+              <select id="aims-message-category"><option value="all">Todas</option></select>
+            </label>
+          </div>
+          <div class="aims-message-grid" id="aims-message-grid"></div>
+        </div>
+      </div>
+    </section>
+
     <div class="agr-no-results" id="agr-no-results" hidden>
       <strong>Nenhum recurso encontrado.</strong>
       <span>Tente buscar por outro termo ou categoria.</span>
@@ -1377,7 +1455,9 @@
 
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
-  <script src="../js/agr/agr.js?v=4.3.0" defer></script>
+  <script src="../js/agr/agr.js?v=4.4.0" defer></script>
+  <script src="../js/agr/aims-data.js?v=4.4.0" defer></script>
+  <script src="../js/agr/aims.js?v=4.4.0" defer></script>
 
 </body>
 </html>

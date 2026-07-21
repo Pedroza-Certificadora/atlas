@@ -19,6 +19,15 @@
   var VERSION = "4.3.1";
   var MAX_HISTORY = 5;
   var resourceMap = new Map();
+  var globalResources = [
+    { title: "Área do Cliente", category: "Área do Cliente", url: "../cliente/", terms: "cliente consultar vencimento certificado cpf cnpj" },
+    { title: "Documentos necessários", category: "Portal", url: "../index.html#documentos", terms: "documentos e-cpf e-cnpj a1 a3 emissão" },
+    { title: "Perguntas frequentes", category: "FAQ", url: "../index.html#faq", terms: "faq perguntas dúvidas certificado digital" },
+    { title: "Links úteis", category: "Portal", url: "../index.html#links-uteis", terms: "links úteis governo ecac govbr esocial fgts" },
+    { title: "Blog — A1 ou A3", category: "Blog", url: "../blog/a1-ou-a3.html", terms: "blog diferença certificado a1 a3 escolher" },
+    { title: "Blog — Emissão por videoconferência", category: "Blog", url: "../blog/emissao-videoconferencia.html", terms: "blog emissão videoconferência online" },
+    { title: "Blog — Cuidados com certificado A1", category: "Blog", url: "../blog/cuidados-certificado-a1.html", terms: "blog cuidados segurança backup certificado a1" }
+  ];
 
   function read(key, fallback) {
     try {
@@ -256,7 +265,7 @@
     showToast.timer = setTimeout(function () { toast.classList.remove("is-visible"); }, 2200);
   }
 
-  function renderSearchResults(matches, query) {
+  function renderSearchResults(matches, query, externalMatches) {
     var target = document.getElementById("agr-search-results");
     if (!target) return;
 
@@ -267,14 +276,17 @@
     }
 
     target.hidden = false;
-    if (!matches.length) {
-      target.innerHTML = '<p class="agr-search-results-empty">Nenhum acesso rápido disponível para esta busca.</p>';
+    externalMatches = externalMatches || [];
+    if (!matches.length && !externalMatches.length) {
+      target.innerHTML = '<p class="agr-search-results-empty">Nenhum recurso disponível para esta busca.</p>';
       return;
     }
 
     target.innerHTML = matches.map(function (resource) {
       return '<a class="agr-search-result-item" href="' + escapeHtml(resource.url) + '" target="_blank" rel="noopener" data-smart-access="' + escapeHtml(resource.key) + '"><span><strong>' + escapeHtml(resource.title) + '</strong><small>' + escapeHtml(resource.category) + '</small></span><b aria-hidden="true">Abrir ↗</b></a>';
-    }).join("");
+    }).concat(externalMatches.map(function (resource) {
+      return '<a class="agr-search-result-item" href="' + escapeHtml(resource.url) + '"><span><strong>' + escapeHtml(resource.title) + '</strong><small>' + escapeHtml(resource.category) + '</small></span><b aria-hidden="true">Abrir →</b></a>';
+    })).join("");
   }
 
   function applySearch(value) {
@@ -295,11 +307,15 @@
       var hasVisible = Array.from(resources).some(function (resource) { return !resource.hidden; });
       section.classList.toggle("agr-filtered-empty", !hasVisible && !!query);
     });
-    renderSearchResults(matches, query);
+    var externalMatches = query ? globalResources.filter(function (resource) {
+      return normalize([resource.title, resource.category, resource.terms].join(" ")).indexOf(query) >= 0;
+    }) : [];
+    renderSearchResults(matches, query, externalMatches);
+    var totalFound = visible + externalMatches.length;
     var status = document.getElementById("agr-search-status");
-    status.textContent = query ? visible + (visible === 1 ? " recurso encontrado." : " recursos encontrados.") : "Todos os recursos estão visíveis.";
+    status.textContent = query ? totalFound + (totalFound === 1 ? " recurso encontrado no portal." : " recursos encontrados no portal.") : "Todos os recursos estão visíveis.";
     document.getElementById("agr-search-clear").hidden = !query;
-    document.getElementById("agr-no-results").hidden = visible !== 0;
+    document.getElementById("agr-no-results").hidden = totalFound !== 0;
   }
 
   function modal() {
