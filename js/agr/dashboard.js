@@ -1,4 +1,4 @@
-/* Atlas AASS v1.0 - Dashboard Administrativo 4.6.8 */
+/* Atlas AASS v1.0 - Dashboard Administrativo 4.6.9 */
 (function(window,document){
   "use strict";
   function safeUsers(){try{return window.AtlasAuth.userProvider.list();}catch(e){return[];}}

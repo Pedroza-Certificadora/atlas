@@ -489,7 +489,7 @@ body.auth-modal-open { overflow: hidden; }
 .auth-account-button{white-space:nowrap}
 @media(max-width:1280px){.auth-account-button{padding-inline:12px;font-size:11px}}
 
-/* Sprint 4.6.7 — refinamento institucional do login */
+/* Sprint 4.6.9 — refinamento institucional do login */
 @media (max-height: 760px) and (min-width: 901px) {
   .auth-logo { width: min(390px, 78%); min-height: 124px; padding: 5px 20px; }
   .auth-logo img { width: min(338px, 100%); height: 112px; }
