@@ -30,10 +30,17 @@
     } catch (error) {
       // A autenticacao nao deve falhar caso o armazenamento esteja indisponivel.
     }
+
+    if (window.AtlasAPI && window.AtlasAPI.isConfigured()) {
+      window.AtlasAPI.audit(action, details || {}).catch(function () {
+        // A fila local preserva o evento mesmo quando a API estiver indisponivel.
+      });
+    }
   }
 
   window.AtlasAuth.audit = Object.freeze({
     read: read,
+    list: read,
     record: record
   });
 })(window);

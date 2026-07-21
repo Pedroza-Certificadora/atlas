@@ -22,6 +22,7 @@
     var now = Date.now();
     var session = {
       token: window.AtlasAuth.crypto.randomId(),
+      apiToken: user.apiToken || "",
       user: {
         id: user.id,
         username: user.username,

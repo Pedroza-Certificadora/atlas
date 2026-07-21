@@ -29,10 +29,21 @@
       return { ok: false, code: "locked", remainingSeconds: Math.ceil((attempts.lockedUntil - now) / 1000) };
     }
 
-    var user = window.AtlasAuth.userProvider.findByLogin(loginName);
     var passwordHash = await window.AtlasAuth.crypto.sha256(password || "");
+    var user = null;
 
-    if (!user || !user.active || user.passwordHash !== passwordHash) {
+    if (window.AtlasAPI && window.AtlasAPI.isConfigured()) {
+      try {
+        user = await window.AtlasAPI.login(loginName, passwordHash);
+      } catch (apiError) {
+        if (apiError.code !== "INVALID_CREDENTIALS") throw apiError;
+      }
+    } else {
+      user = window.AtlasAuth.userProvider.findByLogin(loginName);
+      if (user && user.passwordHash !== passwordHash) user = null;
+    }
+
+    if (!user || !user.active) {
       var count = attempts.count + 1;
       var lockedUntil = count >= config.maxFailedAttempts ? now + config.lockoutMs : 0;
       writeAttempts(loginName, { count: count, lockedUntil: lockedUntil });
