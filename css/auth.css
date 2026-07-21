@@ -9,7 +9,11 @@ html.auth-check-pending body {
 }
 
 .auth-page {
+  width: 100%;
   min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: hidden;
   color: #18324f;
   background:
     radial-gradient(circle at 78% 18%, rgba(19, 134, 255, .24), transparent 28%),
@@ -18,10 +22,14 @@ html.auth-check-pending body {
 }
 
 .auth-shell {
+  width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
+  min-height: 100svh;
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 500px);
   align-items: stretch;
+  overflow-x: hidden;
 }
 
 .auth-brand-panel {
@@ -30,7 +38,8 @@ html.auth-check-pending body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(34px, 6vw, 78px);
+  min-width: 0;
+  padding: clamp(24px, 4vw, 56px);
   color: #fff;
 }
 
@@ -50,19 +59,32 @@ html.auth-check-pending body {
   position: relative;
   z-index: 1;
   display: inline-flex;
-  width: min(280px, 74vw);
+  align-items: center;
+  justify-content: center;
+  width: 232px;
+  height: 76px;
+  max-width: 74vw;
+  padding: 2px 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
 }
 
 .auth-logo img {
-  width: 100%;
-  height: auto;
+  display: block;
+  width: 218px;
+  height: 72px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .auth-brand-copy {
   position: relative;
   z-index: 1;
   max-width: 650px;
-  margin: 50px 0;
+  margin: clamp(26px, 5vh, 44px) 0;
 }
 
 .auth-kicker {
@@ -82,7 +104,7 @@ html.auth-check-pending body {
 .auth-brand-copy h1 {
   margin: 0;
   max-width: 720px;
-  font-size: clamp(42px, 6vw, 72px);
+  font-size: clamp(38px, 4.8vw, 62px);
   line-height: 1.02;
   letter-spacing: -2.5px;
 }
@@ -98,10 +120,10 @@ html.auth-check-pending body {
 
 .auth-brand-copy p {
   max-width: 610px;
-  margin: 24px 0 0;
+  margin: 18px 0 0;
   color: #d6e4f5;
-  font-size: 17px;
-  line-height: 1.75;
+  font-size: 16px;
+  line-height: 1.65;
 }
 
 .auth-security-list {
@@ -110,7 +132,7 @@ html.auth-check-pending body {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 28px 0 0;
+  margin: 22px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -133,18 +155,19 @@ html.auth-check-pending body {
 }
 
 .auth-form-panel {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: clamp(20px, 3vw, 34px);
   background: rgba(247, 250, 253, .98);
   box-shadow: -24px 0 80px rgba(0, 9, 30, .20);
 }
 
 .auth-card {
   width: 100%;
-  max-width: 430px;
-  padding: 36px;
+  max-width: 410px;
+  padding: clamp(26px, 3.2vh, 34px);
   background: #fff;
   border: 1px solid #dce8f3;
   border-radius: 20px;
@@ -165,14 +188,14 @@ html.auth-check-pending body {
 }
 
 .auth-card h2 {
-  margin: 14px 0 8px;
+  margin: 12px 0 7px;
   color: #092750;
-  font-size: 30px;
+  font-size: 28px;
   letter-spacing: -.7px;
 }
 
 .auth-card-intro {
-  margin: 0 0 27px;
+  margin: 0 0 20px;
   color: #667b90;
   font-size: 14px;
   line-height: 1.65;
@@ -181,7 +204,7 @@ html.auth-check-pending body {
 .auth-field {
   display: grid;
   gap: 8px;
-  margin-top: 17px;
+  margin-top: 14px;
 }
 
 .auth-field > span,
@@ -197,7 +220,7 @@ html.auth-check-pending body {
 
 .auth-field input {
   width: 100%;
-  min-height: 49px;
+  min-height: 46px;
   padding: 0 14px;
   color: #18324f;
   background: #f8fbfe;
@@ -243,7 +266,7 @@ html.auth-check-pending body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 18px;
+  margin-top: 15px;
   font-size: 12px;
 }
 
@@ -270,8 +293,8 @@ html.auth-check-pending body {
 .auth-submit {
   position: relative;
   width: 100%;
-  min-height: 50px;
-  margin-top: 22px;
+  min-height: 47px;
+  margin-top: 18px;
   color: #fff;
   background: linear-gradient(135deg, #0878ff, #075cc7);
   border: 0;
@@ -316,8 +339,8 @@ html.auth-check-pending body {
 .auth-feedback-info { color: #24547f; background: #eef7ff; border: 1px solid #d4e8fa; }
 
 .auth-card-note {
-  margin: 22px 0 0;
-  padding-top: 18px;
+  margin: 18px 0 0;
+  padding-top: 15px;
   color: #73869a;
   border-top: 1px solid #e4edf5;
   font-size: 10px;
@@ -391,6 +414,42 @@ html.auth-check-pending body {
   cursor: pointer;
 }
 body.auth-modal-open { overflow: hidden; }
+
+@media (min-width: 981px) {
+  .auth-page {
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .auth-shell {
+    height: 100vh;
+    height: 100svh;
+  }
+
+  .auth-brand-panel,
+  .auth-form-panel {
+    min-height: 0;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 981px) {
+  .auth-brand-panel { padding-top: 22px; padding-bottom: 22px; }
+  .auth-logo { width: 210px; height: 68px; }
+  .auth-logo img { width: 198px; height: 64px; }
+  .auth-brand-copy { margin: 18px 0; }
+  .auth-kicker { margin-bottom: 12px; padding: 5px 10px; }
+  .auth-brand-copy h1 { font-size: clamp(36px, 4.2vw, 54px); }
+  .auth-brand-copy p { margin-top: 14px; font-size: 14px; line-height: 1.55; }
+  .auth-security-list { margin-top: 16px; }
+  .auth-security-list li { padding: 8px 11px; }
+  .auth-card { padding: 24px 28px; }
+  .auth-card-intro { margin-bottom: 15px; }
+  .auth-field { margin-top: 11px; }
+  .auth-options { margin-top: 12px; }
+  .auth-submit { margin-top: 14px; }
+  .auth-card-note { margin-top: 14px; padding-top: 12px; }
+}
 
 @media (max-width: 980px) {
   .auth-shell { grid-template-columns: 1fr; }
