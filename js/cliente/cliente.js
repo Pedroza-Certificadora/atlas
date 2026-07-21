@@ -1,0 +1,365 @@
+﻿(() => {
+  "use strict";
+
+  const config = window.ATLAS_AEVS_CONFIG || {};
+  const endpoint = String(config.endpoint || "").trim();
+  const whatsapp = String(config.whatsapp || "5521991674117").replace(/\D/g, "");
+
+  const form = document.querySelector("#form-consulta");
+  const inputDocumento = document.querySelector("#documento");
+  const consentimento = document.querySelector("#consentimento");
+  const botaoConsultar = document.querySelector("#botao-consultar");
+  const botaoTexto = document.querySelector(".botao-texto");
+  const botaoCarregando = document.querySelector(".botao-carregando");
+  const mensagemErro = document.querySelector("#documento-erro");
+
+  const resultadoSection = document.querySelector("#resultado-consulta");
+  const resultadoCard = document.querySelector("#resultado-card");
+  const resultadoIcone = document.querySelector("#resultado-icone");
+  const resultadoCategoria = document.querySelector("#resultado-categoria");
+  const resultadoTitulo = document.querySelector("#resultado-titulo");
+  const resultadoMensagem = document.querySelector("#resultado-mensagem");
+  const resultadoDados = document.querySelector("#resultado-dados");
+
+  const resultadoTitular = document.querySelector("#resultado-titular");
+  const resultadoDocumento = document.querySelector("#resultado-documento");
+  const resultadoTipo = document.querySelector("#resultado-tipo");
+  const resultadoValidade = document.querySelector("#resultado-validade");
+  const resultadoSituacao = document.querySelector("#resultado-situacao");
+  const resultadoPrazo = document.querySelector("#resultado-prazo");
+  const resultadoWhatsapp = document.querySelector("#resultado-whatsapp");
+  const novaConsulta = document.querySelector("#nova-consulta");
+
+  if (!form || !inputDocumento) {
+    return;
+  }
+
+  function somenteNumeros(valor) {
+    return String(valor || "").replace(/\D/g, "");
+  }
+
+  function formatarDocumento(valor) {
+    const numeros = somenteNumeros(valor).slice(0, 14);
+
+    if (numeros.length <= 11) {
+      return numeros
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+
+    return numeros
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  function documentoValidoBasico(documento) {
+    if (![11, 14].includes(documento.length)) {
+      return false;
+    }
+
+    return !/^(\d)\1+$/.test(documento);
+  }
+
+  function mostrarErro(mensagem) {
+    inputDocumento.setAttribute("aria-invalid", "true");
+    mensagemErro.textContent = mensagem;
+    mensagemErro.hidden = false;
+  }
+
+  function limparErro() {
+    inputDocumento.removeAttribute("aria-invalid");
+    mensagemErro.textContent = "";
+    mensagemErro.hidden = true;
+  }
+
+  function alternarCarregamento(ativo) {
+    botaoConsultar.disabled = ativo;
+    inputDocumento.disabled = ativo;
+    consentimento.disabled = ativo;
+    botaoTexto.hidden = ativo;
+    botaoCarregando.hidden = !ativo;
+  }
+
+  function primeiroValor(objeto, chaves, padrao = "") {
+    for (const chave of chaves) {
+      const valor = objeto?.[chave];
+
+      if (valor !== undefined && valor !== null && String(valor).trim() !== "") {
+        return valor;
+      }
+    }
+
+    return padrao;
+  }
+
+  function normalizarStatus(valor, dias) {
+    const status = String(valor || "").trim().toLowerCase();
+
+    if (
+      status.includes("vencid") ||
+      status.includes("expirad") ||
+      Number(dias) < 0
+    ) {
+      return "vencido";
+    }
+
+    if (
+      status.includes("próxim") ||
+      status.includes("proxim") ||
+      status.includes("atenção") ||
+      status.includes("atencao") ||
+      (Number.isFinite(Number(dias)) && Number(dias) >= 0 && Number(dias) <= 30)
+    ) {
+      return "atencao";
+    }
+
+    return "valido";
+  }
+
+  function criarMensagemWhatsapp(tipo, documento) {
+    const texto =
+      tipo === "vencido"
+        ? `Olá! Consultei a Área do Cliente e meu certificado aparece como vencido. Documento: ${documento}.`
+        : tipo === "atencao"
+          ? `Olá! Consultei a Área do Cliente e meu certificado está próximo do vencimento. Documento: ${documento}.`
+          : `Olá! Consultei meu certificado na Área do Cliente e gostaria de orientação sobre renovação. Documento: ${documento}.`;
+
+    return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
+  }
+
+  function exibirNaoEncontrado(mensagem) {
+    resultadoCard.className = "resultado-card status-erro";
+    resultadoIcone.textContent = "!";
+    resultadoCategoria.textContent = "Consulta concluída";
+    resultadoTitulo.textContent = "Certificado não encontrado";
+    resultadoMensagem.textContent =
+      mensagem ||
+      "Não localizamos um certificado vinculado a este documento. Confira os dados ou fale com nosso atendimento.";
+
+    resultadoDados.hidden = true;
+    resultadoWhatsapp.textContent = "Falar com atendimento";
+    resultadoWhatsapp.href =
+      `https://wa.me/${whatsapp}?text=${encodeURIComponent(
+        "Olá! Não encontrei meu certificado na Área do Cliente e preciso de ajuda."
+      )}`;
+
+    resultadoSection.hidden = false;
+    resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function exibirResultado(dados, documentoDigitado) {
+    const encontradoRaw = primeiroValor(
+      dados,
+      ["encontrado", "found", "success", "localizado", "ok"],
+      true
+    );
+
+    const encontrado =
+      encontradoRaw !== false &&
+      String(encontradoRaw).toLowerCase() !== "false" &&
+      String(encontradoRaw).toLowerCase() !== "não" &&
+      String(encontradoRaw).toLowerCase() !== "nao";
+
+    if (!encontrado) {
+      exibirNaoEncontrado(
+        primeiroValor(dados, ["mensagem", "message", "erro"], "")
+      );
+      return;
+    }
+
+    const titular = primeiroValor(
+      dados,
+      ["titularMascarado", "nomeMascarado", "titular", "nome", "razaoSocial"],
+      "Dado protegido"
+    );
+
+    const documento = primeiroValor(
+      dados,
+      ["documentoMascarado", "cpfCnpjMascarado", "documento", "cpfCnpj"],
+      formatarDocumento(documentoDigitado)
+    );
+
+    const tipo = primeiroValor(
+      dados,
+      ["tipoCertificado", "tipo", "produto", "certificado"],
+      "Certificado digital"
+    );
+
+    const validade = primeiroValor(
+      dados,
+      ["validadeFormatada", "validade", "dataValidade", "vencimento"],
+      "Consulte o atendimento"
+    );
+
+    const dias = primeiroValor(
+      dados,
+      ["diasRestantes", "dias", "diasParaVencer", "prazo"],
+      ""
+    );
+
+    const situacaoOriginal = primeiroValor(
+      dados,
+      ["situacao", "status", "estado"],
+      "Válido"
+    );
+
+    const status = normalizarStatus(situacaoOriginal, dias);
+
+    resultadoCard.className = `resultado-card status-${status}`;
+    resultadoDados.hidden = false;
+
+    resultadoTitular.textContent = titular;
+    resultadoDocumento.textContent = documento;
+    resultadoTipo.textContent = tipo;
+    resultadoValidade.textContent = validade;
+    resultadoSituacao.textContent = situacaoOriginal;
+
+    if (dias === "" || dias === null || dias === undefined) {
+      resultadoPrazo.textContent = "Não informado";
+    } else if (Number(dias) < 0) {
+      resultadoPrazo.textContent = `Vencido há ${Math.abs(Number(dias))} dia(s)`;
+    } else {
+      resultadoPrazo.textContent = `${Number(dias)} dia(s) restante(s)`;
+    }
+
+    if (status === "vencido") {
+      resultadoIcone.textContent = "!";
+      resultadoCategoria.textContent = "Atenção necessária";
+      resultadoTitulo.textContent = "Certificado vencido";
+      resultadoMensagem.textContent =
+        "Entre em contato para verificar a emissão de um novo certificado.";
+      resultadoWhatsapp.textContent = "Emitir novo certificado";
+    } else if (status === "atencao") {
+      resultadoIcone.textContent = "!";
+      resultadoCategoria.textContent = "Renovação recomendada";
+      resultadoTitulo.textContent = "Próximo do vencimento";
+      resultadoMensagem.textContent =
+        "Recomendamos iniciar a renovação antes do término da validade.";
+      resultadoWhatsapp.textContent = "Renovar agora";
+    } else {
+      resultadoIcone.textContent = "✓";
+      resultadoCategoria.textContent = "Situação regular";
+      resultadoTitulo.textContent = "Certificado válido";
+      resultadoMensagem.textContent =
+        "O certificado está dentro do prazo de validade informado.";
+      resultadoWhatsapp.textContent = "Renovar antecipadamente";
+    }
+
+    resultadoWhatsapp.href = criarMensagemWhatsapp(
+      status,
+      formatarDocumento(documentoDigitado)
+    );
+
+    resultadoSection.hidden = false;
+    resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "consulta_certificado_concluida", {
+        event_category: "AEVS",
+        status_certificado: status
+      });
+    }
+  }
+
+  async function consultar(documento) {
+    if (!endpoint || endpoint.includes("__ENDPOINT")) {
+      throw new Error("O endereço do serviço de consulta ainda não foi configurado.");
+    }
+
+    const url = new URL(endpoint);
+    url.searchParams.set("documento", documento);
+    url.searchParams.set("cpfCnpj", documento);
+    url.searchParams.set("_", Date.now().toString());
+
+    const resposta = await fetch(url.toString(), {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!resposta.ok) {
+      throw new Error(`Falha na consulta. Código ${resposta.status}.`);
+    }
+
+    const texto = await resposta.text();
+
+    try {
+      return JSON.parse(texto);
+    } catch {
+      throw new Error("O serviço retornou uma resposta inválida.");
+    }
+  }
+
+  inputDocumento.addEventListener("input", () => {
+    inputDocumento.value = formatarDocumento(inputDocumento.value);
+    limparErro();
+  });
+
+  form.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    limparErro();
+
+    const documento = somenteNumeros(inputDocumento.value);
+
+    if (!documentoValidoBasico(documento)) {
+      mostrarErro("Digite um CPF com 11 números ou um CNPJ com 14 números.");
+      inputDocumento.focus();
+      return;
+    }
+
+    if (!consentimento.checked) {
+      mostrarErro("Confirme que você está autorizado a realizar esta consulta.");
+      consentimento.focus();
+      return;
+    }
+
+    resultadoSection.hidden = true;
+    alternarCarregamento(true);
+
+    try {
+      const retorno = await consultar(documento);
+      const dados = retorno?.dados || retorno?.data || retorno?.resultado || retorno;
+      exibirResultado(dados, documento);
+    } catch (erro) {
+      console.error("AEVS:", erro);
+
+      resultadoCard.className = "resultado-card status-erro";
+      resultadoIcone.textContent = "!";
+      resultadoCategoria.textContent = "Serviço temporariamente indisponível";
+      resultadoTitulo.textContent = "Não foi possível concluir a consulta";
+      resultadoMensagem.textContent =
+        "Tente novamente em alguns instantes ou fale com nosso atendimento pelo WhatsApp.";
+
+      resultadoDados.hidden = true;
+      resultadoWhatsapp.textContent = "Falar com atendimento";
+      resultadoWhatsapp.href =
+        `https://wa.me/${whatsapp}?text=${encodeURIComponent(
+          "Olá! Não consegui consultar meu certificado na Área do Cliente."
+        )}`;
+
+      resultadoSection.hidden = false;
+      resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } finally {
+      alternarCarregamento(false);
+    }
+  });
+
+  novaConsulta?.addEventListener("click", () => {
+    resultadoSection.hidden = true;
+    resultadoDados.hidden = false;
+    inputDocumento.value = "";
+    consentimento.checked = false;
+    limparErro();
+    inputDocumento.focus();
+    window.scrollTo({
+      top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 130),
+      behavior: "smooth"
+    });
+  });
+})();

@@ -1,0 +1,15 @@
+﻿PROJETO ATLAS
+SPRINT 4.2 - AEVS v1.0
+
+Inicio: 20/07/2026 17:40:24
+
+Escopo:
+- Area do Cliente
+- Consulta de vencimento por CPF ou CNPJ
+- Integracao com Google Apps Script e Google Sheets
+- Mascaramento de dados conforme LGPD
+- Central do Agente de Registro
+- Links operacionais do AGR
+- Links uteis e institucionais do AGR
+- Integracao com WhatsApp
+- Responsividade, acessibilidade e SEO

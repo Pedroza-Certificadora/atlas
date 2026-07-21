@@ -1,0 +1,619 @@
+﻿/*
+  Pedroza Certificadora
+  Central AGR
+
+  Concepção, Design e Desenvolvimento
+  Marcos Henrique Pedroza
+*/
+
+.agr-page {
+  color: #18324f;
+  background: #f7f9fc;
+}
+
+.agr-hero {
+  position: relative;
+  min-height: 610px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 132px 0 72px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 8, 23, .99) 0%,
+      rgba(2, 8, 23, .97) 34%,
+      rgba(2, 8, 23, .86) 54%,
+      rgba(2, 8, 23, .68) 74%,
+      rgba(2, 8, 23, .84) 100%
+    ),
+    radial-gradient(
+      circle at 83% 28%,
+      rgba(19, 134, 255, .34),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      #020817 0%,
+      #03152f 56%,
+      #073e7b 100%
+    );
+  border-bottom: 1px solid rgba(76, 151, 240, .18);
+}
+
+.agr-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.agr-orb-one {
+  top: 5%;
+  right: -110px;
+  width: 420px;
+  height: 420px;
+  background: rgba(19, 134, 255, .14);
+}
+
+.agr-orb-two {
+  bottom: -210px;
+  left: 20%;
+  width: 420px;
+  height: 420px;
+  background: rgba(22, 200, 255, .07);
+}
+
+.agr-hero-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(360px, 500px);
+  gap: 70px;
+  align-items: center;
+}
+
+.agr-heading {
+  max-width: 680px;
+}
+
+.agr-eyebrow {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 7px 12px;
+  color: #dff5ff;
+  background: rgba(7, 72, 157, .62);
+  border: 1px solid rgba(92, 171, 255, .30);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.agr-heading h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(42px, 5vw, 64px);
+  line-height: 1.03;
+  letter-spacing: -2px;
+}
+
+.agr-heading h1 em {
+  display: block;
+  color: transparent;
+  background: linear-gradient(90deg, #1386ff, #35b9ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-style: normal;
+}
+
+.agr-heading > p {
+  max-width: 620px;
+  margin: 24px 0 0;
+  color: #d6e4f5;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.agr-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 29px;
+}
+
+.button-outline-light {
+  color: #fff;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .36);
+}
+
+.agr-summary-card {
+  padding: 32px;
+  color: #18324f;
+  background: rgba(255, 255, 255, .97);
+  border: 1px solid rgba(117, 173, 244, .26);
+  border-radius: 18px;
+  box-shadow: 0 28px 70px rgba(0, 9, 30, .28);
+}
+
+.agr-summary-label {
+  color: #0878ff;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.agr-summary-card h2 {
+  margin: 7px 0 23px;
+  color: #092750;
+  font-size: 29px;
+}
+
+.agr-summary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.agr-summary-list > div {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 13px;
+  background: #f6f9fd;
+  border: 1px solid #dde8f3;
+  border-radius: 10px;
+}
+
+.agr-summary-list strong {
+  color: #173655;
+  font-size: 13px;
+}
+
+.agr-summary-list small {
+  color: #6d7d91;
+  font-size: 10px;
+}
+
+.agr-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.agr-status-online {
+  background: #22b96d;
+  box-shadow: 0 0 0 4px rgba(34, 185, 109, .12);
+}
+
+.agr-security-note {
+  margin: 18px 0 0;
+  padding: 13px;
+  color: #5f7187;
+  background: #eef7ff;
+  border: 1px solid #d4e8fa;
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.agr-section {
+  padding: 76px 0;
+  background: #fff;
+}
+
+.agr-section-soft {
+  background: #f3f7fb;
+}
+
+.agr-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 17px;
+}
+
+.agr-card-grid-primary {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.agr-card-grid-two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.agr-card {
+  position: relative;
+  display: flex;
+  min-height: 285px;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 25px;
+  background: #fff;
+  border: 1px solid #d9e4f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(10, 43, 82, .07);
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease;
+}
+
+.agr-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: #0878ff;
+}
+
+.agr-card:hover {
+  transform: translateY(-4px);
+  border-color: #a9cdf1;
+  box-shadow: 0 18px 38px rgba(10, 43, 82, .12);
+}
+
+.agr-card-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 17px;
+  color: #fff;
+  background: linear-gradient(145deg, #0758c5, #0d93f3);
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+}
+
+.agr-card-category {
+  color: #0878ff;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.agr-card h3 {
+  margin: 7px 0 9px;
+  color: #12345a;
+  font-size: 19px;
+}
+
+.agr-card p {
+  margin: 0 0 21px;
+  color: #607188;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.agr-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  margin-top: auto;
+  padding: 10px 13px;
+  color: #fff;
+  background: #0878ff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform .18s ease,
+    filter .18s ease;
+}
+
+.agr-link:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.07);
+}
+
+/* Emissão */
+
+.agr-category-emissao::before {
+  background: #18a965;
+}
+
+.agr-category-emissao .agr-card-icon {
+  background: linear-gradient(145deg, #087c48, #18b86d);
+}
+
+.agr-category-emissao .agr-card-category {
+  color: #0b9660;
+}
+
+.agr-category-emissao .agr-link {
+  background: #0b9660;
+}
+
+/* Gestão */
+
+.agr-category-gestao::before {
+  background: #7758d8;
+}
+
+.agr-category-gestao .agr-card-icon {
+  background: linear-gradient(145deg, #5640b8, #8669e3);
+}
+
+.agr-category-gestao .agr-card-category {
+  color: #6e51c8;
+}
+
+.agr-category-gestao .agr-link {
+  background: #6e51c8;
+}
+
+/* Consultas */
+
+.agr-category-consulta::before {
+  background: #0878ff;
+}
+
+.agr-category-consulta .agr-card-icon {
+  background: linear-gradient(145deg, #0758c5, #0d93f3);
+}
+
+.agr-category-consulta .agr-card-category {
+  color: #0878ff;
+}
+
+.agr-category-consulta .agr-link {
+  background: #0878ff;
+}
+
+/* Governo e ICP */
+
+.agr-category-governo::before {
+  background: #263b57;
+}
+
+.agr-category-governo .agr-card-icon {
+  background: linear-gradient(145deg, #263b57, #49698e);
+}
+
+.agr-category-governo .agr-card-category {
+  color: #425e7f;
+}
+
+.agr-category-governo .agr-link {
+  background: #334d6c;
+}
+
+.agr-operational-note {
+  margin-top: 22px;
+  padding: 16px 18px;
+  color: #5b6d82;
+  background: #eef7ff;
+  border: 1px solid #d0e5f8;
+  border-radius: 11px;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.agr-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 13px;
+}
+
+.agr-compact-link {
+  position: relative;
+  display: flex;
+  min-height: 76px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 17px;
+  background: #fff;
+  border: 1px solid #d9e4f0;
+  border-radius: 12px;
+  box-shadow: 0 7px 22px rgba(10, 43, 82, .05);
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease;
+}
+
+.agr-compact-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: #0878ff;
+}
+
+.agr-compact-link:hover {
+  transform: translateY(-3px);
+  border-color: #afd0ef;
+  box-shadow: 0 13px 28px rgba(10, 43, 82, .10);
+}
+
+.agr-compact-link strong {
+  color: #173655;
+  font-size: 13px;
+}
+
+.agr-compact-link span {
+  color: #0878ff;
+  font-size: 10px;
+  font-weight: 750;
+  text-align: right;
+}
+
+.agr-compact-tool::before {
+  background: #ef8d18;
+}
+
+.agr-compact-tool span {
+  color: #c36b08;
+}
+
+.agr-compact-support::before {
+  background: #13a866;
+}
+
+.agr-compact-support span {
+  color: #0b9560;
+}
+
+.agr-compact-government::before {
+  background: #334d6c;
+}
+
+.agr-compact-government span {
+  color: #425e7f;
+}
+
+.agr-support {
+  padding: 58px 0;
+  background: linear-gradient(120deg, #05234b, #075caa);
+}
+
+.agr-support-inner {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agr-support span {
+  color: #64dcff;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.agr-support h2 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: 31px;
+}
+
+.agr-support p {
+  margin: 0;
+  color: #d7e8f8;
+  font-size: 13px;
+}
+
+@media (max-width: 1120px) {
+  .agr-card-grid,
+  .agr-card-grid-primary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 960px) {
+  .agr-card-grid,
+  .agr-card-grid-primary,
+  .agr-card-grid-two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .agr-compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .agr-hero {
+    min-height: auto;
+    padding: 120px 0 70px;
+  }
+
+  .agr-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .agr-heading {
+    max-width: 720px;
+    margin: auto;
+    text-align: center;
+  }
+
+  .agr-heading > p {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .agr-hero-actions {
+    justify-content: center;
+  }
+
+  .agr-summary-card {
+    width: 100%;
+    max-width: 620px;
+    margin: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .agr-hero {
+    padding: 104px 0 52px;
+  }
+
+  .agr-heading h1 {
+    font-size: 39px;
+    letter-spacing: -1.2px;
+  }
+
+  .agr-heading > p {
+    font-size: 14px;
+  }
+
+  .agr-summary-card {
+    padding: 23px 18px;
+  }
+
+  .agr-summary-list > div {
+    grid-template-columns: 12px 1fr;
+  }
+
+  .agr-summary-list small {
+    grid-column: 2;
+  }
+
+  .agr-section {
+    padding: 54px 0;
+  }
+
+  .agr-card-grid,
+  .agr-card-grid-primary,
+  .agr-card-grid-two,
+  .agr-compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agr-card {
+    min-height: auto;
+  }
+
+  .agr-compact-link {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agr-compact-link span {
+    text-align: left;
+  }
+
+  .agr-support-inner {
+    display: grid;
+  }
+
+  .agr-support h2 {
+    font-size: 25px;
+  }
+}
