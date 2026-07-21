@@ -8,7 +8,7 @@
 
   window.AtlasAuth = window.AtlasAuth || {};
   window.AtlasAuth.config = Object.freeze({
-    version: "4.6.5",
+    version: "4.6.6",
     storagePrefix: "atlas_aass_",
     sessionKey: "atlas_aass_session",
     rememberedUserKey: "atlas_aass_remembered_user",

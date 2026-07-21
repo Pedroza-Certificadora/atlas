@@ -82,6 +82,17 @@
     return true;
   }
 
+  function updateUser(user) {
+    var session = read();
+    if (!session || !session.user || session.user.id !== user.id) return false;
+    session.user.displayName = user.displayName;
+    session.user.email = user.email;
+    session.user.document = user.document || "";
+    session.user.certificateOwnerKey = user.certificateOwnerKey || "";
+    write(session);
+    return true;
+  }
+
   function clear(reason) {
     var session = read();
     try {
@@ -102,6 +113,7 @@
     validate: validate,
     getActive: getActive,
     touch: touch,
+    updateUser: updateUser,
     clear: clear
   });
 })(window);

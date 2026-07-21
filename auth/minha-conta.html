@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="auth-check-pending" data-auth-protected>
+<head>
+  <!-- Pedroza Certificadora | Atlas AASS v1.0 | Marcos Henrique Pedroza -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="author" content="Marcos Henrique Pedroza">
+  <meta name="designer" content="Marcos Henrique Pedroza">
+  <meta name="theme-color" content="#020817">
+  <title>Minha Conta e Segurança | Atlas</title>
+  <link rel="icon" href="../images/logo/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css?v=4.6.6">
+  <link rel="stylesheet" href="../css/auth.css?v=4.6.6">
+  <link rel="stylesheet" href="../css/account.css?v=4.6.6">
+  <script src="../js/auth/config.js?v=4.6.6"></script>
+  <script src="../js/auth/crypto.js?v=4.6.6"></script>
+  <script src="../js/auth/users.mock.js?v=4.6.6"></script>
+  <script src="../js/auth/audit.js?v=4.6.6"></script>
+  <script src="../js/auth/permissions.js?v=4.6.6"></script>
+  <script src="../js/auth/session.js?v=4.6.6"></script>
+  <script src="../js/auth/guards.js?v=4.6.6"></script>
+</head>
+<body class="account-page">
+  <header class="account-header">
+    <div class="container account-header-inner">
+      <a class="account-brand" href="../" aria-label="Pedroza Certificadora - início">
+        <img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154">
+      </a>
+      <div class="account-header-actions">
+        <span class="account-user-summary"><strong data-auth-user-name>Usuário Atlas</strong><small data-auth-user-role>Perfil</small></span>
+        <a class="button button-outline" id="account-back-link" href="../agr/">Voltar ao painel</a>
+        <a class="button button-primary" href="logout.html" data-auth-logout>Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="account-main">
+    <div class="container">
+      <section class="account-hero">
+        <span class="account-kicker">AASS v1.0 • Conta protegida</span>
+        <h1>Minha Conta &amp; Segurança</h1>
+        <p>Atualize seus dados, altere sua senha e personalize as preferências da sua conta Atlas.</p>
+      </section>
+
+      <nav class="account-tabs" aria-label="Seções da conta">
+        <button class="account-tab active" type="button" data-account-tab="profile">Meu perfil</button>
+        <button class="account-tab" type="button" data-account-tab="security">Segurança</button>
+        <button class="account-tab" type="button" data-account-tab="preferences">Preferências</button>
+        <button class="account-tab" type="button" data-account-tab="sessions">Sessões</button>
+      </nav>
+
+      <section class="account-panel active" data-account-panel="profile">
+        <div class="account-card-heading"><div><h2>Meu perfil</h2><p>Dados associados à sua conta.</p></div><span class="account-status">Conta ativa</span></div>
+        <form id="profile-form" class="account-form-grid">
+          <label>Nome completo<input id="profile-name" required maxlength="100"></label>
+          <label>Usuário<input id="profile-username" disabled></label>
+          <label>E-mail<input id="profile-email" type="email" required maxlength="120"></label>
+          <label>Telefone<input id="profile-phone" inputmode="tel" maxlength="20" placeholder="(21) 99999-9999"></label>
+          <label>Perfil<input id="profile-role" disabled></label>
+          <label>Documento vinculado<input id="profile-document" disabled></label>
+          <div class="account-form-actions"><button class="button button-primary" type="submit">Salvar perfil</button></div>
+          <p class="account-feedback" id="profile-feedback" hidden></p>
+        </form>
+      </section>
+
+      <section class="account-panel" data-account-panel="security" hidden>
+        <div class="account-card-heading"><div><h2>Alterar senha</h2><p>A alteração vale imediatamente para o próximo acesso.</p></div><span class="security-badge">SHA-256 local</span></div>
+        <form id="password-form" class="password-form">
+          <label>Senha atual<span class="account-password-wrap"><input id="current-password" type="password" autocomplete="current-password" required><button type="button" data-password-toggle="current-password">Mostrar</button></span></label>
+          <label>Nova senha<span class="account-password-wrap"><input id="new-password" type="password" autocomplete="new-password" required minlength="8"><button type="button" data-password-toggle="new-password">Mostrar</button></span></label>
+          <label>Confirmar nova senha<span class="account-password-wrap"><input id="confirm-password" type="password" autocomplete="new-password" required minlength="8"><button type="button" data-password-toggle="confirm-password">Mostrar</button></span></label>
+          <div class="password-strength"><div><span id="password-strength-bar"></span></div><strong id="password-strength-label">Informe uma nova senha</strong></div>
+          <ul class="password-rules" id="password-rules">
+            <li data-rule="length">Mínimo de 8 caracteres</li><li data-rule="upper">Uma letra maiúscula</li><li data-rule="lower">Uma letra minúscula</li><li data-rule="number">Um número</li><li data-rule="symbol">Um caractere especial</li>
+          </ul>
+          <button class="button button-primary" type="submit">Alterar senha</button>
+          <p class="account-feedback" id="password-feedback" hidden></p>
+        </form>
+      </section>
+
+      <section class="account-panel" data-account-panel="preferences" hidden>
+        <div class="account-card-heading"><div><h2>Preferências</h2><p>Defina como deseja receber comunicações.</p></div></div>
+        <form id="preferences-form" class="preference-list">
+          <label><span><strong>Avisos de vencimento</strong><small>Receber lembretes sobre certificados próximos do vencimento.</small></span><input id="pref-expiration" type="checkbox"></label>
+          <label><span><strong>Comunicações por e-mail</strong><small>Receber atualizações importantes no e-mail cadastrado.</small></span><input id="pref-email" type="checkbox"></label>
+          <label><span><strong>Comunicações por WhatsApp</strong><small>Autorizar avisos operacionais por WhatsApp.</small></span><input id="pref-whatsapp" type="checkbox"></label>
+          <label><span><strong>Lembrar usuário</strong><small>Preencher o nome de usuário na próxima entrada.</small></span><input id="pref-remember" type="checkbox"></label>
+          <button class="button button-primary" type="submit">Salvar preferências</button>
+          <p class="account-feedback" id="preferences-feedback" hidden></p>
+        </form>
+      </section>
+
+      <section class="account-panel" data-account-panel="sessions" hidden>
+        <div class="account-card-heading"><div><h2>Sessão atual</h2><p>Informações da sessão ativa neste navegador.</p></div></div>
+        <div class="session-card">
+          <div class="session-icon">✓</div>
+          <div><strong id="session-device">Navegador atual</strong><p id="session-details">Sessão autenticada</p><small id="session-created"></small></div>
+          <span class="session-current">Atual</span>
+        </div>
+        <button id="end-session" class="button button-outline" type="button">Encerrar esta sessão</button>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/auth/auth.js?v=4.6.6"></script>
+  <script src="../js/auth/protected-ui.js?v=4.6.6"></script>
+  <script src="../js/auth/account.js?v=4.6.6"></script>
+</body>
+</html>
