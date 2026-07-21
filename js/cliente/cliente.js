@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   "use strict";
 
   const config = window.ATLAS_AEVS_CONFIG || {};
@@ -53,6 +53,24 @@
       .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
       .replace(/\.(\d{3})(\d)/, ".$1/$2")
       .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  function mascararDocumento(documento) {
+    const numeros = somenteNumeros(documento);
+
+    if (numeros.length === 11) {
+      return `***.${numeros.slice(3, 6)}.${numeros.slice(6, 9)}-**`;
+    }
+
+    if (numeros.length === 14) {
+      return `**.${numeros.slice(2, 5)}.${numeros.slice(5, 8)}/****-**`;
+    }
+
+    return "Documento protegido";
+  }
+
+  function emitirEventoAics(detalhe) {
+    document.dispatchEvent(new CustomEvent("atlas:aevs-result", { detail: detalhe }));
   }
 
   function documentoValidoBasico(documento) {
@@ -130,7 +148,7 @@
     return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
   }
 
-  function exibirNaoEncontrado(mensagem) {
+  function exibirNaoEncontrado(mensagem, documentoDigitado = "") {
     resultadoCard.className = "resultado-card status-erro";
     resultadoIcone.textContent = "!";
     resultadoCategoria.textContent = "Consulta concluída";
@@ -148,6 +166,15 @@
 
     resultadoSection.hidden = false;
     resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    emitirEventoAics({
+      documentoMascarado: mascararDocumento(documentoDigitado),
+      documentoTemporario: documentoDigitado,
+      tipo: "Certificado digital",
+      situacao: "Não localizado",
+      status: "erro",
+      validade: "Não informada"
+    });
   }
 
   function exibirResultado(dados, documentoDigitado) {
@@ -165,7 +192,8 @@
 
     if (!encontrado) {
       exibirNaoEncontrado(
-        primeiroValor(dados, ["mensagem", "message", "erro"], "")
+        primeiroValor(dados, ["mensagem", "message", "erro"], ""),
+        documentoDigitado
       );
       return;
     }
@@ -176,11 +204,15 @@
       "Dado protegido"
     );
 
-    const documento = primeiroValor(
+    const documentoRecebido = primeiroValor(
       dados,
       ["documentoMascarado", "cpfCnpjMascarado", "documento", "cpfCnpj"],
-      formatarDocumento(documentoDigitado)
+      mascararDocumento(documentoDigitado)
     );
+
+    const documento = somenteNumeros(documentoRecebido).length >= 11
+      ? mascararDocumento(documentoDigitado)
+      : documentoRecebido;
 
     const tipo = primeiroValor(
       dados,
@@ -250,7 +282,7 @@
 
     resultadoWhatsapp.href = criarMensagemWhatsapp(
       status,
-      formatarDocumento(documentoDigitado)
+      mascararDocumento(documentoDigitado)
     );
 
     resultadoSection.hidden = false;
@@ -262,6 +294,15 @@
         status_certificado: status
       });
     }
+
+    emitirEventoAics({
+      documentoMascarado: documento,
+      documentoTemporario: documentoDigitado,
+      tipo,
+      situacao: situacaoOriginal,
+      status,
+      validade
+    });
   }
 
   async function consultar(documento) {

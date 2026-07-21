@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <!-- Google Analytics 4 -->
@@ -43,9 +43,9 @@
   <link rel="apple-touch-icon" sizes="192x192" href="../images/logo/icon-192.png">
   <link rel="manifest" href="../site.webmanifest">
 
-  <link rel="stylesheet" href="../css/style.css?v=4.2.0">
-  <link rel="stylesheet" href="../css/motion.css?v=4.2.0">
-  <link rel="stylesheet" href="../css/cliente.css?v=4.2.0">
+  <link rel="stylesheet" href="../css/style.css?v=4.5.0">
+  <link rel="stylesheet" href="../css/motion.css?v=4.5.0">
+  <link rel="stylesheet" href="../css/cliente.css?v=4.5.0">
 
   <script type="application/ld+json">
   {
@@ -270,6 +270,127 @@
             </button>
           </div>
         </article>
+      </div>
+    </section>
+
+    <section class="aics-hub" aria-labelledby="aics-title">
+      <div class="container">
+        <div class="section-heading aics-heading">
+          <span>AICS — Atlas Intelligent Customer System</span>
+          <h2 id="aics-title">Tudo o que você precisa em um só lugar</h2>
+          <p>Consulte conteúdos, encontre downloads oficiais e acesse suporte sem criar conta ou informar dados adicionais.</p>
+        </div>
+
+        <div class="aics-search-shell" role="search">
+          <label for="aics-pesquisa">Pesquisar na Área do Cliente</label>
+          <div class="aics-search-field">
+            <span aria-hidden="true">⌕</span>
+            <input id="aics-pesquisa" type="search" autocomplete="off" placeholder="Ex.: instalação A3, renovação, videoconferência">
+            <button id="aics-limpar-pesquisa" type="button">Limpar</button>
+          </div>
+          <small>Pesquisa local em perguntas, downloads, links úteis, blog e orientações.</small>
+        </div>
+
+        <section id="aics-resultados-pesquisa" class="aics-resultados" hidden aria-live="polite">
+          <h3>Resultados da pesquisa</h3>
+          <div id="aics-pesquisa-lista" class="aics-pesquisa-lista"></div>
+        </section>
+
+        <nav class="aics-nav" aria-label="Atalhos da Área do Cliente">
+          <a href="#meu-certificado"><span aria-hidden="true">▣</span>Meu certificado</a>
+          <a href="#downloads"><span aria-hidden="true">⇩</span>Downloads</a>
+          <a href="#instalacao"><span aria-hidden="true">⚙</span>Instalação</a>
+          <a href="#renovacao"><span aria-hidden="true">↻</span>Renovação</a>
+          <a href="#suporte"><span aria-hidden="true">?</span>Suporte</a>
+          <a href="#seguranca"><span aria-hidden="true">◇</span>Segurança</a>
+        </nav>
+      </div>
+    </section>
+
+    <section id="meu-certificado" class="aics-local" aria-labelledby="local-title">
+      <div class="container">
+        <div class="section-heading">
+          <span>Meu certificado</span>
+          <h2 id="local-title">Histórico e favoritos neste navegador</h2>
+          <p>Somente documento mascarado, tipo, situação, validade e horário são armazenados localmente. CPF ou CNPJ completo nunca é salvo.</p>
+        </div>
+
+        <div id="aics-aviso" class="aics-aviso" role="status" hidden></div>
+
+        <div class="aics-local-grid">
+          <section class="aics-panel" aria-labelledby="historico-title">
+            <div class="aics-panel-header">
+              <div><span>Últimas consultas</span><h3 id="historico-title">Histórico local</h3></div>
+              <button id="aics-limpar-historico" type="button">Limpar histórico</button>
+            </div>
+            <p id="aics-historico-vazio" class="aics-empty">Suas consultas aparecerão aqui após a primeira pesquisa.</p>
+            <div id="aics-historico-lista" class="aics-consulta-lista"></div>
+          </section>
+
+          <section class="aics-panel" aria-labelledby="favoritos-title">
+            <div class="aics-panel-header">
+              <div><span>Acesso rápido</span><h3 id="favoritos-title">Consultas favoritas</h3></div>
+              <button id="aics-limpar-favoritos" type="button">Limpar favoritos</button>
+            </div>
+            <p id="aics-favoritos-vazio" class="aics-empty">Marque uma consulta com a estrela para adicioná-la aqui.</p>
+            <div id="aics-favoritos-lista" class="aics-consulta-lista"></div>
+          </section>
+        </div>
+
+        <p class="aics-browser-note"><strong>Importante:</strong> histórico e favoritos existem somente neste navegador e podem ser apagados a qualquer momento.</p>
+      </div>
+    </section>
+
+    <section id="downloads" class="aics-downloads" aria-labelledby="downloads-title">
+      <div class="container">
+        <div class="section-heading">
+          <span>Central de Downloads</span>
+          <h2 id="downloads-title">Fontes oficiais e suporte confiável</h2>
+          <p>Os links levam diretamente aos fabricantes e autoridades responsáveis. A Pedroza Certificadora não hospeda executáveis nesta página.</p>
+        </div>
+
+        <div class="aics-download-tools">
+          <label>Pesquisar materiais<input id="aics-download-busca" type="search" placeholder="Driver, A3, cadeia, manual..."></label>
+          <label>Filtrar por categoria<select id="aics-download-filtro"><option value="todos">Todos</option><option value="drivers">Drivers</option><option value="instalacao">Instalação</option><option value="seguranca">Segurança</option><option value="suporte">Suporte</option></select></label>
+        </div>
+        <p id="aics-downloads-vazio" class="aics-empty" hidden>Nenhum material encontrado com esses filtros.</p>
+        <div id="aics-downloads-lista" class="aics-download-grid"></div>
+      </div>
+    </section>
+
+    <section id="instalacao" class="aics-timeline-section" aria-labelledby="timeline-title">
+      <div class="container aics-timeline-layout">
+        <div class="section-heading aics-timeline-copy">
+          <span>Como funciona</span>
+          <h2 id="timeline-title">Linha do tempo educativa</h2>
+          <p>Este fluxo mostra as etapas normalmente envolvidas em uma emissão. Ele é apenas informativo e não representa acompanhamento individual em tempo real.</p>
+          <div class="aics-demo-warning"><strong>Demonstração:</strong> o acompanhamento personalizado será disponibilizado somente após a integração segura das próximas Sprints.</div>
+        </div>
+        <ol id="aics-timeline" class="aics-timeline"></ol>
+      </div>
+    </section>
+
+    <section id="suporte" class="aics-support" aria-labelledby="support-title">
+      <div class="container">
+        <div class="section-heading">
+          <span>Central de Suporte</span>
+          <h2 id="support-title">Escolha o atendimento ideal</h2>
+          <p>Ações rápidas para emissão, renovação, instalação e dúvidas.</p>
+        </div>
+        <div class="aics-support-grid">
+          <a class="aics-support-card primary" href="https://wa.me/5521991674117?text=Olá!%20Preciso%20de%20ajuda%20com%20meu%20certificado%20digital." target="_blank" rel="noopener"><span>◉</span><h3>WhatsApp</h3><p>Atendimento humano e orientação rápida.</p><b>Iniciar conversa ↗</b></a>
+          <a class="aics-support-card" href="mailto:certificadodigital@pedroza.com.br"><span>✉</span><h3>E-mail</h3><p>Envie sua dúvida ou solicitação detalhada.</p><b>Enviar e-mail</b></a>
+          <a class="aics-support-card" href="../#perguntas-frequentes"><span>?</span><h3>Perguntas frequentes</h3><p>Respostas sobre emissão, renovação e uso.</p><b>Consultar FAQ</b></a>
+          <a class="aics-support-card" href="../blog/a1-ou-a3.html"><span>▤</span><h3>Blog e orientações</h3><p>Conteúdos práticos para escolher e usar seu certificado.</p><b>Ler artigos</b></a>
+        </div>
+        <div id="renovacao" class="aics-action-strip"><div><span>Renovação ou nova emissão</span><h3>Evite interrupções no uso do seu certificado</h3><p>Consulte a validade acima e fale com nossa equipe para receber a orientação adequada.</p></div><a class="button button-primary" href="https://wa.me/5521991674117?text=Olá!%20Quero%20orientação%20sobre%20renovação%20ou%20emissão%20de%20certificado%20digital." target="_blank" rel="noopener">Solicitar orientação</a></div>
+      </div>
+    </section>
+
+    <section id="seguranca" class="aics-privacy" aria-labelledby="privacy-title">
+      <div class="container aics-privacy-inner">
+        <div><span>Privacidade e LGPD</span><h2 id="privacy-title">Você mantém o controle dos dados locais</h2><p>Esta página não é uma área autenticada. Nenhum dado interno da Central AGR é exibido e nenhum CPF ou CNPJ completo é salvo no navegador.</p></div>
+        <ul><li>Documento sempre mascarado</li><li>Limpeza de histórico e favoritos</li><li>Dados restritos ao navegador utilizado</li><li>Sem cadastro ou login nesta Sprint</li></ul>
       </div>
     </section>
 
@@ -510,9 +631,11 @@
     };
   </script>
 
-  <script src="../js/app.js?v=4.2.0" defer></script>
-  <script src="../js/motion.js?v=4.2.0" defer></script>
-  <script src="../js/cliente/cliente.js?v=4.2.0" defer></script>
+  <script src="../js/app.js?v=4.5.0" defer></script>
+  <script src="../js/motion.js?v=4.5.0" defer></script>
+  <script src="../js/cliente/aics-data.js?v=4.5.0" defer></script>
+  <script src="../js/cliente/cliente.js?v=4.5.0" defer></script>
+  <script src="../js/cliente/aics.js?v=4.5.0" defer></script>
 </body>
 </html>
 

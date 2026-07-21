@@ -1,72 +1,211 @@
 # Projeto Atlas — Pedroza Certificadora
 
+# Documento Oficial de Fechamento
+
 ## Sprint 4.3 — AOSS v1.0
+### Atlas Operational Smart System
 
-**Atlas Operational Smart System**  
-**Versão de pré-homologação:** 4.3.0  
-**Data:** 21 de julho de 2026
+Status:
 
-## Objetivo
+✅ HOMOLOGADA
 
-Transformar a Central AGR em um painel operacional inteligente, preservando integralmente a identidade visual homologada na Sprint 4.2.
+Versão oficial:
 
-## Implementações
+4.3.1
 
-- Busca inteligente em tempo real em todos os cards, ferramentas e portais.
-- Favoritos persistentes via LocalStorage.
-- Histórico com os cinco últimos acessos e horário.
-- Botão de copiar link nos cards principais.
-- Indicadores visuais por categoria preservados e integrados ao sistema.
-- Atalhos de teclado para Emissão A1, Emissão A3, Consulta CPF, Gestão Online e Manual AGR.
-- Modal acessível com a relação dos atalhos.
-- Estatísticas locais de acessos, favoritos, sistema mais utilizado e último acesso.
-- Refinamentos de área de toque e organização para smartphones e tablets.
-- Compatibilidade com `prefers-reduced-motion`.
-- Nenhuma dependência externa adicionada.
-- Nenhum dado operacional enviado ao servidor.
+Data:
 
-## Armazenamento local
+Julho/2026
 
-Chaves utilizadas:
+---
 
-- `atlasAGRFavorites`
-- `atlasAGRHistory`
-- `atlasAGRStats`
-- `atlasAGRVersion`
+## Objetivo da Sprint
 
-Não são armazenados CPF, CNPJ, documentos, senhas, tokens, biometria ou credenciais.
+Transformar a Central AGR em um painel operacional inteligente, preservando integralmente a identidade visual homologada e elevando significativamente a produtividade dos Agentes de Registro.
+
+---
+
+## Funcionalidades implementadas
+
+### Busca Inteligente
+
+Implementada pesquisa dinâmica em tempo real.
+
+Localiza instantaneamente recursos através de palavras-chave como:
+
+- CPF
+- CNPJ
+- A1
+- A3
+- Soluti
+- REDESIM
+- PIS
+- CNH
+- Gov.br
+- Manual
+- Gestão
+
+Resultados exibidos imediatamente na interface.
+
+---
+
+### Favoritos
+
+Implementado sistema de favoritos.
+
+Permite marcar qualquer card como favorito.
+
+Persistência via LocalStorage.
+
+---
+
+### Últimos acessos
+
+Implementado histórico automático.
+
+Recursos:
+
+- últimos cinco acessos
+- horário do acesso
+- retorno rápido
+
+Persistência local.
+
+---
+
+### Copiar Link
+
+Todos os cards passaram a possuir:
+
+Copiar Link
+
+Copiando automaticamente a URL para a área de transferência.
+
+---
+
+### Estatísticas Locais
+
+Painel contendo:
+
+- quantidade de acessos
+- favoritos cadastrados
+- sistema mais utilizado
+- último acesso
+
+Todos os dados permanecem exclusivamente no navegador.
+
+---
+
+### Atalhos
+
+Implementados atalhos de teclado.
+
+Exemplos:
+
+Alt+1
+
+Alt+2
+
+Alt+C
+
+Alt+G
+
+Alt+M
+
+Modal de ajuda integrado.
+
+---
+
+### Mobile
+
+Refinados:
+
+- área de toque
+- espaçamentos
+- pesquisa
+- favoritos
+- navegação
+
+---
+
+### Performance
+
+Mantida.
+
+Sem bibliotecas externas.
+
+JavaScript modular.
+
+CSS organizado.
+
+---
+
+## Correção 4.3.1
+
+Correção da exibição dos resultados da Busca Inteligente.
+
+Agora os resultados são apresentados imediatamente abaixo do campo de pesquisa.
+
+---
+
+## Homologação
+
+Todos os testes aprovados.
+
+Desktop:
+
+✅
+
+Tablet:
+
+✅
+
+Smartphone:
+
+✅
+
+Responsividade:
+
+✅
+
+Performance:
+
+✅
+
+Persistência:
+
+✅
+
+Compatibilidade:
+
+✅
+
+---
 
 ## Arquivos atualizados
 
-- `agr/index.html`
-- `css/agr.css`
-- `js/agr/agr.js`
+- agr/index.html
+- css/agr.css
+- js/agr/agr.js
 
-## Validações executadas
+---
 
-- Sintaxe JavaScript validada com Node.js.
-- HTML analisado sem erro estrutural bloqueante.
-- Integridade dos caminhos dos arquivos verificada.
-- Cache-busting atualizado para a versão 4.3.0 nos arquivos da Central AGR.
-- Layout institucional externo à Central AGR não alterado.
+## Git
 
-## Homologação necessária
+Sprint publicada.
 
-Validar manualmente:
+Backup realizado.
 
-1. Pesquisa por CPF, CNPJ, A1, A3, REDESIM, PIS, CNH, CAEPF, Manual, Gestão, ITI e Gov.br.
-2. Inclusão e remoção de favoritos após recarregar a página.
-3. Registro dos cinco últimos acessos.
-4. Cópia de links sem abertura de nova janela.
-5. Atalhos Alt+1, Alt+2, Alt+C, Alt+G e Alt+M.
-6. Modal de atalhos e fechamento com Esc.
-7. Painel de estatísticas locais.
-8. Desktop, tablet e smartphone.
-9. Chrome, Edge e Firefox.
+GitHub atualizado.
 
-Após aprovação visual e funcional, gerar o Documento Oficial de Fechamento da Sprint 4.3.
+---
 
+## Situação do Projeto
 
-## Correção 4.3.1 — Resultados visíveis na busca
+Sprint 4.3 oficialmente encerrada.
 
-A pesquisa agora exibe imediatamente, abaixo do campo, os recursos encontrados com botão de acesso rápido, além de manter a filtragem das seções originais.
+Versão oficial do Portal Atlas:
+
+# 4.3.1
+
+Preparado para a Sprint 4.4.
