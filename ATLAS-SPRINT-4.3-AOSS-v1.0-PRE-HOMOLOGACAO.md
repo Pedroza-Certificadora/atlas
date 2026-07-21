@@ -65,3 +65,8 @@ Validar manualmente:
 9. Chrome, Edge e Firefox.
 
 Após aprovação visual e funcional, gerar o Documento Oficial de Fechamento da Sprint 4.3.
+
+
+## Correção 4.3.1 — Resultados visíveis na busca
+
+A pesquisa agora exibe imediatamente, abaixo do campo, os recursos encontrados com botão de acesso rápido, além de manter a filtragem das seções originais.

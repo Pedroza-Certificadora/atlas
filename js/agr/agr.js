@@ -16,7 +16,7 @@
     stats: "atlasAGRStats",
     version: "atlasAGRVersion"
   };
-  var VERSION = "4.3.0";
+  var VERSION = "4.3.1";
   var MAX_HISTORY = 5;
   var resourceMap = new Map();
 
@@ -256,13 +256,38 @@
     showToast.timer = setTimeout(function () { toast.classList.remove("is-visible"); }, 2200);
   }
 
+  function renderSearchResults(matches, query) {
+    var target = document.getElementById("agr-search-results");
+    if (!target) return;
+
+    if (!query) {
+      target.hidden = true;
+      target.innerHTML = "";
+      return;
+    }
+
+    target.hidden = false;
+    if (!matches.length) {
+      target.innerHTML = '<p class="agr-search-results-empty">Nenhum acesso rápido disponível para esta busca.</p>';
+      return;
+    }
+
+    target.innerHTML = matches.map(function (resource) {
+      return '<a class="agr-search-result-item" href="' + escapeHtml(resource.url) + '" target="_blank" rel="noopener" data-smart-access="' + escapeHtml(resource.key) + '"><span><strong>' + escapeHtml(resource.title) + '</strong><small>' + escapeHtml(resource.category) + '</small></span><b aria-hidden="true">Abrir ↗</b></a>';
+    }).join("");
+  }
+
   function applySearch(value) {
     var query = normalize(value);
     var visible = 0;
+    var matches = [];
     resourceMap.forEach(function (resource) {
       var match = !query || resource.searchText.indexOf(query) >= 0;
       resource.element.hidden = !match;
-      if (match) visible += 1;
+      if (match) {
+        visible += 1;
+        if (query) matches.push(resource);
+      }
     });
     document.querySelectorAll(".agr-section").forEach(function (section) {
       var resources = section.querySelectorAll("[data-agr-resource]");
@@ -270,6 +295,7 @@
       var hasVisible = Array.from(resources).some(function (resource) { return !resource.hidden; });
       section.classList.toggle("agr-filtered-empty", !hasVisible && !!query);
     });
+    renderSearchResults(matches, query);
     var status = document.getElementById("agr-search-status");
     status.textContent = query ? visible + (visible === 1 ? " recurso encontrado." : " recursos encontrados.") : "Todos os recursos estão visíveis.";
     document.getElementById("agr-search-clear").hidden = !query;
