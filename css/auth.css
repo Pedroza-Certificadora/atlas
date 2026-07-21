@@ -58,27 +58,40 @@ html.auth-check-pending body {
 .auth-logo {
   position: relative;
   z-index: 1;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   align-self: center;
-  width: 310px;
-  height: 104px;
-  max-width: 74vw;
-  padding: 2px 10px;
+  width: min(430px, 82%);
+  min-height: 150px;
+  padding: 8px 24px;
   overflow: hidden;
-  background: #fff;
-  border: 1px solid rgba(255, 255, 255, .9);
-  border-radius: 10px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+  background: rgba(255, 255, 255, .98);
+  border: 1px solid rgba(255, 255, 255, .92);
+  border-radius: 20px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .24);
+}
+
+.auth-logo::after {
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  bottom: 10px;
+  height: 14px;
+  content: "";
+  background: radial-gradient(ellipse, rgba(0, 31, 74, .20), transparent 70%);
+  filter: blur(7px);
+  pointer-events: none;
 }
 
 .auth-logo img {
+  position: relative;
+  z-index: 1;
   display: block;
-  width: 292px;
-  height: 98px;
-  max-width: 100%;
+  width: min(370px, 100%);
+  height: 132px;
   object-fit: contain;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.8)) drop-shadow(0 7px 10px rgba(0,31,74,.18));
 }
 
 .auth-brand-copy {
@@ -475,3 +488,17 @@ body.auth-modal-open { overflow: hidden; }
 /* AASS 4.6.6 - acesso universal a Minha Conta */
 .auth-account-button{white-space:nowrap}
 @media(max-width:1280px){.auth-account-button{padding-inline:12px;font-size:11px}}
+
+/* Sprint 4.6.7 — refinamento institucional do login */
+@media (max-height: 760px) and (min-width: 901px) {
+  .auth-logo { width: min(390px, 78%); min-height: 124px; padding: 5px 20px; }
+  .auth-logo img { width: min(338px, 100%); height: 112px; }
+}
+@media (max-width: 900px) {
+  .auth-logo { width: min(390px, 88vw); min-height: 132px; }
+  .auth-logo img { width: min(340px, 100%); height: 116px; }
+}
+@media (max-width: 520px) {
+  .auth-logo { width: min(330px, 92vw); min-height: 112px; padding: 4px 14px; border-radius: 16px; }
+  .auth-logo img { width: min(292px, 100%); height: 98px; }
+}
