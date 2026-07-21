@@ -1,4 +1,4 @@
-/* Atlas Data Foundation v1.0 - Dashboard Administrativo 4.7.1 */
+/* Atlas Data Foundation v1.0 - Dashboard Administrativo 4.7.3 */
 (function(window,document){
   "use strict";
   function safeUsers(){try{return window.AtlasAuth.userProvider.list();}catch(e){return[];}}
@@ -9,7 +9,7 @@
     var session=window.AtlasAuth&&window.AtlasAuth.session?window.AtlasAuth.session.getActive():null;
     if(session){document.querySelectorAll("[data-auth-user-first-name]").forEach(function(el){el.textContent=String(session.user.displayName||"Usuario").split(" ")[0];});text("atlas-last-access",formatDate(session.createdAt||Date.now()));}
     if(window.AtlasAPI&&window.AtlasAPI.isConfigured()){
-      try{var summary=await window.AtlasAPI.dashboard();text("atlas-kpi-clients",summary.activeClients||0);text("atlas-kpi-users",summary.users||0);var agrs=summary.activeAgr||0;text("atlas-kpi-agr",agrs+" AGR ativo"+(agrs===1?"":"s"));renderActivity(summary.recentAudit||[]);return;}catch(error){}
+      try{var summary=await window.AtlasAPI.dashboard();text("atlas-kpi-clients",summary.activeClients||0);text("atlas-kpi-users",summary.users||0);text("atlas-kpi-certificates",summary.certificates||0);text("atlas-kpi-renewals",summary.renewalsDue||0);var agrs=summary.activeAgr||0;text("atlas-kpi-agr",agrs+" AGR ativo"+(agrs===1?"":"s"));renderActivity(summary.recentAudit||[]);return;}catch(error){}
     }
     var users=safeUsers(),clients=users.filter(function(u){return u.role==="CLIENTE"&&u.active;}).length,agrs=users.filter(function(u){return u.role==="AGR"&&u.active;}).length;
     text("atlas-kpi-clients",clients);text("atlas-kpi-users",users.length);text("atlas-kpi-agr",agrs+" AGR ativo"+(agrs===1?"":"s"));

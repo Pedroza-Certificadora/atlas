@@ -21,7 +21,8 @@
     target.hidden = false;
   }
 
-  function renderUsers() {
+  async function renderUsers(refresh) {
+    if (refresh && window.AtlasAuth.userProvider.sync) { try { await window.AtlasAuth.userProvider.sync(); } catch (error) {} }
     var users = window.AtlasAuth.userProvider.list();
     list.innerHTML = users.map(function (user) {
       return '<article class="user-row"><div><strong>' + esc(user.displayName) + '</strong><span>' +
@@ -97,16 +98,16 @@
     }
   });
 
-  list.addEventListener("click", function (event) {
+  list.addEventListener("click", async function (event) {
     var button = event.target.closest(".user-toggle");
     if (!button) return;
     var active = button.getAttribute("data-active") === "true";
-    window.AtlasAuth.userProvider.setActive(button.getAttribute("data-id"), !active);
+    await window.AtlasAuth.userProvider.setActive(button.getAttribute("data-id"), !active);
     window.AtlasAuth.audit.record("USER_STATUS_CHANGED", { userId: button.getAttribute("data-id"), active: !active, by: window.AtlasAuth.currentUser.username });
     renderUsers();
   });
 
-  document.getElementById("users-refresh").addEventListener("click", renderUsers);
+  document.getElementById("users-refresh").addEventListener("click", function () { renderUsers(true); });
   renderPermissions();
-  renderUsers();
+  renderUsers(true);
 })(window, document);

@@ -34,7 +34,7 @@
         } catch (error) { return ""; }
       })(),
       client: {
-        version: config.version || "4.7.0",
+        version: config.version || "4.7.3",
         path: window.location.pathname,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo"
       }
@@ -72,6 +72,12 @@
     getPreferences: function (id) { return request("users.getPreferences", { id: id }); },
     setPreferences: function (id, preferences) { return request("users.setPreferences", { id: id, preferences: preferences }); },
     audit: function (action, details) { return request("audit.record", { action: action, details: details || {} }); },
+    listClients: function () { return request("clients.list"); },
+    createClient: function (data) { return request("clients.create", data); },
+    updateClient: function (id, data) { return request("clients.update", { id: id, data: data }); },
+    listCertificates: function () { return request("certificates.list"); },
+    createCertificate: function (data) { return request("certificates.create", data); },
+    updateCertificate: function (id, data) { return request("certificates.update", { id: id, data: data }); },
     dashboard: function () { return request("dashboard.summary"); }
   });
 })(window);

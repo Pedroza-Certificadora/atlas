@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.7.1';
+const ATLAS_VERSION = '4.7.3';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -38,7 +38,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','dashboard.summary'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -51,6 +51,12 @@ function route_(action,payload,client,authToken) {
     case 'users.changePassword': return changePassword_(payload);
     case 'users.getPreferences': return getPreferences_(payload);
     case 'users.setPreferences': return setPreferences_(payload);
+    case 'clients.list': return listClients_();
+    case 'clients.create': return createClient_(payload);
+    case 'clients.update': return updateClient_(payload);
+    case 'certificates.list': return listCertificates_();
+    case 'certificates.create': return createCertificate_(payload);
+    case 'certificates.update': return updateCertificate_(payload);
     case 'audit.record': return recordAudit_(payload,client);
     case 'dashboard.summary': return dashboardSummary_();
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
@@ -85,6 +91,9 @@ function createUser_(data) {
     PREFERENCIAS_JSON:JSON.stringify({expiration:true,email:false,whatsapp:false}),STATUS:'ATIVO',
     CRIADO_EM:now,CRIADO_POR:String(data.actor || 'ATLAS'),ALTERADO_EM:now,ALTERADO_POR:String(data.actor || 'ATLAS')
   });
+  if (role === 'CLIENTE') {
+    createClient_({cpfCnpj:digits_(data.document),nome:String(data.displayName || login).trim(),email:email,telefone:String(data.phone || ''),responsavel:String(data.actor || 'ATLAS'),observacoes:'Conta do Portal Atlas: ' + login,actor:String(data.actor || 'ATLAS')});
+  }
   return publicUser_(findById_('USUARIOS',id));
 }
 function setUserActive_(p) { return updateRow_('USUARIOS',p.id,{STATUS:p.active?'ATIVO':'INATIVO'},p.actor || 'ATLAS',publicUser_); }
@@ -102,6 +111,30 @@ function changePassword_(p) {
 }
 function getPreferences_(p) { const u=findById_('USUARIOS',p.id); return parseJson_(u&&u.PREFERENCIAS_JSON,{expiration:true,email:false,whatsapp:false}); }
 function setPreferences_(p) { const prefs=Object.assign({expiration:true,email:false,whatsapp:false},p.preferences||{}); updateRow_('USUARIOS',p.id,{PREFERENCIAS_JSON:JSON.stringify(prefs)},p.actor||'ATLAS'); return prefs; }
+function listClients_() { return rows_('CLIENTES').map(publicClient_); }
+function createClient_(data) {
+  const doc=digits_(data.cpfCnpj||data.document), email=normalize_(data.email), name=String(data.nome||data.displayName||'').trim();
+  if(!doc||!name||!email) throw apiError_('VALIDATION','Informe CPF/CNPJ, nome e e-mail do cliente.');
+  const existing=rows_('CLIENTES').find(r=>digits_(r.CPF_CNPJ)===doc);
+  if(existing) return publicClient_(existing);
+  const now=new Date(),id=nextId_('CLIENTES','CLI'),actor=String(data.actor||'ATLAS');
+  appendObject_('CLIENTES',{ID:id,CPF_CNPJ:doc,NOME:name,EMAIL:email,TELEFONE:String(data.telefone||data.phone||''),SITUACAO:String(data.situacao||'ATIVO'),HISTORICO_JSON:JSON.stringify([{data:now.toISOString(),acao:'CADASTRO',origem:'PORTAL_ATLAS'}]),RESPONSAVEL:String(data.responsavel||actor),OBSERVACOES:String(data.observacoes||''),STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  return publicClient_(findById_('CLIENTES',id));
+}
+function updateClient_(p) { const d=p.data||{};return updateRow_('CLIENTES',p.id,{NOME:String(d.nome||'').trim(),EMAIL:normalize_(d.email),TELEFONE:String(d.telefone||''),SITUACAO:String(d.situacao||'ATIVO'),RESPONSAVEL:String(d.responsavel||''),OBSERVACOES:String(d.observacoes||'')},d.actor||'ATLAS',publicClient_); }
+function listCertificates_() { return rows_('CERTIFICADOS').map(publicCertificate_); }
+function createCertificate_(data) {
+  const clientId=String(data.clienteId||''), type=String(data.tipo||'').trim(), expiry=String(data.vencimento||'').trim();
+  if(!clientId||!type||!expiry) throw apiError_('VALIDATION','Informe cliente, tipo e vencimento do certificado.');
+  if(!findById_('CLIENTES',clientId)) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+  const now=new Date(),id=nextId_('CERTIFICADOS','CERT'),actor=String(data.actor||'ATLAS');
+  appendObject_('CERTIFICADOS',{ID:id,CLIENTE_ID:clientId,TIPO:type,AUTORIDADE_CERTIFICADORA:String(data.autoridadeCertificadora||''),NUMERO_SERIE:String(data.numeroSerie||''),EMISSAO:String(data.emissao||''),VENCIMENTO:expiry,STATUS_CERTIFICADO:String(data.statusCertificado||'ATIVO'),HISTORICO_RENOVACOES_JSON:JSON.stringify([]),STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  return publicCertificate_(findById_('CERTIFICADOS',id));
+}
+function updateCertificate_(p) { const d=p.data||{};return updateRow_('CERTIFICADOS',p.id,{TIPO:String(d.tipo||''),AUTORIDADE_CERTIFICADORA:String(d.autoridadeCertificadora||''),NUMERO_SERIE:String(d.numeroSerie||''),EMISSAO:String(d.emissao||''),VENCIMENTO:String(d.vencimento||''),STATUS_CERTIFICADO:String(d.statusCertificado||'ATIVO')},d.actor||'ATLAS',publicCertificate_); }
+function publicClient_(r){return{id:r.ID,cpfCnpj:String(r.CPF_CNPJ||''),nome:String(r.NOME||''),email:String(r.EMAIL||''),telefone:String(r.TELEFONE||''),situacao:String(r.SITUACAO||''),responsavel:String(r.RESPONSAVEL||''),observacoes:String(r.OBSERVACOES||''),active:String(r.STATUS||'').toUpperCase()==='ATIVO'};}
+function publicCertificate_(r){return{id:r.ID,clienteId:String(r.CLIENTE_ID||''),tipo:String(r.TIPO||''),autoridadeCertificadora:String(r.AUTORIDADE_CERTIFICADORA||''),numeroSerie:String(r.NUMERO_SERIE||''),emissao:r.EMISSAO,vencimento:r.VENCIMENTO,statusCertificado:String(r.STATUS_CERTIFICADO||''),active:String(r.STATUS||'').toUpperCase()==='ATIVO'};}
+
 function recordAudit_(p,client) {
   const d=p.details||{}, now=new Date(), id=nextId_('AUDITORIA','AUD');
   appendObject_('AUDITORIA',{ID:id,USUARIO_ID:String(d.userId||''),USUARIO_LOGIN:String(d.username||d.user||d.login||''),ACAO:String(p.action||'ATIVIDADE'),DETALHES_JSON:JSON.stringify(d),CAMINHO:String(client.path||''),USER_AGENT:String(client.userAgent||''),DATA_HORA:now,STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:String(d.username||'ATLAS'),ALTERADO_EM:now,ALTERADO_POR:String(d.username||'ATLAS')});
@@ -109,7 +142,9 @@ function recordAudit_(p,client) {
 }
 function dashboardSummary_() {
   const users=rows_('USUARIOS'), clients=rows_('CLIENTES'), certs=rows_('CERTIFICADOS'), audit=rows_('AUDITORIA');
-  return {users:users.length,activeClients:clients.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,activeAgr:users.filter(r=>String(r.PERFIL).toUpperCase()==='AGR'&&String(r.STATUS).toUpperCase()==='ATIVO').length,certificates:certs.length,recentAudit:audit.slice(-10).reverse()};
+  const limit=new Date();limit.setDate(limit.getDate()+60);
+  const renewalsDue=certs.filter(r=>{const d=new Date(r.VENCIMENTO);return !isNaN(d.getTime())&&d>=new Date()&&d<=limit&&String(r.STATUS).toUpperCase()==='ATIVO';}).length;
+  return {users:users.length,activeClients:clients.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,activeAgr:users.filter(r=>String(r.PERFIL).toUpperCase()==='AGR'&&String(r.STATUS).toUpperCase()==='ATIVO').length,certificates:certs.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,renewalsDue:renewalsDue,recentAudit:audit.slice(-10).reverse()};
 }
 
 function createSession_(user) {
