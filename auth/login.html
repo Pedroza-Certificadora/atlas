@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!--
+    Pedroza Certificadora
+    Atlas Authentication & Security System v1.0
+    Concepcao, Design e Desenvolvimento
+    Marcos Henrique Pedroza
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Seguro | Pedroza Certificadora</title>
+  <meta name="description" content="Acesso seguro às áreas restritas da Pedroza Certificadora.">
+  <meta name="author" content="Marcos Henrique Pedroza">
+  <meta name="designer" content="Marcos Henrique Pedroza">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#020817">
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="../images/logo/icon-192.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <link rel="stylesheet" href="../css/style.css?v=4.6.0">
+  <link rel="stylesheet" href="../css/auth.css?v=4.6.0">
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-brand-panel" aria-labelledby="auth-brand-title">
+      <a class="auth-logo" href="../" aria-label="Pedroza Certificadora — início">
+        <img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154">
+      </a>
+
+      <div class="auth-brand-copy">
+        <span class="auth-kicker">Atlas Authentication &amp; Security System</span>
+        <h1 id="auth-brand-title">Acesso protegido.<em>Operação segura.</em></h1>
+        <p>Entre com suas credenciais para acessar os recursos internos autorizados da Pedroza Certificadora.</p>
+        <ul class="auth-security-list" aria-label="Recursos de segurança">
+          <li>Sessão monitorada</li>
+          <li>Perfis de acesso</li>
+          <li>Auditoria local</li>
+          <li>Logout seguro</li>
+        </ul>
+      </div>
+
+      <p class="auth-brand-footer">Área restrita. O uso é permitido somente a usuários autorizados.</p>
+    </section>
+
+    <section class="auth-form-panel" aria-labelledby="login-title">
+      <div class="auth-card">
+        <span class="auth-card-badge">Área segura</span>
+        <h2 id="login-title">Entrar no Atlas</h2>
+        <p class="auth-card-intro">Informe seu usuário ou e-mail e sua senha de acesso.</p>
+
+        <form id="auth-login-form" novalidate>
+          <label class="auth-field" for="auth-login">
+            <span>Usuário ou e-mail</span>
+            <input id="auth-login" name="login" type="text" autocomplete="username" maxlength="120" required placeholder="Digite seu usuário">
+          </label>
+
+          <label class="auth-field" for="auth-password">
+            <span>Senha</span>
+            <span class="auth-input-wrap">
+              <input class="auth-password-input" id="auth-password" name="password" type="password" autocomplete="current-password" minlength="6" maxlength="128" required placeholder="Digite sua senha">
+              <button class="auth-toggle-password" id="auth-toggle-password" type="button" aria-pressed="false">Mostrar</button>
+            </span>
+          </label>
+          <p class="auth-helper" id="auth-caps-lock" hidden>Caps Lock está ativado.</p>
+
+          <div class="auth-options">
+            <label class="auth-check">
+              <input id="auth-remember" name="remember" type="checkbox">
+              <span>Lembrar usuário</span>
+            </label>
+            <a class="auth-link" href="forgot-password.html">Recuperar acesso</a>
+          </div>
+
+          <button class="auth-submit" id="auth-submit" type="submit"><span>Entrar com segurança</span></button>
+          <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite" hidden></p>
+        </form>
+
+        <p class="auth-card-note">Nunca compartilhe sua senha, códigos, tokens ou dados biométricos.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/auth/config.js?v=4.6.0"></script>
+  <script src="../js/auth/crypto.js?v=4.6.0"></script>
+  <script src="../js/auth/users.mock.js?v=4.6.0"></script>
+  <script src="../js/auth/audit.js?v=4.6.0"></script>
+  <script src="../js/auth/permissions.js?v=4.6.0"></script>
+  <script src="../js/auth/session.js?v=4.6.0"></script>
+  <script src="../js/auth/auth.js?v=4.6.0"></script>
+  <script src="../js/auth/guards.js?v=4.6.0"></script>
+  <script src="../js/auth/login-page.js?v=4.6.0"></script>
+</body>
+</html>

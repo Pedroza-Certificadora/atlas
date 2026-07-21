@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR" class="auth-check-pending" data-auth-protected data-auth-permission="AGR_ACCESS">
 <head>
   <!--
     Pedroza Certificadora
@@ -62,6 +62,14 @@
   <link rel="stylesheet" href="../css/style.css?v=4.3.0">
   <link rel="stylesheet" href="../css/motion.css?v=4.3.0">
   <link rel="stylesheet" href="../css/agr.css?v=4.3.0">
+  <link rel="stylesheet" href="../css/auth.css?v=4.6.0">
+
+  <script src="../js/auth/config.js?v=4.6.0"></script>
+  <script src="../js/auth/crypto.js?v=4.6.0"></script>
+  <script src="../js/auth/audit.js?v=4.6.0"></script>
+  <script src="../js/auth/permissions.js?v=4.6.0"></script>
+  <script src="../js/auth/session.js?v=4.6.0"></script>
+  <script src="../js/auth/guards.js?v=4.6.0"></script>
 </head>
 
 <body class="agr-page">
@@ -125,6 +133,21 @@
       </nav>
 
       <div class="header-actions">
+        <div class="auth-user-chip" aria-label="Usuário autenticado">
+          <span aria-hidden="true">●</span>
+          <span>
+            <strong data-auth-user-name>Usuário Atlas</strong>
+            <small data-auth-user-role>Perfil</small>
+          </span>
+        </div>
+
+        <a
+          class="button button-outline auth-logout-button"
+          href="../auth/logout.html"
+          data-auth-logout>
+          Sair
+        </a>
+
         <a
           class="header-phone"
           href="https://wa.me/5521991674117"
@@ -1453,6 +1476,21 @@
     </div>
   </footer>
 
+  <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden>
+    <div class="auth-session-dialog">
+      <span class="auth-card-badge">Segurança da sessão</span>
+      <h2 id="auth-session-title">Sua sessão está prestes a expirar</h2>
+      <p>Por segurança, acessos inativos são encerrados automaticamente.</p>
+      <div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div>
+      <div class="auth-session-actions">
+        <button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button>
+        <button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth/auth.js?v=4.6.0"></script>
+  <script src="../js/auth/protected-ui.js?v=4.6.0"></script>
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
   <script src="../js/agr/agr.js?v=4.4.0" defer></script>
