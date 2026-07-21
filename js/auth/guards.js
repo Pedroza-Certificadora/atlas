@@ -36,7 +36,11 @@
     document.documentElement.classList.remove("auth-check-pending");
   }
 
+  var redirecting = false;
+
   function deny(reason) {
+    if (redirecting) return;
+    redirecting = true;
     window.location.replace(loginUrl(reason || "authentication_required"));
   }
 
