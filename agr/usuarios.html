@@ -1,8 +1,95 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="" data-auth-protected data-auth-permission="SETTINGS_MANAGE">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Usuários e Permissões | Atlas</title>
-<link rel="icon" href="../images/logo/favicon-32.png"><link rel="stylesheet" href="../css/style.css?v=4.5.0"><link rel="stylesheet" href="../css/agr.css?v=4.5.0"><link rel="stylesheet" href="../css/auth.css?v=4.6.2"><link rel="stylesheet" href="../css/users-admin.css?v=4.6.2">
-<script src="../js/auth/config.js?v=4.6.2"></script><script src="../js/auth/crypto.js?v=4.6.2"></script><script src="../js/auth/users.mock.js?v=4.6.2"></script><script src="../js/auth/audit.js?v=4.6.2"></script><script src="../js/auth/permissions.js?v=4.6.2"></script><script src="../js/auth/session.js?v=4.6.2"></script><script src="../js/auth/guards.js?v=4.6.3"></script></head>
-<body class="agr-page users-admin-page"><header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154"></a><nav class="main-nav"><a href="./">Central AGR</a><a class="active" href="usuarios.html">Configurações</a></nav><div class="header-actions"><div class="auth-user-chip"><span><strong data-auth-user-name>Marcos Pedroza</strong><small data-auth-user-role>FULL</small></span></div><a class="button button-outline" href="../auth/logout.html" data-auth-logout>Sair</a></div></div></header>
-<main class="users-main"><div class="container"><div class="users-heading"><span class="section-kicker">AASS v1.0</span><h1>Usuários e permissões</h1><p>Crie contas de clientes e agentes. Somente o perfil FULL pode acessar esta área.</p></div><div class="users-grid"><section class="users-card"><h2>Criar nova conta</h2><form id="user-create-form"><label>Nome completo<input id="u-name" required></label><label>Usuário<input id="u-username" required></label><label>E-mail<input id="u-email" type="email" required></label><label>CPF/CNPJ vinculado<input id="u-document" inputmode="numeric" placeholder="Obrigatório para cliente"></label><label>Perfil<select id="u-role"><option value="CLIENTE">Cliente</option><option value="AGR">AGR</option></select></label><label>Senha provisória<input id="u-password" type="password" minlength="8" required></label><button class="button button-primary" type="submit">Criar conta</button><p id="user-feedback" class="users-feedback" hidden></p></form></section><section class="users-card users-list-card"><div class="users-list-title"><h2>Contas cadastradas</h2><button id="users-refresh" class="button button-outline" type="button">Atualizar</button></div><div id="users-list"></div></section></div><aside class="permission-summary"><h2>Matriz de acesso</h2><div><strong>FULL — Marcos Pedroza</strong><span>Acesso total, incluindo configurações e usuários.</span></div><div><strong>AGR</strong><span>Acesso operacional completo, exceto configurações e gestão de usuários.</span></div><div><strong>Cliente</strong><span>Acesso somente à própria área e aos certificados vinculados ao CPF/CNPJ da conta.</span></div></aside></div></main>
-<script src="../js/auth/auth.js?v=4.6.3"></script><script src="../js/auth/protected-ui.js?v=4.6.2"></script><script src="../js/auth/users-admin.js?v=4.6.2"></script></body></html>
+<html lang="pt-BR" data-auth-protected data-auth-permission="SETTINGS_MANAGE">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Configuracoes e Usuarios | Atlas</title>
+  <link rel="icon" href="../images/logo/favicon-32.png">
+  <link rel="stylesheet" href="../css/style.css?v=4.6.5">
+  <link rel="stylesheet" href="../css/agr.css?v=4.6.5">
+  <link rel="stylesheet" href="../css/auth.css?v=4.6.5">
+  <link rel="stylesheet" href="../css/users-admin.css?v=4.6.5">
+  <script src="../js/auth/config.js?v=4.6.5"></script>
+  <script src="../js/auth/crypto.js?v=4.6.5"></script>
+  <script src="../js/auth/users.mock.js?v=4.6.5"></script>
+  <script src="../js/auth/audit.js?v=4.6.5"></script>
+  <script src="../js/auth/permissions.js?v=4.6.5"></script>
+  <script src="../js/auth/session.js?v=4.6.5"></script>
+  <script src="../js/auth/guards.js?v=4.6.5"></script>
+</head>
+<body class="agr-page users-admin-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Pedroza Certificadora - inicio">
+        <img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154">
+      </a>
+      <nav class="main-nav" aria-label="Navegacao interna">
+        <a href="./">Central AGR</a>
+        <a class="active" href="usuarios.html">Configuracoes</a>
+      </nav>
+      <div class="header-actions">
+        <div class="auth-user-chip"><span><strong data-auth-user-name>Marcos Pedroza</strong><small data-auth-user-role>FULL</small></span></div>
+        <a class="button button-outline" href="../auth/logout.html" data-auth-logout>Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="users-main">
+    <div class="container">
+      <div class="users-heading">
+        <span class="section-kicker">AASS v1.0</span>
+        <h1>Configuracoes, usuarios e permissoes</h1>
+        <p>O perfil FULL possui acesso total e permanente. Marque ou desmarque o que os perfis AGR e Cliente poderao utilizar.</p>
+      </div>
+
+      <section class="users-card permissions-card" aria-labelledby="permissions-title">
+        <div class="users-list-title">
+          <div>
+            <h2 id="permissions-title">Matriz de permissoes</h2>
+            <p class="card-description">As alteracoes entram em vigor imediatamente neste navegador.</p>
+          </div>
+          <div class="permission-actions">
+            <button id="permissions-reset" class="button button-outline" type="button">Restaurar padrao</button>
+            <button id="permissions-save" class="button button-primary" type="button">Salvar permissoes</button>
+          </div>
+        </div>
+        <div class="permission-table-wrap">
+          <table class="permission-table">
+            <thead>
+              <tr><th>Recurso</th><th>FULL</th><th>AGR</th><th>Cliente</th></tr>
+            </thead>
+            <tbody id="permission-matrix-body"></tbody>
+          </table>
+        </div>
+        <p id="permissions-feedback" class="users-feedback" hidden></p>
+      </section>
+
+      <div class="users-grid">
+        <section class="users-card">
+          <h2>Criar nova conta</h2>
+          <form id="user-create-form">
+            <label>Nome completo<input id="u-name" required></label>
+            <label>Usuario<input id="u-username" required></label>
+            <label>E-mail<input id="u-email" type="email" required></label>
+            <label>CPF/CNPJ vinculado<input id="u-document" inputmode="numeric" placeholder="Obrigatorio para cliente"></label>
+            <label>Perfil<select id="u-role"><option value="CLIENTE">Cliente</option><option value="AGR">AGR</option></select></label>
+            <label>Senha provisoria<input id="u-password" type="password" minlength="8" required></label>
+            <button class="button button-primary" type="submit">Criar conta</button>
+            <p id="user-feedback" class="users-feedback" hidden></p>
+          </form>
+        </section>
+
+        <section class="users-card users-list-card">
+          <div class="users-list-title"><h2>Contas cadastradas</h2><button id="users-refresh" class="button button-outline" type="button">Atualizar</button></div>
+          <div id="users-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/auth/auth.js?v=4.6.5"></script>
+  <script src="../js/auth/protected-ui.js?v=4.6.5"></script>
+  <script src="../js/auth/users-admin.js?v=4.6.5"></script>
+</body>
+</html>

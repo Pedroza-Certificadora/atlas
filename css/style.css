@@ -282,3 +282,121 @@ html, body { max-width: 100%; overflow-x: clip; }
 @media (max-width: 640px) {
   .agr-page .brand, .agr-page .brand img { width: 160px; }
 }
+
+/* ================================================================
+   AASS v1.0 — estabilização responsiva do cabeçalho (v4.6.4)
+   Evita sobreposição entre marca, navegação e ações em desktops.
+   ================================================================ */
+@media (max-width:1600px) and (min-width:1181px){
+  .header-inner{
+    grid-template-columns:220px minmax(0,1fr) auto;
+    gap:14px;
+  }
+  .brand,.brand img{
+    width:214px;
+  }
+  .main-nav{
+    min-width:0;
+    gap:13px;
+    justify-content:center;
+  }
+  .main-nav a{
+    font-size:12px;
+  }
+  .header-actions{
+    gap:12px;
+  }
+  .header-cta{
+    display:none;
+  }
+}
+
+@media (max-width:1320px) and (min-width:1181px){
+  .header-inner{
+    grid-template-columns:205px minmax(0,1fr);
+  }
+  .brand,.brand img{
+    width:200px;
+  }
+  .main-nav{
+    gap:11px;
+  }
+  .main-nav a{
+    font-size:11.5px;
+  }
+  .header-actions{
+    display:none;
+  }
+}
+
+@media (max-width:1180px){
+  .site-header,.header-inner{
+    height:76px;
+  }
+  .header-inner{
+    grid-template-columns:minmax(0,1fr) auto auto;
+    gap:12px;
+  }
+  .brand{
+    width:218px;
+    height:72px;
+  }
+  .brand img{
+    width:218px;
+    height:72px;
+  }
+  .menu-toggle{
+    width:42px;
+    height:40px;
+    display:grid;
+    align-content:center;
+    gap:5px;
+    padding:10px;
+    border:1px solid #204475;
+    border-radius:6px;
+    background:#06142e;
+  }
+  .menu-toggle span{
+    height:2px;
+    background:#fff;
+  }
+  .main-nav{
+    position:fixed;
+    top:76px;
+    left:12px;
+    right:12px;
+    height:auto;
+    max-height:calc(100vh - 92px);
+    display:none;
+    align-items:stretch;
+    flex-direction:column;
+    gap:0;
+    padding:8px;
+    overflow-y:auto;
+    color:#fff;
+    background:#03132f;
+    border:1px solid #1a477d;
+    border-radius:10px;
+    box-shadow:var(--shadow);
+  }
+  .main-nav.open{
+    display:flex;
+  }
+  .main-nav a{
+    height:auto;
+    padding:10px;
+    color:#f7fbff;
+    font-size:13px;
+    text-shadow:0 1px 2px rgba(0,0,0,.35);
+    font-weight:700;
+  }
+  .main-nav a:after{
+    bottom:4px;
+  }
+  .header-phone{
+    display:none;
+  }
+  .header-cta{
+    height:39px;
+  }
+}
