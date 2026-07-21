@@ -12,6 +12,16 @@
     });
   }
 
+
+  if (activeSession) {
+    document.querySelectorAll("[data-auth-permission]").forEach(function (element) {
+      var permission = element.getAttribute("data-auth-permission");
+      if (!window.AtlasAuth.permissions.has(activeSession.user.role, permission)) element.hidden = true;
+    });
+    document.documentElement.setAttribute("data-auth-role", activeSession.user.role);
+    window.AtlasAuth.currentUser = activeSession.user;
+  }
+
   var logoutButtons = document.querySelectorAll("[data-auth-logout]");
   logoutButtons.forEach(function (button) {
     button.addEventListener("click", function (event) {

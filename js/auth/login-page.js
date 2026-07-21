@@ -18,10 +18,10 @@
     return new URLSearchParams(window.location.search).get(name) || "";
   }
 
-  function safeReturnPath() {
+  function safeReturnPath(role) {
     var target = getParam("return");
     if (!target || target.charAt(0) !== "/" || target.indexOf("//") === 0) {
-      return window.AtlasAuth.guard.projectUrl(config.defaultAuthenticatedPath);
+      return window.AtlasAuth.guard.projectUrl(window.AtlasAuth.permissions.defaultPath(role || "AGR"));
     }
     return target;
   }
@@ -40,7 +40,7 @@
 
   var existingSession = window.AtlasAuth.session.getActive();
   if (existingSession) {
-    window.location.replace(safeReturnPath());
+    window.location.replace(safeReturnPath(existingSession.user.role));
     return;
   }
 
@@ -105,7 +105,7 @@
         return;
       }
 
-      if (!window.AtlasAuth.permissions.canAccessPath(result.session.user.role, safeReturnPath())) {
+      if (!window.AtlasAuth.permissions.canAccessPath(result.session.user.role, safeReturnPath(result.session.user.role))) {
         window.AtlasAuth.auth.logout("permission_denied_after_login");
         setFeedback("Este perfil não possui acesso à área solicitada.", "error");
         return;
@@ -113,7 +113,7 @@
 
       setFeedback("Acesso confirmado. Redirecionando...", "success");
       window.setTimeout(function () {
-        window.location.replace(safeReturnPath());
+        window.location.replace(safeReturnPath(result.session.user.role));
       }, 350);
     } catch (error) {
       setFeedback(error.message || "Não foi possível validar o acesso neste navegador.", "error");

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="auth-check-pending" data-auth-protected data-auth-permission="CLIENT_ACCESS">
 <head>
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KKLWZ21C87"></script>
@@ -46,6 +46,14 @@
   <link rel="stylesheet" href="../css/style.css?v=4.5.0">
   <link rel="stylesheet" href="../css/motion.css?v=4.5.0">
   <link rel="stylesheet" href="../css/cliente.css?v=4.5.0">
+  <link rel="stylesheet" href="../css/auth.css?v=4.6.2">
+  <script src="../js/auth/config.js?v=4.6.2"></script>
+  <script src="../js/auth/crypto.js?v=4.6.2"></script>
+  <script src="../js/auth/users.mock.js?v=4.6.2"></script>
+  <script src="../js/auth/audit.js?v=4.6.2"></script>
+  <script src="../js/auth/permissions.js?v=4.6.2"></script>
+  <script src="../js/auth/session.js?v=4.6.2"></script>
+  <script src="../js/auth/guards.js?v=4.6.2"></script>
 
   <script type="application/ld+json">
   {
@@ -101,6 +109,8 @@
       </nav>
 
       <div class="header-actions">
+        <div class="auth-user-chip"><span><strong data-auth-user-name>Cliente</strong><small data-auth-user-role>CLIENTE</small></span></div>
+        <a class="button button-outline auth-logout-button" href="../auth/logout.html" data-auth-logout>Sair</a>
         <a
           class="header-phone"
           href="https://wa.me/5521991674117"
@@ -636,6 +646,8 @@
   <script src="../js/cliente/aics-data.js?v=4.5.0" defer></script>
   <script src="../js/cliente/cliente.js?v=4.5.0" defer></script>
   <script src="../js/cliente/aics.js?v=4.5.0" defer></script>
+  <script src="../js/auth/auth.js?v=4.6.2"></script>
+  <script src="../js/auth/protected-ui.js?v=4.6.2"></script>
 </body>
 </html>
 

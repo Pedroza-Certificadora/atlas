@@ -27,7 +27,9 @@
         username: user.username,
         email: user.email,
         displayName: user.displayName,
-        role: user.role
+        role: user.role,
+        document: user.document || "",
+        certificateOwnerKey: user.certificateOwnerKey || ""
       },
       createdAt: now,
       lastActivityAt: now,
