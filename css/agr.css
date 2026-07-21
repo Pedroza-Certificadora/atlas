@@ -617,3 +617,483 @@
     font-size: 25px;
   }
 }
+
+/* =====================================================
+   AOSS v1.0 — Sprint 4.3
+   Camada operacional inteligente da Central AGR
+===================================================== */
+
+.agr-smart-panel {
+  padding: 54px 0;
+  background: #edf4fb;
+  border-bottom: 1px solid #d8e5f2;
+}
+
+.agr-smart-heading {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.agr-smart-heading > div > span,
+.agr-modal-eyebrow {
+  color: #0878ff;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.agr-smart-heading h2 {
+  margin: 6px 0 8px;
+  color: #0b2d54;
+  font-size: 30px;
+  letter-spacing: -.6px;
+}
+
+.agr-smart-heading p {
+  max-width: 720px;
+  margin: 0;
+  color: #64758a;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.agr-help-button,
+.agr-text-button,
+.agr-favorite-button,
+.agr-copy-button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.agr-help-button {
+  display: inline-flex;
+  min-height: 42px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 15px;
+  color: #0b5eba;
+  background: #fff;
+  border: 1px solid #cfe0f1;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 7px 20px rgba(10, 43, 82, .06);
+}
+
+.agr-search-box {
+  padding: 19px;
+  background: #fff;
+  border: 1px solid #d8e5f2;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(10, 43, 82, .06);
+}
+
+.agr-search-box > label {
+  display: block;
+  margin-bottom: 8px;
+  color: #294867;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.agr-search-control {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 50px;
+  padding: 0 14px;
+  background: #f7fafd;
+  border: 1px solid #cfddeb;
+  border-radius: 10px;
+}
+
+.agr-search-control > span {
+  color: #0878ff;
+  font-size: 25px;
+}
+
+.agr-search-control input {
+  width: 100%;
+  padding: 13px 0;
+  color: #173655;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 14px;
+}
+
+.agr-search-control:focus-within {
+  border-color: #0878ff;
+  box-shadow: 0 0 0 3px rgba(8, 120, 255, .12);
+}
+
+.agr-search-control button,
+.agr-text-button {
+  padding: 7px 9px;
+  color: #0878ff;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.agr-search-status {
+  margin: 9px 2px 0;
+  color: #738397;
+  font-size: 10px;
+}
+
+.agr-smart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.agr-smart-block {
+  min-width: 0;
+  padding: 18px;
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid #d8e5f2;
+  border-radius: 14px;
+}
+
+.agr-stats-block {
+  grid-column: 1 / -1;
+}
+
+.agr-smart-block-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.agr-smart-block-title h3 {
+  margin: 0;
+  color: #173655;
+  font-size: 14px;
+}
+
+.agr-smart-block-title > span {
+  color: #7c8b9d;
+  font-size: 9px;
+}
+
+.agr-smart-list {
+  display: grid;
+  gap: 7px;
+}
+
+.agr-smart-empty {
+  margin: 0;
+  padding: 14px;
+  color: #77879a;
+  background: #f7fafd;
+  border: 1px dashed #cedcea;
+  border-radius: 9px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.agr-smart-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  color: #294867;
+  background: #f7fafd;
+  border: 1px solid #dde8f2;
+  border-radius: 9px;
+}
+
+.agr-smart-item span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.agr-smart-item strong {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agr-smart-item small {
+  color: #7c8b9d;
+  font-size: 8px;
+}
+
+.agr-smart-item b {
+  color: #0878ff;
+}
+
+.agr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+.agr-stats-grid > div {
+  min-width: 0;
+  padding: 13px;
+  background: #f7fafd;
+  border: 1px solid #dde8f2;
+  border-radius: 9px;
+}
+
+.agr-stats-grid dt {
+  color: #748499;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.agr-stats-grid dd {
+  overflow: hidden;
+  margin: 5px 0 0;
+  color: #173655;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agr-card-smart-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2ebf4;
+}
+
+.agr-favorite-button,
+.agr-copy-button {
+  display: inline-flex;
+  min-height: 34px;
+  flex: 1;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  color: #53677e;
+  background: #f5f8fb;
+  border: 1px solid #dbe6f0;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.agr-favorite-button.is-active {
+  color: #8b6200;
+  background: #fff8dc;
+  border-color: #f1d679;
+}
+
+.agr-filtered-empty {
+  display: none;
+}
+
+.agr-no-results {
+  margin: 34px auto;
+  max-width: 720px;
+  padding: 24px;
+  color: #607188;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d9e4f0;
+  border-radius: 14px;
+}
+
+.agr-no-results strong,
+.agr-no-results span {
+  display: block;
+}
+
+.agr-no-results strong {
+  margin-bottom: 5px;
+  color: #173655;
+}
+
+.agr-toast {
+  position: fixed;
+  z-index: 1200;
+  right: 20px;
+  bottom: 20px;
+  max-width: calc(100vw - 40px);
+  padding: 12px 16px;
+  color: #fff;
+  background: #12345a;
+  border-radius: 9px;
+  box-shadow: 0 14px 35px rgba(2, 8, 23, .25);
+  font-size: 11px;
+  font-weight: 750;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.agr-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.agr-modal[hidden] {
+  display: none;
+}
+
+.agr-modal {
+  position: fixed;
+  z-index: 1300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.agr-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 8, 23, .72);
+  backdrop-filter: blur(6px);
+}
+
+.agr-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid rgba(117, 173, 244, .35);
+  border-radius: 16px;
+  box-shadow: 0 28px 80px rgba(0, 9, 30, .35);
+}
+
+.agr-modal-dialog h2 {
+  margin: 6px 0 9px;
+  color: #0b2d54;
+  font-size: 25px;
+}
+
+.agr-modal-dialog > p {
+  margin: 0 0 18px;
+  color: #6b7b8e;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.agr-modal-dialog dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.agr-modal-dialog dl > div {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f7fafd;
+  border: 1px solid #dde8f2;
+  border-radius: 8px;
+}
+
+.agr-modal-dialog dt {
+  color: #0878ff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.agr-modal-dialog dd {
+  margin: 0;
+  color: #42566d;
+  font-size: 10px;
+}
+
+.agr-modal-close {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  width: 34px;
+  height: 34px;
+  color: #53677e;
+  background: #f2f6fa;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.agr-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .agr-smart-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agr-smart-grid,
+  .agr-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .agr-stats-block {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .agr-smart-panel {
+    padding: 42px 0;
+  }
+
+  .agr-smart-heading h2 {
+    font-size: 25px;
+  }
+
+  .agr-smart-grid,
+  .agr-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agr-smart-block,
+  .agr-search-box {
+    padding: 15px;
+  }
+
+  .agr-card-smart-actions {
+    flex-direction: column;
+  }
+
+  .agr-favorite-button,
+  .agr-copy-button,
+  .agr-help-button {
+    min-height: 44px;
+  }
+
+  .agr-modal-dialog {
+    padding: 24px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agr-toast {
+    transition: none;
+  }
+}

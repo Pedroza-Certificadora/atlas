@@ -59,9 +59,9 @@
 
   <link rel="manifest" href="../site.webmanifest">
 
-  <link rel="stylesheet" href="../css/style.css?v=4.2.1">
-  <link rel="stylesheet" href="../css/motion.css?v=4.2.1">
-  <link rel="stylesheet" href="../css/agr.css?v=4.2.1">
+  <link rel="stylesheet" href="../css/style.css?v=4.3.0">
+  <link rel="stylesheet" href="../css/motion.css?v=4.3.0">
+  <link rel="stylesheet" href="../css/agr.css?v=4.3.0">
 </head>
 
 <body class="agr-page">
@@ -247,6 +247,77 @@
         </aside>
       </div>
     </section>
+
+    <!-- =================================================
+         AOSS — PAINEL OPERACIONAL INTELIGENTE
+    ================================================== -->
+
+    <section class="agr-smart-panel" aria-labelledby="agr-smart-title">
+      <div class="container">
+        <div class="agr-smart-heading">
+          <div>
+            <span>Atlas Operational Smart System</span>
+            <h2 id="agr-smart-title">Acesso rápido à operação</h2>
+            <p>Pesquise sistemas, consulte seus favoritos e retome os últimos acessos sem sair da Central AGR.</p>
+          </div>
+
+          <button class="agr-help-button" id="agr-help-button" type="button" aria-haspopup="dialog">
+            <span aria-hidden="true">⌨</span>
+            Atalhos
+          </button>
+        </div>
+
+        <div class="agr-search-box" role="search">
+          <label for="agr-search">Buscar na Central AGR</label>
+          <div class="agr-search-control">
+            <span aria-hidden="true">⌕</span>
+            <input id="agr-search" type="search" autocomplete="off" placeholder="Ex.: CPF, CNPJ, A1, REDESIM, Manual, Gov.br">
+            <button id="agr-search-clear" type="button" hidden>Limpar</button>
+          </div>
+          <p id="agr-search-status" class="agr-search-status" aria-live="polite">Todos os recursos estão visíveis.</p>
+        </div>
+
+        <div class="agr-smart-grid">
+          <section class="agr-smart-block" aria-labelledby="agr-favorites-title">
+            <div class="agr-smart-block-title">
+              <h3 id="agr-favorites-title">Favoritos</h3>
+              <span id="agr-favorites-count">0 cadastrados</span>
+            </div>
+            <div class="agr-smart-list" id="agr-favorites-list">
+              <p class="agr-smart-empty">Marque uma estrela nos cards para criar seus atalhos.</p>
+            </div>
+          </section>
+
+          <section class="agr-smart-block" aria-labelledby="agr-history-title">
+            <div class="agr-smart-block-title">
+              <h3 id="agr-history-title">Últimos acessos</h3>
+              <button class="agr-text-button" id="agr-history-clear" type="button">Limpar</button>
+            </div>
+            <div class="agr-smart-list" id="agr-history-list">
+              <p class="agr-smart-empty">Os cinco sistemas acessados mais recentemente aparecerão aqui.</p>
+            </div>
+          </section>
+
+          <section class="agr-smart-block agr-stats-block" aria-labelledby="agr-stats-title">
+            <div class="agr-smart-block-title">
+              <h3 id="agr-stats-title">Estatísticas locais</h3>
+              <span>Somente neste aparelho</span>
+            </div>
+            <dl class="agr-stats-grid">
+              <div><dt>Acessos</dt><dd id="agr-stat-accesses">0</dd></div>
+              <div><dt>Favoritos</dt><dd id="agr-stat-favorites">0</dd></div>
+              <div><dt>Mais utilizado</dt><dd id="agr-stat-top">—</dd></div>
+              <div><dt>Último acesso</dt><dd id="agr-stat-last">—</dd></div>
+            </dl>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <div class="agr-no-results" id="agr-no-results" hidden>
+      <strong>Nenhum recurso encontrado.</strong>
+      <span>Tente buscar por outro termo ou categoria.</span>
+    </div>
 
     <!-- =================================================
          EMISSÃO
@@ -1305,6 +1376,7 @@
 
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
-  <script src="../js/agr/agr.js?v=4.2.1" defer></script>
+  <script src="../js/agr/agr.js?v=4.3.0" defer></script>
+
 </body>
 </html>
