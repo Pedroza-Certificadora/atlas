@@ -353,8 +353,9 @@
     }
 
     const url = new URL(endpoint);
+    url.searchParams.set("action", "aevs.consult");
     url.searchParams.set("documento", documento);
-    url.searchParams.set("cpfCnpj", documento);
+    url.searchParams.set("requestId", `${Date.now()}-${Math.random().toString(36).slice(2)}`);
     url.searchParams.set("_", Date.now().toString());
 
     const resposta = await fetch(url.toString(), {
