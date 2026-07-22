@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.8.2';
+const ATLAS_VERSION = '4.8.3';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -321,20 +321,32 @@ function normalize_(v){return String(v||'').trim().toLowerCase();} function digi
 
 
 /**
- * Sprint 4.8.2 - Importador Inteligente CRM
- * Uso seguro:
- * 1) Envie o XLSX oficial ao Google Drive e abra como Planilhas Google.
- * 2) Copie o ID da planilha de origem.
- * 3) Na planilha oficial do Atlas, execute validarImportacaoCRM("ID").
- * 4) Se o relatorio estiver aprovado, execute importarBaseCRM("ID").
+ * Sprint 4.8.3 - Importador CRM Homologado
+ *
+ * Fluxo seguro:
+ * 1) validarImportacaoCRM(sourceSpreadsheetId)
+ * 2) simularImportacaoCRM(sourceSpreadsheetId)
+ * 3) importarBaseCRM(sourceSpreadsheetId)
+ *
+ * A importacao CRM preserva as estruturas operacionais da producao:
+ * USUARIOS, PERMISSOES, AUDITORIA, CONFIGURACOES e LOGS.
  */
+const CRM_IMPORT_SHEETS = Object.freeze([
+  'CLIENTES','CERTIFICADOS','AGENDA','TIMELINE','COMUNICACOES','MODELOS_EMAIL',
+  'CAMPANHAS','CAMPANHA_DESTINATARIOS','PREFERENCIAS_COMUNICACAO','CONVITES',
+  'FILA_ENVIO','SETORES','SUBSETORES','TAGS','CLIENTE_TAGS','IA_PROFILE'
+]);
+
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Atlas CRM')
-    .addItem('Configurar estrutura 4.8.2', 'configurarAtlasDataFoundation')
+    .addItem('Configurar estrutura 4.8.3', 'configurarAtlasDataFoundation')
     .addSeparator()
     .addItem('Validar base para importacao', 'solicitarValidacaoImportacaoCRM')
-    .addItem('Importar base validada', 'solicitarImportacaoCRM')
+    .addItem('Simular importacao (sem gravar)', 'solicitarSimulacaoImportacaoCRM')
+    .addItem('Importar base homologada', 'solicitarImportacaoCRM')
+    .addSeparator()
+    .addItem('Restaurar backup da importacao', 'solicitarRestauracaoBackupCRM')
     .addToUi();
 }
 
@@ -346,20 +358,40 @@ function solicitarValidacaoImportacaoCRM() {
   ui.alert('Validacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
 }
 
+function solicitarSimulacaoImportacaoCRM() {
+  const ui=SpreadsheetApp.getUi();
+  const r=ui.prompt('Simular importacao CRM','Cole o ID da Planilha Google ja validada:',ui.ButtonSet.OK_CANCEL);
+  if(r.getSelectedButton()!==ui.Button.OK) return;
+  const result=simularImportacaoCRM(String(r.getResponseText()||'').trim());
+  ui.alert('Simulacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
+}
+
 function solicitarImportacaoCRM() {
   const ui=SpreadsheetApp.getUi();
-  const r=ui.prompt('Importar base CRM','Cole o ID da Planilha Google ja validada:',ui.ButtonSet.OK_CANCEL);
+  const r=ui.prompt('Importar base CRM','Cole o ID da Planilha Google validada e simulada:',ui.ButtonSet.OK_CANCEL);
   if(r.getSelectedButton()!==ui.Button.OK) return;
-  const confirm=ui.alert('Confirmar importacao','Um backup automatico sera criado antes da importacao. Deseja continuar?',ui.ButtonSet.YES_NO);
+  const confirm=ui.alert('Confirmar importacao','Apenas as abas CRM serao importadas. Usuarios, senhas, permissoes, auditoria, configuracoes e logs da producao serao preservados. Um backup automatico sera criado. Deseja continuar?',ui.ButtonSet.YES_NO);
   if(confirm!==ui.Button.YES) return;
   const result=importarBaseCRM(String(r.getResponseText()||'').trim());
   ui.alert('Importacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
 }
 
+function solicitarRestauracaoBackupCRM() {
+  const ui=SpreadsheetApp.getUi();
+  const r=ui.prompt('Restaurar backup CRM','Cole o ID do backup criado pela importacao:',ui.ButtonSet.OK_CANCEL);
+  if(r.getSelectedButton()!==ui.Button.OK) return;
+  const confirm=ui.alert('Confirmar restauracao','As abas CRM atuais serao substituidas pelas copias do backup informado. Deseja continuar?',ui.ButtonSet.YES_NO);
+  if(confirm!==ui.Button.YES) return;
+  const result=restaurarBackupImportacaoCRM(String(r.getResponseText()||'').trim());
+  ui.alert('Restauracao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
+}
+
 function validarImportacaoCRM(sourceSpreadsheetId) {
   if(!sourceSpreadsheetId) throw apiError_('VALIDATION','Informe o ID da planilha de origem.');
+  const target=SpreadsheetApp.getActiveSpreadsheet();
+  if(String(sourceSpreadsheetId)===String(target.getId())) throw apiError_('VALIDATION','A planilha de origem nao pode ser a propria base oficial do Atlas.');
   const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const report={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),sheets:{},errors:[],warnings:[],approved:false};
+  const report={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),sheets:{},errors:[],warnings:[],protectedSheets:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],approved:false};
   const sourceClientIds={};
   const clientSheet=source.getSheetByName('CLIENTES');
   if(!clientSheet){ report.errors.push('Aba CLIENTES nao encontrada.'); return writeImportReport_(report); }
@@ -369,20 +401,20 @@ function validarImportacaoCRM(sourceSpreadsheetId) {
   const duplicateClientIds=findDuplicateValues_(clients,'ID');
   if(duplicateClientIds.length) report.errors.push('IDs duplicados em CLIENTES: '+duplicateClientIds.join(', '));
 
-  Object.keys(SHEETS).forEach(name=>{
+  CRM_IMPORT_SHEETS.forEach(name=>{
     const sh=source.getSheetByName(name);
     if(!sh){
-      report.warnings.push('Aba opcional ausente: '+name);
+      report.warnings.push('Aba CRM ausente: '+name);
       return;
     }
     const objects=readSheetObjects_(sh);
     const headers=sh.getLastColumn()?sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(String):[];
-    const missing=SHEETS[name].filter(h=>headers.indexOf(h)<0);
+    const missing=(SHEETS[name]||[]).filter(h=>headers.indexOf(h)<0);
     report.sheets[name]={rows:objects.length,missingHeaders:missing};
-    if(missing.length) report.warnings.push(name+' sem colunas: '+missing.join(', '));
+    if(missing.length) report.errors.push(name+' sem colunas obrigatorias: '+missing.join(', '));
     if(headers.indexOf('ID')>=0){
       const dup=findDuplicateValues_(objects,'ID');
-      if(dup.length) report.errors.push('IDs duplicados em '+name+': '+dup.slice(0,20).join(', '));
+      if(dup.length) report.errors.push('IDs duplicados em '+name+': '+dup.slice(0,50).join(', '));
     }
     if(headers.indexOf('CLIENTE_ID')>=0){
       const orphans=objects.filter(r=>String(r.CLIENTE_ID||'').trim()&&!sourceClientIds[String(r.CLIENTE_ID).trim()]);
@@ -390,71 +422,156 @@ function validarImportacaoCRM(sourceSpreadsheetId) {
     }
   });
   report.approved=report.errors.length===0;
+  report.fingerprint=report.approved?buildImportFingerprint_(source,report):'';
+  if(report.approved) PropertiesService.getScriptProperties().setProperty('CRM_VALIDATED_'+sourceSpreadsheetId,report.fingerprint);
   return writeImportReport_(report);
+}
+
+function simularImportacaoCRM(sourceSpreadsheetId) {
+  const validation=validarImportacaoCRM(sourceSpreadsheetId);
+  if(!validation.approved) throw apiError_('IMPORT_VALIDATION_FAILED','A base nao foi aprovada. Consulte a aba IMPORTACAO_CRM.');
+  const target=SpreadsheetApp.getActiveSpreadsheet();
+  const source=SpreadsheetApp.openById(sourceSpreadsheetId);
+  const simulation={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),fingerprint:validation.fingerprint,sheets:{},protectedSheetsPreserved:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],totals:{inserted:0,updated:0,skipped:0},approved:true,generatedAt:new Date().toISOString()};
+  CRM_IMPORT_SHEETS.forEach(name=>{
+    const src=source.getSheetByName(name);
+    if(!src) return;
+    const dst=target.getSheetByName(name);
+    const result=previewSheetUpsert_(src,dst);
+    simulation.sheets[name]=result;
+    simulation.totals.inserted+=result.inserted;
+    simulation.totals.updated+=result.updated;
+    simulation.totals.skipped+=result.skipped;
+  });
+  PropertiesService.getScriptProperties().setProperty('CRM_SIMULATED_'+sourceSpreadsheetId,validation.fingerprint);
+  writeImportReport_({approved:true,simulation:simulation,errors:[],warnings:[]});
+  return simulation;
 }
 
 function importarBaseCRM(sourceSpreadsheetId) {
   const validation=validarImportacaoCRM(sourceSpreadsheetId);
   if(!validation.approved) throw apiError_('IMPORT_VALIDATION_FAILED','A base nao foi aprovada. Consulte a aba IMPORTACAO_CRM.');
+  const props=PropertiesService.getScriptProperties();
+  const simulated=props.getProperty('CRM_SIMULATED_'+sourceSpreadsheetId);
+  if(simulated!==validation.fingerprint) throw apiError_('IMPORT_NOT_SIMULATED','Execute primeiro Simular importacao (sem gravar) para esta mesma versao da base.');
+
   const target=SpreadsheetApp.getActiveSpreadsheet();
   const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.2 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
+  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.3 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
   const lock=LockService.getScriptLock();
   lock.waitLock(30000);
-  const summary={version:ATLAS_VERSION,backupId:backup.getId(),backupName:backup.getName(),sheets:{},startedAt:new Date().toISOString()};
+  const summary={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),fingerprint:validation.fingerprint,backupId:backup.getId(),backupName:backup.getName(),protectedSheetsPreserved:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],sheets:{},totals:{inserted:0,updated:0,skipped:0},startedAt:new Date().toISOString()};
   try {
-    Object.keys(SHEETS).forEach(name=>{
+    CRM_IMPORT_SHEETS.forEach(name=>{
       const src=source.getSheetByName(name);
       if(!src) return;
-      const dst=ensureSheet_(target,name,SHEETS[name])||target.getSheetByName(name);
-      const result=upsertSheetFromSource_(src,dst);
+      ensureSheet_(target,name,SHEETS[name]||[]);
+      const dst=target.getSheetByName(name);
+      const result=upsertSheetFromSourceBatch_(src,dst);
       summary.sheets[name]=result;
+      summary.totals.inserted+=result.inserted;
+      summary.totals.updated+=result.updated;
+      summary.totals.skipped+=result.skipped;
     });
     seedConfig_();
-    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.2 concluida',summary);
-    recordAudit_({action:'CRM_IMPORT_SUCCESS',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),summary:summary}},{});
     summary.finishedAt=new Date().toISOString();
     summary.ok=true;
+    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.3 concluida',summary);
+    recordAudit_({action:'CRM_IMPORT_SUCCESS',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),summary:summary}},{});
     writeImportReport_({approved:true,importSummary:summary,errors:[],warnings:[]});
+    props.setProperty('CRM_LAST_BACKUP_ID',backup.getId());
+    props.setProperty('CRM_LAST_IMPORT_SOURCE',sourceSpreadsheetId);
+    props.deleteProperty('CRM_SIMULATED_'+sourceSpreadsheetId);
     SpreadsheetApp.flush();
     return summary;
   } catch(error) {
-    summary.ok=false; summary.error=error.message;
-    try{appendLog_('ERROR','IMPORTADOR_CRM','Falha na importacao CRM',summary);}catch(_){ }
+    summary.ok=false; summary.error=error.message; summary.failedAt=new Date().toISOString();
+    try{appendLog_('ERROR','IMPORTADOR_CRM','Falha na importacao CRM. Backup disponivel para restauracao.',summary);}catch(_){ }
+    try{recordAudit_({action:'CRM_IMPORT_FAILED',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),error:error.message}},{});}catch(_){ }
+    writeImportReport_({approved:false,importSummary:summary,errors:['Falha na importacao: '+error.message,'Use o backup '+backup.getId()+' para restauracao, se necessario.'],warnings:[]});
     throw error;
   } finally {
     lock.releaseLock();
   }
 }
 
-function upsertSheetFromSource_(sourceSheet,targetSheet) {
+function restaurarBackupImportacaoCRM(backupSpreadsheetId) {
+  if(!backupSpreadsheetId) throw apiError_('VALIDATION','Informe o ID do backup.');
+  const target=SpreadsheetApp.getActiveSpreadsheet();
+  const backup=SpreadsheetApp.openById(backupSpreadsheetId);
+  const lock=LockService.getScriptLock();
+  lock.waitLock(30000);
+  const result={version:ATLAS_VERSION,backupId:backupSpreadsheetId,backupName:backup.getName(),restoredSheets:{},startedAt:new Date().toISOString()};
+  try{
+    CRM_IMPORT_SHEETS.forEach(name=>{
+      const src=backup.getSheetByName(name);
+      if(!src) return;
+      ensureSheet_(target,name,SHEETS[name]||[]);
+      const dst=target.getSheetByName(name);
+      const values=src.getDataRange().getValues();
+      dst.clearContents();
+      if(values.length&&values[0].length) dst.getRange(1,1,values.length,values[0].length).setValues(values);
+      dst.setFrozenRows(1);
+      result.restoredSheets[name]={rows:Math.max(values.length-1,0)};
+    });
+    result.finishedAt=new Date().toISOString(); result.ok=true;
+    appendLog_('WARN','IMPORTADOR_CRM','Backup CRM restaurado',result);
+    recordAudit_({action:'CRM_IMPORT_ROLLBACK',details:result},{});
+    writeImportReport_({approved:true,restoreSummary:result,errors:[],warnings:['Backup restaurado manualmente.']});
+    SpreadsheetApp.flush();
+    return result;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function previewSheetUpsert_(sourceSheet,targetSheet) {
+  const sourceRows=readSheetObjects_(sourceSheet);
+  if(!targetSheet) return {sourceRows:sourceRows.length,inserted:sourceRows.length,updated:0,skipped:0};
+  const targetHeaders=targetSheet.getLastColumn()?targetSheet.getRange(1,1,1,targetSheet.getLastColumn()).getValues()[0].map(String):[];
+  const targetRows=readSheetObjects_(targetSheet);
+  const hasId=targetHeaders.indexOf('ID')>=0;
+  const targetIds={}; targetRows.forEach(r=>{const id=String(r.ID||'').trim();if(id)targetIds[id]=true;});
+  let inserted=0,updated=0,skipped=0;
+  sourceRows.forEach(obj=>{const id=String(obj.ID||'').trim();if(hasId&&!id){skipped++;}else if(id&&targetIds[id]){updated++;}else{inserted++;}});
+  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped};
+}
+
+function upsertSheetFromSourceBatch_(sourceSheet,targetSheet) {
   const sourceRows=readSheetObjects_(sourceSheet);
   const targetHeaders=targetSheet.getRange(1,1,1,targetSheet.getLastColumn()).getValues()[0].map(String);
   const targetData=targetSheet.getDataRange().getValues();
   const idIndex=targetHeaders.indexOf('ID');
   const rowById={};
-  if(idIndex>=0){
-    for(let r=1;r<targetData.length;r++){
-      const id=String(targetData[r][idIndex]||'').trim();
-      if(id) rowById[id]=r+1;
-    }
+  for(let r=1;r<targetData.length;r++){
+    const id=idIndex>=0?String(targetData[r][idIndex]||'').trim():'';
+    if(id) rowById[id]=r;
   }
   let inserted=0,updated=0,skipped=0;
   sourceRows.forEach(obj=>{
     const id=String(obj.ID||'').trim();
     const values=targetHeaders.map(h=>obj[h]!==undefined?obj[h]:'');
-    if(id&&rowById[id]){
-      targetSheet.getRange(rowById[id],1,1,values.length).setValues([values]);
+    if(idIndex>=0&&!id){skipped++;return;}
+    if(id&&rowById[id]!==undefined){
+      targetData[rowById[id]]=values;
       updated++;
-    }else if(idIndex<0||id){
-      targetSheet.appendRow(values);
-      inserted++;
     }else{
-      skipped++;
+      targetData.push(values);
+      if(id) rowById[id]=targetData.length-1;
+      inserted++;
     }
   });
+  targetSheet.clearContents();
+  if(targetData.length&&targetHeaders.length) targetSheet.getRange(1,1,targetData.length,targetHeaders.length).setValues(targetData);
   targetSheet.setFrozenRows(1);
-  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped};
+  targetSheet.getRange(1,1,1,targetHeaders.length).setFontWeight('bold');
+  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped,finalRows:Math.max(targetData.length-1,0)};
+}
+
+function buildImportFingerprint_(source,report) {
+  const payload=[ATLAS_VERSION,source.getId(),source.getName()];
+  Object.keys(report.sheets||{}).sort().forEach(name=>payload.push(name+':'+report.sheets[name].rows+':'+(report.sheets[name].missingHeaders||[]).join(',')));
+  return sha256Hex_(payload.join('|'));
 }
 
 function readSheetObjects_(sheet) {
@@ -480,8 +597,14 @@ function writeImportReport_(report) {
   const rows=[['ATLAS CRM - RELATORIO DE IMPORTACAO',''],['Versao',ATLAS_VERSION],['Gerado em',new Date()],['Aprovado',report.approved?'SIM':'NAO']];
   (report.errors||[]).forEach(v=>rows.push(['ERRO',v]));
   (report.warnings||[]).forEach(v=>rows.push(['AVISO',v]));
-  if(report.sheets){Object.keys(report.sheets).forEach(k=>rows.push(['ABA '+k,JSON.stringify(report.sheets[k])]));}
+  if(report.protectedSheets) rows.push(['ABAS PROTEGIDAS',report.protectedSheets.join(', ')]);
+  if(report.sheets){Object.keys(report.sheets).forEach(k=>rows.push(['VALIDACAO '+k,JSON.stringify(report.sheets[k])]));}
+  if(report.simulation){
+    rows.push(['SIMULACAO TOTAL',JSON.stringify(report.simulation.totals)]);
+    Object.keys(report.simulation.sheets||{}).forEach(k=>rows.push(['SIMULACAO '+k,JSON.stringify(report.simulation.sheets[k])]));
+  }
   if(report.importSummary) rows.push(['RESUMO IMPORTACAO',JSON.stringify(report.importSummary)]);
+  if(report.restoreSummary) rows.push(['RESUMO RESTAURACAO',JSON.stringify(report.restoreSummary)]);
   sh.getRange(1,1,rows.length,2).setValues(rows);
   sh.getRange(1,1,1,2).setFontWeight('bold').setBackground('#17365D').setFontColor('#FFFFFF');
   sh.autoResizeColumns(1,2); sh.setFrozenRows(1);
