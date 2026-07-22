@@ -1,5 +1,5 @@
 /*
- * Atlas CRM Enterprise Gold - Sprint 4.9.11 FINAL
+ * Atlas CRM Enterprise Gold - Sprint 4.9.12 FINAL
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
 (function (w, d) {
@@ -68,7 +68,7 @@
     var actions = d.querySelector(".crm-drawer-actions");
     var tabs = id("crm-drawer-tabs");
     if (actions && !id("crm-enterprise-actions")) {
-      actions.insertAdjacentHTML("beforeend", '<div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="duplicate" type="button">⌕ Localizar e unificar duplicidade</button><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button></div></div>');
+      actions.insertAdjacentHTML("beforeend", '<div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="duplicate" type="button">⌕ Localizar e unificar duplicidade</button><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button><span class="crm-popover-divider" aria-hidden="true"></span><button class="crm-enterprise-danger" data-enterprise-action="delete-client" type="button">🗑 Excluir cliente</button></div></div>');
     }
     if (tabs && !tabs.querySelector('[data-tab="administracao"]')) tabs.insertAdjacentHTML("beforeend", '<button data-tab="administracao" type="button">Administração</button>');
     var body = d.querySelector(".crm-drawer-body");
@@ -212,7 +212,7 @@
 
   function auditView() {
     if (!state.current || !w.AtlasAPI || !w.AtlasAPI.audit) return;
-    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.11" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
+    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.12" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
   }
 
   function copySummary() {
@@ -238,6 +238,7 @@
         if (action === "print") w.print();
         if (action === "copy-summary") copySummary();
         if (action === "audit") auditView();
+        if (action === "delete-client") { if (!state.current) notify("Abra uma Ficha 360º primeiro.", "warning"); else d.dispatchEvent(new CustomEvent("atlas:acdm-open", { detail: { view: "delete", clientId: state.current.id } })); }
         if (action === "duplicate") openDuplicateFinder();
       }
 
@@ -288,7 +289,7 @@
     id("crm-bulk-export").addEventListener("click", function () {
       var selectedClients = state.clients.filter(function (client) { return state.selected.has(String(client.id)); });
       var csv = ["ID;NOME;DOCUMENTO;EMAIL;TELEFONE;SITUACAO"].concat(selectedClients.map(function (client) { return [client.id, client.nome, client.cpfCnpj, client.email, client.telefone || client.whatsapp, client.situacao || client.status].map(function (value) { return '"' + String(value || "").replace(/"/g, '""') + '"'; }).join(";"); })).join("\r\n");
-      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.11.csv"; link.click(); URL.revokeObjectURL(link.href);
+      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.12.csv"; link.click(); URL.revokeObjectURL(link.href);
     });
     id("crm-bulk-clear").addEventListener("click", function () { state.selected.clear(); d.querySelectorAll(".crm-row-selector input").forEach(function (input) { input.checked = false; }); updateBulk(); });
 
