@@ -1,12 +1,12 @@
 /*
- * Atlas CRM Enterprise Gold - Sprint 4.9.10 FINAL
+ * Atlas CRM Enterprise Gold - Sprint 4.9.11 FINAL
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
 (function (w, d) {
   "use strict";
 
   var state = { clients: [], certificates: [], timeline: [], communications: [], users: [], current: null, selected: new Set(), alertFilter: "all" };
-  var STORAGE = { templates: "atlas_crm_templates_4910", preferences: "atlas_crm_preferences_4910", queue: "atlas_crm_queue_4910", relations: "atlas_crm_relations_4910" };
+  var STORAGE = { templates: "atlas_crm_templates_4911", preferences: "atlas_crm_preferences_4911", queue: "atlas_crm_queue_4911", relations: "atlas_crm_relations_4911" };
 
   function id(value) { return d.getElementById(value); }
   function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]; }); }
@@ -68,7 +68,7 @@
     var actions = d.querySelector(".crm-drawer-actions");
     var tabs = id("crm-drawer-tabs");
     if (actions && !id("crm-enterprise-actions")) {
-      actions.insertAdjacentHTML("beforeend", '<div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button></div></div>');
+      actions.insertAdjacentHTML("beforeend", '<div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="duplicate" type="button">⌕ Localizar e unificar duplicidade</button><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button></div></div>');
     }
     if (tabs && !tabs.querySelector('[data-tab="administracao"]')) tabs.insertAdjacentHTML("beforeend", '<button data-tab="administracao" type="button">Administração</button>');
     var body = d.querySelector(".crm-drawer-body");
@@ -110,7 +110,7 @@
       var client = state.clients.find(function (item) { return String(item.id) === clientId(certificate); });
       alerts.push({ kind: days < 0 ? "expired" : "30", priority: days < 0 ? 1 : 2, clientId: clientId(certificate), title: days < 0 ? "Certificado vencido" : "Vencimento próximo", description: (client && client.nome || "Cliente") + " • " + (certificate.tipo || certificate.nome || "Certificado") + " • " + (days < 0 ? Math.abs(days) + " dia(s) vencido" : days + " dia(s)") });
     });
-    duplicates().forEach(function (group) { alerts.push({ kind: "duplicate", priority: 3, title: "Possível duplicidade", description: group.clients.map(function (client) { return client.nome || client.id; }).join(" × "), clientId: group.clients[0] && group.clients[0].id }); });
+    duplicates().forEach(function (group) { alerts.push({ kind: "duplicate", priority: 3, title: "Possível duplicidade", description: group.clients.map(function (client) { return client.nome || client.id; }).join(" × "), clientId: group.clients[0] && group.clients[0].id, candidateId: group.clients[1] && group.clients[1].id }); });
     return alerts.sort(function (a, b) { return a.priority - b.priority; });
   }
 
@@ -120,7 +120,7 @@
     if (state.alertFilter !== "all") items = items.filter(function (item) { return item.kind === state.alertFilter; });
     var count = id("crm-alert-count"); if (count) count.textContent = alertItems().length;
     var list = id("crm-alert-list"); if (!list) return;
-    list.innerHTML = items.length ? items.map(function (item) { return '<button type="button" data-alert-client="' + esc(item.clientId) + '" class="' + esc(item.kind) + '"><span>' + (item.kind === "duplicate" ? "⇄" : "!") + '</span><div><strong>' + esc(item.title) + '</strong><p>' + esc(item.description) + '</p></div></button>'; }).join("") : '<div class="crm-tab-empty"><b>✓</b><h3>Nenhum alerta</h3><p>Não há ocorrências para o filtro selecionado.</p></div>';
+    list.innerHTML = items.length ? items.map(function (item) { return '<article class="crm-alert-card ' + esc(item.kind) + '"><span>' + (item.kind === "duplicate" ? "⇄" : "!") + '</span><div><strong>' + esc(item.title) + '</strong><p>' + esc(item.description) + '</p><div class="crm-alert-actions"><button type="button" data-alert-action="open" data-alert-client="' + esc(item.clientId) + '">Abrir</button>' + (item.kind === "duplicate" ? '<button type="button" data-alert-action="compare" data-alert-client="' + esc(item.clientId) + '" data-alert-candidate="' + esc(item.candidateId || "") + '">⌕ Comparar e unificar</button>' : '') + '</div></div></article>'; }).join("") : '<div class="crm-tab-empty"><b>✓</b><h3>Nenhum alerta</h3><p>Não há ocorrências para o filtro selecionado.</p></div>';
   }
 
   function renderAdmin(client) {
@@ -201,9 +201,18 @@
     notify("Relacionamento registrado com " + target.nome + ".");
   }
 
+  function openDuplicateFinder(clientIdValue, candidateIdValue) {
+    var sourceId = clientIdValue || (state.current && state.current.id);
+    if (!sourceId) { notify("Selecione um cliente para localizar duplicidades.", "warning"); return; }
+    var group = duplicates().find(function (item) { return item.clients.some(function (client) { return String(client.id) === String(sourceId); }); });
+    var candidateId = candidateIdValue || (group && group.clients.find(function (client) { return String(client.id) !== String(sourceId); }) || {}).id;
+    if (!candidateId) { notify("Nenhuma duplicidade automática foi encontrada para este cliente.", "warning"); return; }
+    d.dispatchEvent(new CustomEvent("atlas:acdm-open", { detail: { view: "integrate", clientId: sourceId, candidateId: candidateId } }));
+  }
+
   function auditView() {
     if (!state.current || !w.AtlasAPI || !w.AtlasAPI.audit) return;
-    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.10" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
+    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.11" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
   }
 
   function copySummary() {
@@ -229,6 +238,7 @@
         if (action === "print") w.print();
         if (action === "copy-summary") copySummary();
         if (action === "audit") auditView();
+        if (action === "duplicate") openDuplicateFinder();
       }
 
       var adminAction = event.target.closest("[data-admin-action]");
@@ -251,7 +261,7 @@
     id("crm-alerts-close").addEventListener("click", function () { closeModal("crm-alerts"); });
     id("crm-alerts-backdrop").addEventListener("click", function () { closeModal("crm-alerts"); });
     id("crm-alert-filters").addEventListener("click", function (event) { var button = event.target.closest("button[data-filter]"); if (!button) return; state.alertFilter = button.dataset.filter; this.querySelectorAll("button").forEach(function (item) { item.classList.toggle("active", item === button); }); renderAlerts(); });
-    id("crm-alert-list").addEventListener("click", function (event) { var button = event.target.closest("button[data-alert-client]"); if (button && button.dataset.alertClient) { closeModal("crm-alerts"); openClient(button.dataset.alertClient); } });
+    id("crm-alert-list").addEventListener("click", function (event) { var button = event.target.closest("button[data-alert-action]"); if (!button) return; closeModal("crm-alerts"); if (button.dataset.alertAction === "compare") openDuplicateFinder(button.dataset.alertClient, button.dataset.alertCandidate); else if (button.dataset.alertClient) openClient(button.dataset.alertClient); });
 
     id("crm-communication-close").addEventListener("click", function () { closeModal("crm-communication"); });
     id("crm-communication-backdrop").addEventListener("click", function () { closeModal("crm-communication"); });
@@ -278,7 +288,7 @@
     id("crm-bulk-export").addEventListener("click", function () {
       var selectedClients = state.clients.filter(function (client) { return state.selected.has(String(client.id)); });
       var csv = ["ID;NOME;DOCUMENTO;EMAIL;TELEFONE;SITUACAO"].concat(selectedClients.map(function (client) { return [client.id, client.nome, client.cpfCnpj, client.email, client.telefone || client.whatsapp, client.situacao || client.status].map(function (value) { return '"' + String(value || "").replace(/"/g, '""') + '"'; }).join(";"); })).join("\r\n");
-      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.10.csv"; link.click(); URL.revokeObjectURL(link.href);
+      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.11.csv"; link.click(); URL.revokeObjectURL(link.href);
     });
     id("crm-bulk-clear").addEventListener("click", function () { state.selected.clear(); d.querySelectorAll(".crm-row-selector input").forEach(function (input) { input.checked = false; }); updateBulk(); });
 

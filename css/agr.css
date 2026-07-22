@@ -1192,7 +1192,7 @@
 @media(max-width:640px){.atlas-admin-shell{padding:86px 0 28px}.atlas-admin-welcome{display:block}.atlas-admin-session{margin-top:14px;text-align:left}.atlas-kpi-grid,.atlas-quick-grid,.atlas-admin-nav{grid-template-columns:1fr}.atlas-admin-profile{padding-bottom:13px}.atlas-admin-panel{padding:17px}.atlas-kpi-card{padding:16px}}
 
 /* =====================================================
-   CRM Enterprise Gold 4.9.10 — Refinamento do Dashboard
+   CRM Enterprise Gold 4.9.11 — Refinamento do Dashboard
 ===================================================== */
 .agr-page .site-header .brand img {
   transform: scale(1.08);
@@ -1422,3 +1422,10 @@
     transition: none;
   }
 }
+
+/* Sprint 4.9.11 - Cards operacionais do Dashboard */
+.atlas-kpi-action{cursor:pointer;padding-right:46px;outline:none}
+.atlas-kpi-action .atlas-kpi-arrow{position:absolute;right:18px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#edf6ff;color:#0878ef;font-size:21px;font-weight:900;transition:transform .18s ease,background .18s ease,color .18s ease}
+.atlas-kpi-action:hover .atlas-kpi-arrow,.atlas-kpi-action:focus-visible .atlas-kpi-arrow{transform:translate(3px,-50%);background:#0878ef;color:#fff}
+.atlas-kpi-action:focus-visible{border-color:#1688ed;box-shadow:0 0 0 3px rgba(22,136,237,.18),0 17px 36px rgba(16,53,93,.11)}
+.atlas-kpi-action:active{transform:translateY(0) scale(.99)}

@@ -1,4 +1,4 @@
-/* Atlas ACMS Interface - Dashboard Administrativo 4.9.10 */
+/* Atlas ACMS Interface - Dashboard Administrativo 4.9.11 */
 (function (window, document) {
   "use strict";
 
@@ -92,6 +92,26 @@
     text("atlas-kpi-activity-today", count);
   }
 
+
+  function bindDashboardCards() {
+    function activate(card) {
+      var target = card && card.getAttribute("data-dashboard-target");
+      if (!target) return;
+      if (target.charAt(0) === "#") {
+        var section = document.querySelector(target);
+        if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      window.location.href = target;
+    }
+    document.querySelectorAll("[data-dashboard-target]").forEach(function (card) {
+      card.addEventListener("click", function () { activate(card); });
+      card.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(card); }
+      });
+    });
+  }
+
   async function render() {
     var session = window.AtlasAuth && window.AtlasAuth.session ? window.AtlasAuth.session.getActive() : null;
     if (session) {
@@ -138,6 +158,6 @@
     renderActivity(records);
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
-  else render();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { bindDashboardCards(); render(); });
+  else { bindDashboardCards(); render(); }
 })(window, document);
