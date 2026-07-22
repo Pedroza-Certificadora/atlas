@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.8.3';
+const ATLAS_VERSION = '4.8.3.1';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -321,7 +321,7 @@ function normalize_(v){return String(v||'').trim().toLowerCase();} function digi
 
 
 /**
- * Sprint 4.8.3 - Importador CRM Homologado
+ * Sprint 4.8.3.1 - Hotfix Code.gs Limpo
  *
  * Fluxo seguro:
  * 1) validarImportacaoCRM(sourceSpreadsheetId)
@@ -340,7 +340,7 @@ const CRM_IMPORT_SHEETS = Object.freeze([
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Atlas CRM')
-    .addItem('Configurar estrutura 4.8.3', 'configurarAtlasDataFoundation')
+    .addItem('Configurar estrutura 4.8.3.1', 'configurarAtlasDataFoundation')
     .addSeparator()
     .addItem('Validar base para importacao', 'solicitarValidacaoImportacaoCRM')
     .addItem('Simular importacao (sem gravar)', 'solicitarSimulacaoImportacaoCRM')
@@ -457,7 +457,7 @@ function importarBaseCRM(sourceSpreadsheetId) {
 
   const target=SpreadsheetApp.getActiveSpreadsheet();
   const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.3 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
+  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.3.1 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
   const lock=LockService.getScriptLock();
   lock.waitLock(30000);
   const summary={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),fingerprint:validation.fingerprint,backupId:backup.getId(),backupName:backup.getName(),protectedSheetsPreserved:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],sheets:{},totals:{inserted:0,updated:0,skipped:0},startedAt:new Date().toISOString()};
@@ -476,7 +476,7 @@ function importarBaseCRM(sourceSpreadsheetId) {
     seedConfig_();
     summary.finishedAt=new Date().toISOString();
     summary.ok=true;
-    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.3 concluida',summary);
+    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.3.1 concluida',summary);
     recordAudit_({action:'CRM_IMPORT_SUCCESS',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),summary:summary}},{});
     writeImportReport_({approved:true,importSummary:summary,errors:[],warnings:[]});
     props.setProperty('CRM_LAST_BACKUP_ID',backup.getId());
