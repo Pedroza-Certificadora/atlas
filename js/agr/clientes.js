@@ -1,4 +1,4 @@
-/* Atlas ACMS Interface v1.0 - Central de Clientes e Ficha 360 4.9.9 | Marcos Henrique Pedroza */
+/* Atlas ACMS Interface v1.0 - Central de Clientes e Ficha 360 4.9.10 | Marcos Henrique Pedroza */
 (function(window,document){
   "use strict";
   var state={clients:[],certificates:[],timeline:[],sectors:{setores:[],subsetores:[]},rows:[],filtered:[],filter:"all",query:"",page:1,pageSize:25,sort:"name",direction:1,drawer:null,lastFocus:null};
