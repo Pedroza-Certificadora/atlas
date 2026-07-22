@@ -34,7 +34,7 @@
         } catch (error) { return ""; }
       })(),
       client: {
-        version: config.version || "4.7.3",
+        version: config.version || "4.7.4",
         path: window.location.pathname,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo"
       }
