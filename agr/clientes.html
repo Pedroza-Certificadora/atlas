@@ -12,19 +12,19 @@
   <meta name="theme-color" content="#071b36">
   <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
   <link rel="manifest" href="../site.webmanifest">
-  <link rel="stylesheet" href="../css/style.css?v=4.9.1">
-  <link rel="stylesheet" href="../css/agr.css?v=4.9.1">
-  <link rel="stylesheet" href="../css/auth.css?v=4.9.1">
-  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.1">
-  <script src="../js/auth/config.js?v=4.9.1"></script>
-  <script src="../js/api/atlas-api.js?v=4.9.1"></script>
-  <script src="../js/auth/storage.js?v=4.9.1"></script>
-  <script src="../js/auth/crypto.js?v=4.9.1"></script>
-  <script src="../js/auth/users.mock.js?v=4.9.1"></script>
-  <script src="../js/auth/audit.js?v=4.9.1"></script>
-  <script src="../js/auth/permissions.js?v=4.9.1"></script>
-  <script src="../js/auth/session.js?v=4.9.1"></script>
-  <script src="../js/auth/guards.js?v=4.9.1"></script>
+  <link rel="stylesheet" href="../css/style.css?v=4.9.2">
+  <link rel="stylesheet" href="../css/agr.css?v=4.9.2">
+  <link rel="stylesheet" href="../css/auth.css?v=4.9.2">
+  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.2">
+  <script src="../js/auth/config.js?v=4.9.2"></script>
+  <script src="../js/api/atlas-api.js?v=4.9.2"></script>
+  <script src="../js/auth/storage.js?v=4.9.2"></script>
+  <script src="../js/auth/crypto.js?v=4.9.2"></script>
+  <script src="../js/auth/users.mock.js?v=4.9.2"></script>
+  <script src="../js/auth/audit.js?v=4.9.2"></script>
+  <script src="../js/auth/permissions.js?v=4.9.2"></script>
+  <script src="../js/auth/session.js?v=4.9.2"></script>
+  <script src="../js/auth/guards.js?v=4.9.2"></script>
 </head>
 <body class="agr-page crm-clientes-page">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -60,7 +60,7 @@
             <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
             <a href="../auth/minha-conta.html"><span aria-hidden="true">○</span> Minha conta</a>
           </nav>
-          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.1</small></span></div>
+          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.2</small></span></div>
         </aside>
 
         <div class="atlas-admin-content">
@@ -125,12 +125,51 @@
     </section>
   </main>
 
-  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.1</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
+
+  <div class="crm-drawer-backdrop" id="crm-drawer-backdrop" hidden></div>
+  <aside class="crm-drawer" id="crm-drawer" aria-hidden="true" aria-labelledby="crm-drawer-title">
+    <div class="crm-drawer-loading" id="crm-drawer-loading" hidden><i></i><i></i><i></i><p>Carregando a Ficha 360º pela Atlas API...</p></div>
+    <div class="crm-drawer-content" id="crm-drawer-content">
+      <header class="crm-drawer-header">
+        <button class="crm-drawer-close" id="crm-drawer-close" type="button" aria-label="Fechar Ficha 360º">×</button>
+        <div class="crm-drawer-person">
+          <span class="crm-drawer-avatar" id="crm-drawer-avatar">CL</span>
+          <div><span class="crm-drawer-kicker">Ficha 360º do cliente</span><h2 id="crm-drawer-title">Cliente</h2><p id="crm-drawer-company">Cadastro Atlas</p></div>
+        </div>
+        <div class="crm-drawer-meta"><span id="crm-drawer-status" class="crm-status ok">Ativo</span><span id="crm-drawer-owner">Responsável: —</span></div>
+        <div class="crm-drawer-actions" aria-label="Ações rápidas">
+          <a id="crm-action-whatsapp" class="crm-action-primary" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <a id="crm-action-email" href="#">E-mail</a>
+          <button id="crm-action-copy" type="button">Copiar documento</button>
+        </div>
+      </header>
+      <nav class="crm-drawer-tabs" id="crm-drawer-tabs" aria-label="Seções da Ficha 360º">
+        <button class="active" data-tab="geral" type="button">Geral</button>
+        <button data-tab="certificados" type="button">Certificados <b id="crm-tab-cert-count">0</b></button>
+        <button data-tab="timeline" type="button">Timeline <b id="crm-tab-timeline-count">0</b></button>
+        <button data-tab="comunicacao" type="button">Comunicação <b id="crm-tab-comm-count">0</b></button>
+        <button data-tab="agenda" type="button">Agenda</button>
+        <button data-tab="observacoes" type="button">Observações</button>
+        <button data-tab="auditoria" type="button">Auditoria</button>
+      </nav>
+      <div class="crm-drawer-body">
+        <section class="crm-tab-panel active" data-panel="geral" id="crm-panel-geral"></section>
+        <section class="crm-tab-panel" data-panel="certificados" id="crm-panel-certificados"></section>
+        <section class="crm-tab-panel" data-panel="timeline" id="crm-panel-timeline"></section>
+        <section class="crm-tab-panel" data-panel="comunicacao" id="crm-panel-comunicacao"></section>
+        <section class="crm-tab-panel" data-panel="agenda" id="crm-panel-agenda"></section>
+        <section class="crm-tab-panel" data-panel="observacoes" id="crm-panel-observacoes"></section>
+        <section class="crm-tab-panel" data-panel="auditoria" id="crm-panel-auditoria"></section>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.2</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
   <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden><div class="auth-session-dialog"><span class="auth-card-badge">Segurança da sessão</span><h2 id="auth-session-title">Sua sessão está prestes a expirar</h2><p>Por segurança, acessos inativos são encerrados automaticamente.</p><div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div><div class="auth-session-actions"><button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button><button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button></div></div></div>
-  <script src="../js/auth/auth.js?v=4.9.1"></script>
-  <script src="../js/auth/protected-ui.js?v=4.9.1"></script>
-  <script src="../js/app.js?v=4.9.1" defer></script>
-  <script src="../js/agr/clientes.js?v=4.9.1" defer></script>
-  <script src="../js/build-info.js?v=4.9.1" defer></script>
+  <script src="../js/auth/auth.js?v=4.9.2"></script>
+  <script src="../js/auth/protected-ui.js?v=4.9.2"></script>
+  <script src="../js/app.js?v=4.9.2" defer></script>
+  <script src="../js/agr/clientes.js?v=4.9.2" defer></script>
+  <script src="../js/build-info.js?v=4.9.2" defer></script>
 </body>
 </html>
