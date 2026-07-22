@@ -61,7 +61,7 @@
 
   <link rel="stylesheet" href="../css/style.css?v=4.8.1">
   <link rel="stylesheet" href="../css/motion.css?v=4.3.0">
-  <link rel="stylesheet" href="../css/agr.css?v=4.8.1">
+  <link rel="stylesheet" href="../css/agr.css?v=4.9.2.1">
   <link rel="stylesheet" href="../css/auth.css?v=4.8.1">
 
   <script src="../js/auth/config.js?v=4.8.1"></script>
@@ -217,33 +217,53 @@
 
         <div class="atlas-admin-content" id="dashboard">
           <div class="atlas-admin-welcome">
-            <div>
+            <div class="atlas-admin-welcome-copy">
               <span class="agr-eyebrow">Portal Atlas • Administração</span>
-              <h1 id="dashboard-title">Olá, <span data-auth-user-first-name>Marcos</span>.</h1>
-              <p>Visão geral da operação da Pedroza Certificadora.</p>
-            </div>
-            <div class="atlas-admin-session">
-              <span>Último acesso</span>
-              <strong id="atlas-last-access">Agora</strong>
+              <div class="atlas-admin-title-row">
+                <div>
+                  <h1 id="dashboard-title">Olá, <span data-auth-user-first-name>Marcos</span>.</h1>
+                  <p>Visão geral da operação da Pedroza Certificadora.</p>
+                </div>
+                <div class="atlas-admin-session" aria-label="Status da sessão">
+                  <span class="atlas-session-online"><i aria-hidden="true"></i> Online</span>
+                  <span>Último acesso <strong id="atlas-last-access">Agora</strong></span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="atlas-kpi-grid" aria-label="Indicadores operacionais">
-            <article class="atlas-kpi-card" id="clientes">
+            <article class="atlas-kpi-card atlas-kpi-primary" id="clientes">
               <span class="atlas-kpi-icon" aria-hidden="true">◉</span>
               <div><small>Clientes</small><strong id="atlas-kpi-clients">0</strong><span>Cadastros ativos</span></div>
             </article>
-            <article class="atlas-kpi-card" id="certificados">
+            <article class="atlas-kpi-card atlas-kpi-success" id="certificados">
               <span class="atlas-kpi-icon" aria-hidden="true">▤</span>
-              <div><small>Certificados</small><strong id="atlas-kpi-certificates">0</strong><span>Integração na Sprint 4.7</span></div>
+              <div><small>Certificados</small><strong id="atlas-kpi-certificates">0</strong><span>Vínculos ativos</span></div>
             </article>
-            <article class="atlas-kpi-card">
+            <article class="atlas-kpi-card atlas-kpi-warning">
               <span class="atlas-kpi-icon" aria-hidden="true">↻</span>
-              <div><small>Renovações</small><strong id="atlas-kpi-renewals">0</strong><span>Pendências atuais</span></div>
+              <div><small>Renovações</small><strong id="atlas-kpi-renewals">0</strong><span>Próximos 60 dias</span></div>
             </article>
-            <article class="atlas-kpi-card">
+            <article class="atlas-kpi-card atlas-kpi-neutral">
               <span class="atlas-kpi-icon" aria-hidden="true">♙</span>
-              <div><small>Usuários</small><strong id="atlas-kpi-users">3</strong><span id="atlas-kpi-agr">1 AGR ativo</span></div>
+              <div><small>Usuários</small><strong id="atlas-kpi-users">0</strong><span id="atlas-kpi-agr">0 AGR ativos</span></div>
+            </article>
+            <article class="atlas-kpi-card atlas-kpi-danger">
+              <span class="atlas-kpi-icon" aria-hidden="true">!</span>
+              <div><small>Vencendo hoje</small><strong id="atlas-kpi-due-today">0</strong><span>Prioridade imediata</span></div>
+            </article>
+            <article class="atlas-kpi-card atlas-kpi-warning">
+              <span class="atlas-kpi-icon" aria-hidden="true">30</span>
+              <div><small>Vence em 30 dias</small><strong id="atlas-kpi-due-30">0</strong><span>Acompanhamento preventivo</span></div>
+            </article>
+            <article class="atlas-kpi-card atlas-kpi-danger">
+              <span class="atlas-kpi-icon" aria-hidden="true">×</span>
+              <div><small>Vencidos</small><strong id="atlas-kpi-expired">0</strong><span>Certificados ativos na base</span></div>
+            </article>
+            <article class="atlas-kpi-card atlas-kpi-info">
+              <span class="atlas-kpi-icon" aria-hidden="true">↗</span>
+              <div><small>Atividades hoje</small><strong id="atlas-kpi-activity-today">0</strong><span>Eventos registrados</span></div>
             </article>
           </div>
 
@@ -1596,13 +1616,13 @@
 
   <script src="../js/auth/auth.js?v=4.8.1"></script>
   <script src="../js/auth/protected-ui.js?v=4.8.1"></script>
-  <script src="../js/agr/dashboard.js?v=4.8.1" defer></script>
+  <script src="../js/agr/dashboard.js?v=4.9.2.1" defer></script>
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
   <script src="../js/agr/agr.js?v=4.4.0" defer></script>
   <script src="../js/agr/aims-data.js?v=4.4.0" defer></script>
   <script src="../js/agr/aims.js?v=4.4.0" defer></script>
 
-  <script src="../js/build-info.js?v=4.8.1" defer></script>
+  <script src="../js/build-info.js?v=4.9.2.1" defer></script>
 </body>
 </html>
