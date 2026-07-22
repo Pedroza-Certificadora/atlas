@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="auth-check-pending" data-auth-protected data-auth-permission="CLIENTS_READ">
+<head>
+  <!-- Pedroza Certificadora | ACMS Interface v1.0 | Marcos Henrique Pedroza -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central de Clientes | Atlas CRM</title>
+  <meta name="description" content="Central operacional de clientes e certificados da Pedroza Certificadora.">
+  <meta name="author" content="Marcos Henrique Pedroza">
+  <meta name="designer" content="Marcos Henrique Pedroza">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#071b36">
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <link rel="stylesheet" href="../css/style.css?v=4.9.1">
+  <link rel="stylesheet" href="../css/agr.css?v=4.9.1">
+  <link rel="stylesheet" href="../css/auth.css?v=4.9.1">
+  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.1">
+  <script src="../js/auth/config.js?v=4.9.1"></script>
+  <script src="../js/api/atlas-api.js?v=4.9.1"></script>
+  <script src="../js/auth/storage.js?v=4.9.1"></script>
+  <script src="../js/auth/crypto.js?v=4.9.1"></script>
+  <script src="../js/auth/users.mock.js?v=4.9.1"></script>
+  <script src="../js/auth/audit.js?v=4.9.1"></script>
+  <script src="../js/auth/permissions.js?v=4.9.1"></script>
+  <script src="../js/auth/session.js?v=4.9.1"></script>
+  <script src="../js/auth/guards.js?v=4.9.1"></script>
+</head>
+<body class="agr-page crm-clientes-page">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header" id="inicio">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Pedroza Certificadora — início">
+        <img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154" decoding="async">
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-principal" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+      <nav class="main-nav" id="menu-principal" aria-label="Navegação principal">
+        <a href="../">Início</a><a href="../cliente/">Área do Cliente</a><a class="active" href="./">Área AGR</a><a href="clientes.html">Clientes</a><a href="usuarios.html" data-auth-permission="SETTINGS_MANAGE">Configurações</a>
+      </nav>
+      <div class="header-actions">
+        <div class="auth-user-chip"><span><strong data-auth-user-name>Usuário Atlas</strong><small data-auth-user-role>Perfil</small></span></div>
+        <a class="button button-outline auth-account-button" href="../auth/minha-conta.html">Minha conta</a>
+        <a class="button button-outline auth-logout-button" href="../auth/logout.html" data-auth-logout>Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="atlas-admin-shell crm-shell" aria-labelledby="crm-title">
+      <div class="container atlas-admin-layout">
+        <aside class="atlas-admin-sidebar" aria-label="Navegação administrativa">
+          <div class="atlas-admin-profile"><span class="atlas-admin-avatar" aria-hidden="true">MP</span><div><strong data-auth-user-name>Marcos Pedroza</strong><small data-auth-user-role>FULL</small></div></div>
+          <nav class="atlas-admin-nav">
+            <a href="./"><span aria-hidden="true">▦</span> Dashboard</a>
+            <a class="active" href="clientes.html" data-auth-permission="CLIENTS_READ"><span aria-hidden="true">◉</span> Clientes</a>
+            <a href="./#certificados" data-auth-permission="CERTIFICATES_READ"><span aria-hidden="true">▤</span> Certificados</a>
+            <a href="./#agenda" data-auth-permission="AGENDA_READ"><span aria-hidden="true">□</span> Agenda</a>
+            <a href="./#emissao"><span aria-hidden="true">◇</span> Central AGR</a>
+            <a href="./#auditoria" data-auth-permission="AUDIT_READ"><span aria-hidden="true">◎</span> Auditoria</a>
+            <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
+            <a href="../auth/minha-conta.html"><span aria-hidden="true">○</span> Minha conta</a>
+          </nav>
+          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.1</small></span></div>
+        </aside>
+
+        <div class="atlas-admin-content">
+          <div class="crm-heading">
+            <div><span class="agr-eyebrow">ACMS • Central Operacional CRM</span><h1 id="crm-title">Central de Clientes</h1><p>Localize clientes, certificados e informações operacionais em uma única tela.</p></div>
+            <div class="crm-sync" id="crm-sync" role="status"><i></i><span><strong>Conectando à Atlas API</strong><small id="crm-sync-time">Aguarde...</small></span></div>
+          </div>
+
+          <div class="crm-kpi-grid" aria-label="Indicadores da Central de Clientes">
+            <article><span>◉</span><div><small>Total de clientes</small><strong id="crm-kpi-total">—</strong><em>Base oficial</em></div></article>
+            <article><span>✓</span><div><small>Clientes ativos</small><strong id="crm-kpi-active">—</strong><em>Cadastros operacionais</em></div></article>
+            <article><span>▤</span><div><small>Certificados ativos</small><strong id="crm-kpi-certificates">—</strong><em>Vínculos vigentes</em></div></article>
+            <article><span>!</span><div><small>Vencendo em 30 dias</small><strong id="crm-kpi-30">—</strong><em>Prioridade imediata</em></div></article>
+            <article><span>↻</span><div><small>Em renovação</small><strong id="crm-kpi-renewals">—</strong><em>Acompanhamento</em></div></article>
+          </div>
+
+          <section class="crm-panel" aria-labelledby="crm-list-title">
+            <div class="crm-toolbar">
+              <div class="crm-search-wrap">
+                <label for="crm-search">Pesquisa inteligente</label>
+                <div class="crm-search-box"><span aria-hidden="true">⌕</span><input id="crm-search" type="search" autocomplete="off" placeholder="Nome, CPF, CNPJ, telefone, e-mail, empresa, certificado, setor..."><button id="crm-search-clear" type="button" aria-label="Limpar pesquisa" hidden>×</button></div>
+                <small>Pesquisa instantânea em clientes, certificados, contatos, observações e timeline.</small>
+              </div>
+              <div class="crm-page-size"><label for="crm-page-size">Exibir</label><select id="crm-page-size"><option value="15">15</option><option value="25" selected>25</option><option value="50">50</option><option value="100">100</option></select></div>
+            </div>
+
+            <div class="crm-filter-bar" id="crm-filters" aria-label="Filtros rápidos">
+              <button class="active" data-filter="all" type="button">Todos <b id="count-all">0</b></button>
+              <button data-filter="active" type="button">Ativos <b id="count-active">0</b></button>
+              <button data-filter="inactive" type="button">Inativos <b id="count-inactive">0</b></button>
+              <button data-filter="30" type="button">30 dias <b id="count-30">0</b></button>
+              <button data-filter="60" type="button">60 dias <b id="count-60">0</b></button>
+              <button data-filter="90" type="button">90 dias <b id="count-90">0</b></button>
+              <button data-filter="renewal" type="button">Renovação <b id="count-renewal">0</b></button>
+            </div>
+
+            <div class="crm-list-header"><div><span>Clientes encontrados</span><strong id="crm-result-count">Carregando...</strong></div><button id="crm-refresh" type="button">↻ Atualizar dados</button></div>
+
+            <div class="crm-table-wrap" id="crm-table-wrap" aria-live="polite">
+              <div class="crm-skeleton" id="crm-loading"><i></i><i></i><i></i><i></i><i></i><p>Carregando a base oficial pela Atlas API...</p></div>
+              <table class="crm-table" id="crm-table" hidden>
+                <thead><tr>
+                  <th><button data-sort="priority" type="button">Prioridade ↕</button></th>
+                  <th><button data-sort="name" type="button">Cliente ↕</button></th>
+                  <th><button data-sort="company" type="button">Empresa ↕</button></th>
+                  <th>Documento</th><th>Cidade/UF</th>
+                  <th><button data-sort="certificate" type="button">Certificado ↕</button></th>
+                  <th><button data-sort="expiry" type="button">Vencimento ↕</button></th>
+                  <th><button data-sort="days" type="button">Dias ↕</button></th>
+                  <th>Situação</th><th>Responsável</th>
+                </tr></thead>
+                <tbody id="crm-table-body"></tbody>
+              </table>
+              <div class="crm-empty" id="crm-empty" hidden><b>⌕</b><h2>Nenhum cliente encontrado</h2><p>Revise os termos pesquisados ou selecione outro filtro.</p></div>
+              <div class="crm-error" id="crm-error" hidden><b>!</b><h2>Não foi possível carregar a Central de Clientes</h2><p id="crm-error-message">Verifique a conexão com a Atlas API.</p><button id="crm-error-retry" type="button">Tentar novamente</button></div>
+            </div>
+
+            <div class="crm-pagination" id="crm-pagination" hidden><p id="crm-range">0–0 de 0</p><div><button id="crm-prev" type="button">‹ Anterior</button><span id="crm-pages"></span><button id="crm-next" type="button">Próxima ›</button></div></div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.1</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
+  <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden><div class="auth-session-dialog"><span class="auth-card-badge">Segurança da sessão</span><h2 id="auth-session-title">Sua sessão está prestes a expirar</h2><p>Por segurança, acessos inativos são encerrados automaticamente.</p><div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div><div class="auth-session-actions"><button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button><button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button></div></div></div>
+  <script src="../js/auth/auth.js?v=4.9.1"></script>
+  <script src="../js/auth/protected-ui.js?v=4.9.1"></script>
+  <script src="../js/app.js?v=4.9.1" defer></script>
+  <script src="../js/agr/clientes.js?v=4.9.1" defer></script>
+  <script src="../js/build-info.js?v=4.9.1" defer></script>
+</body>
+</html>
