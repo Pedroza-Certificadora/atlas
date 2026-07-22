@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.8.3.1';
+const ATLAS_VERSION = '4.9.15';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -29,7 +29,19 @@ const SHEETS = Object.freeze({
   IA_PROFILE: ['ID','CLIENTE_ID','PERFIL_JSON','ULTIMA_ANALISE_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR']
 });
 
-function doGet() { return json_({ok:true,data:{service:'Atlas API',version:ATLAS_VERSION,status:'online'}}); }
+function doGet(e) {
+  try {
+    const params = (e && e.parameter) || {};
+    const action = String(params.action || '').trim();
+    if (action === 'aevs.consult' || params.documento || params.cpfCnpj) {
+      return json_({ok:true,data:consultarCertificadoPublico_(params)});
+    }
+    return json_({ok:true,data:{service:'Atlas API',version:ATLAS_VERSION,status:'online'}});
+  } catch (error) {
+    try { appendLog_('ERROR','AEVS_PUBLIC',error.message,{stack:error.stack || ''}); } catch (_) {}
+    return json_({ok:false,code:error.code || 'AEVS_ERROR',message:error.message || 'Nao foi possivel concluir a consulta.'});
+  }
+}
 function doPost(e) {
   try {
     const request = JSON.parse((e && e.postData && e.postData.contents) || '{}');
@@ -88,6 +100,103 @@ function route_(action,payload,client,authToken) {
     case 'tags.list': return rows_('TAGS');
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
   }
+}
+
+
+/**
+ * Consulta publica AEVS sobre a Atlas Data Foundation.
+ * Retorna somente dados reduzidos e mascarados, sem expor PII completa.
+ */
+function consultarCertificadoPublico_(params) {
+  const documento = digits_(params.documento || params.cpfCnpj || '');
+  if ([11,14].indexOf(documento.length) === -1 || /^(\d)\1+$/.test(documento)) {
+    return {encontrado:false,mensagem:'Informe um CPF ou CNPJ valido.'};
+  }
+
+  const cliente = rows_('CLIENTES').find(function(row) {
+    return digits_(row.CPF_CNPJ) === documento && String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
+  });
+  if (!cliente) {
+    return {encontrado:false,mensagem:'Nao encontramos certificado cadastrado para o documento informado.'};
+  }
+
+  const certificados = rows_('CERTIFICADOS').filter(function(row) {
+    return String(row.CLIENTE_ID || '') === String(cliente.ID || '') &&
+      String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
+  });
+  if (!certificados.length) {
+    return {encontrado:false,mensagem:'Nao encontramos certificado cadastrado para o documento informado.'};
+  }
+
+  const hoje = inicioDoDia_(new Date());
+  const ordenados = certificados.map(function(cert) {
+    const vencimento = dataAtlas_(cert.VENCIMENTO);
+    const dias = vencimento ? Math.ceil((inicioDoDia_(vencimento).getTime() - hoje.getTime()) / 86400000) : null;
+    const statusTexto = String(cert.STATUS_CERTIFICADO || '').toUpperCase();
+    const emRenovacao = valorBooleano_(cert.EM_RENOVACAO) || statusTexto.indexOf('RENOV') >= 0;
+    const ativo = String(cert.STATUS || 'ATIVO').toUpperCase() === 'ATIVO';
+    let prioridade = 40;
+    if (ativo && dias !== null && dias >= 0) prioridade = 10;
+    else if (emRenovacao) prioridade = 20;
+    else if (dias !== null && dias < 0) prioridade = 30;
+    return {cert:cert,vencimento:vencimento,dias:dias,prioridade:prioridade};
+  }).sort(function(a,b) {
+    if (a.prioridade !== b.prioridade) return a.prioridade - b.prioridade;
+    if (a.prioridade === 10) return (a.dias === null ? 999999 : a.dias) - (b.dias === null ? 999999 : b.dias);
+    if (a.prioridade === 30) return (b.vencimento ? b.vencimento.getTime() : 0) - (a.vencimento ? a.vencimento.getTime() : 0);
+    return (a.vencimento ? a.vencimento.getTime() : 0) - (b.vencimento ? b.vencimento.getTime() : 0);
+  });
+
+  const escolhido = ordenados[0];
+  const cert = escolhido.cert;
+  const dias = escolhido.dias;
+  const situacao = situacaoPublicaCertificado_(cert,dias);
+  const nome = String(cliente.NOME || cliente.EMPRESA || 'Cliente');
+  return {
+    encontrado:true,
+    titularMascarado:mascararNomePublico_(nome),
+    documentoMascarado:mascararDocumentoPublico_(documento),
+    tipoCertificado:String(cert.TIPO || cert.MODELO || 'Certificado digital'),
+    validadeFormatada:escolhido.vencimento ? Utilities.formatDate(escolhido.vencimento,Session.getScriptTimeZone() || 'America/Sao_Paulo','dd/MM/yyyy') : 'Nao informada',
+    situacao:situacao,
+    diasRestantes:dias,
+    referenciaConsulta:String(params.requestId || params._ || ''),
+    fonte:'ATLAS_DATA_FOUNDATION'
+  };
+}
+
+function dataAtlas_(valor) {
+  if (Object.prototype.toString.call(valor) === '[object Date]' && !isNaN(valor.getTime())) return valor;
+  const texto = String(valor || '').trim();
+  if (!texto) return null;
+  let match = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (match) return new Date(Number(match[3]),Number(match[2])-1,Number(match[1]));
+  match = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));
+  const parsed = new Date(texto);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+function inicioDoDia_(data) { return new Date(data.getFullYear(),data.getMonth(),data.getDate()); }
+function valorBooleano_(valor) { return ['TRUE','SIM','1','ATIVO','YES'].indexOf(String(valor || '').trim().toUpperCase()) >= 0; }
+function situacaoPublicaCertificado_(cert,dias) {
+  const status = String(cert.STATUS_CERTIFICADO || '').trim();
+  if (dias !== null && dias < 0) return 'Vencido';
+  if (valorBooleano_(cert.EM_RENOVACAO) || status.toUpperCase().indexOf('RENOV') >= 0) return 'Em renovacao';
+  if (dias !== null && dias <= 30) return 'Proximo do vencimento';
+  return status || 'Valido';
+}
+function mascararDocumentoPublico_(documento) {
+  const d = digits_(documento);
+  if (d.length === 11) return '***.'+d.slice(3,6)+'.'+d.slice(6,9)+'-**';
+  if (d.length === 14) return '**.'+d.slice(2,5)+'.'+d.slice(5,8)+'/****-**';
+  return 'Documento protegido';
+}
+function mascararNomePublico_(nome) {
+  return String(nome || '').trim().split(/\s+/).filter(Boolean).map(function(parte,index,lista) {
+    if (parte.length <= 2) return parte.charAt(0) + '*';
+    if (index === 0 || index === lista.length - 1) return parte.charAt(0) + '*'.repeat(Math.max(parte.length-2,1)) + parte.charAt(parte.length-1);
+    return parte.charAt(0) + '*'.repeat(Math.max(parte.length-1,1));
+  }).join(' ');
 }
 
 function login_(payload,client) {
