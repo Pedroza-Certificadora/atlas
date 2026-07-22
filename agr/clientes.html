@@ -12,19 +12,20 @@
   <meta name="theme-color" content="#071b36">
   <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
   <link rel="manifest" href="../site.webmanifest">
-  <link rel="stylesheet" href="../css/style.css?v=4.9.2.2">
-  <link rel="stylesheet" href="../css/agr.css?v=4.9.2.2">
-  <link rel="stylesheet" href="../css/auth.css?v=4.9.2.2">
-  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.2.2">
-  <script src="../js/auth/config.js?v=4.9.2.2"></script>
-  <script src="../js/api/atlas-api.js?v=4.9.2.2"></script>
-  <script src="../js/auth/storage.js?v=4.9.2.2"></script>
-  <script src="../js/auth/crypto.js?v=4.9.2.2"></script>
-  <script src="../js/auth/users.mock.js?v=4.9.2.2"></script>
-  <script src="../js/auth/audit.js?v=4.9.2.2"></script>
-  <script src="../js/auth/permissions.js?v=4.9.2.2"></script>
-  <script src="../js/auth/session.js?v=4.9.2.2"></script>
-  <script src="../js/auth/guards.js?v=4.9.2.2"></script>
+  <link rel="stylesheet" href="../css/style.css?v=4.9.9">
+  <link rel="stylesheet" href="../css/agr.css?v=4.9.9">
+  <link rel="stylesheet" href="../css/auth.css?v=4.9.9">
+  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.9">
+  <link rel="stylesheet" href="../css/atlas-core.css?v=4.9.9">
+  <script src="../js/auth/config.js?v=4.9.9"></script>
+  <script src="../js/api/atlas-api.js?v=4.9.9"></script>
+  <script src="../js/auth/storage.js?v=4.9.9"></script>
+  <script src="../js/auth/crypto.js?v=4.9.9"></script>
+  <script src="../js/auth/users.mock.js?v=4.9.9"></script>
+  <script src="../js/auth/audit.js?v=4.9.9"></script>
+  <script src="../js/auth/permissions.js?v=4.9.9"></script>
+  <script src="../js/auth/session.js?v=4.9.9"></script>
+  <script src="../js/auth/guards.js?v=4.9.9"></script>
 </head>
 <body class="agr-page crm-clientes-page">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -60,7 +61,7 @@
             <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
             <a href="../auth/minha-conta.html"><span aria-hidden="true">○</span> Minha conta</a>
           </nav>
-          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.2.2</small></span></div>
+          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>Atlas Core 4.9.9</small></span></div>
         </aside>
 
         <div class="atlas-admin-content">
@@ -147,6 +148,7 @@
           <a id="crm-action-whatsapp" class="crm-action-primary" href="#" target="_blank" rel="noopener">WhatsApp</a>
           <a id="crm-action-email" href="#">E-mail</a>
           <button id="crm-action-copy" type="button">Copiar documento</button>
+          <button id="crm-action-admin" class="crm-action-admin" type="button" data-auth-permission="CLIENTS_UPDATE">⚙ Configurar cliente</button>
         </div>
       </header>
       <nav class="crm-drawer-tabs" id="crm-drawer-tabs" aria-label="Seções da Ficha 360º">
@@ -170,12 +172,41 @@
     </div>
   </aside>
 
-  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.2.2</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
+  <div class="atlas-modal-backdrop" id="acdm-backdrop" hidden></div>
+  <section class="atlas-modal acdm-modal" id="acdm-modal" role="dialog" aria-modal="true" aria-labelledby="acdm-title" hidden>
+    <header><div><span>ACDM • Qualidade da Base</span><h2 id="acdm-title">Configurar cliente</h2><p id="acdm-subtitle">Administração segura do cadastro selecionado.</p></div><button id="acdm-close" type="button" aria-label="Fechar">×</button></header>
+    <div class="acdm-body">
+      <div class="acdm-alert"><b>Proteção de histórico</b><p>O Atlas não apaga fisicamente registros com histórico. Cadastros podem ser integrados ou arquivados, preservando certificados, timeline e auditoria.</p></div>
+      <div class="acdm-options">
+        <button class="acdm-option active" data-acdm-view="integrate" type="button"><span>⇄</span><strong>Integrar com outro cadastro</strong><small>Vincula o cadastro antigo ao cadastro principal.</small></button>
+        <button class="acdm-option" data-acdm-view="archive" type="button"><span>▣</span><strong>Arquivar cadastro</strong><small>Retira o cadastro da operação sem perder o histórico.</small></button>
+      </div>
+      <section class="acdm-view active" data-acdm-panel="integrate">
+        <label for="acdm-search">Localizar cadastro principal</label>
+        <input id="acdm-search" type="search" placeholder="Nome, CPF/CNPJ, e-mail ou telefone">
+        <div id="acdm-candidates" class="acdm-candidates"></div>
+        <div id="acdm-comparison" class="acdm-comparison" hidden></div>
+        <label class="acdm-confirm"><input id="acdm-integrate-confirm" type="checkbox"> Confirmo que o cadastro selecionado é duplicado e deve apontar para o cadastro principal.</label>
+        <button id="acdm-integrate" class="acdm-submit" type="button" disabled>Integrar cadastros</button>
+      </section>
+      <section class="acdm-view" data-acdm-panel="archive">
+        <label for="acdm-archive-reason">Motivo do arquivamento</label>
+        <textarea id="acdm-archive-reason" rows="4" placeholder="Ex.: cadastro antigo, empresa encerrada ou registro duplicado"></textarea>
+        <label class="acdm-confirm"><input id="acdm-archive-confirm" type="checkbox"> Confirmo o arquivamento deste cadastro.</label>
+        <button id="acdm-archive" class="acdm-submit acdm-danger" type="button" disabled>Arquivar cadastro</button>
+      </section>
+      <div id="acdm-status" class="acdm-status" role="status"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9.9 • Atlas Core • v4.9.9</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
   <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden><div class="auth-session-dialog"><span class="auth-card-badge">Segurança da sessão</span><h2 id="auth-session-title">Sua sessão está prestes a expirar</h2><p>Por segurança, acessos inativos são encerrados automaticamente.</p><div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div><div class="auth-session-actions"><button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button><button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button></div></div></div>
-  <script src="../js/auth/auth.js?v=4.9.2.2"></script>
-  <script src="../js/auth/protected-ui.js?v=4.9.2.2"></script>
-  <script src="../js/app.js?v=4.9.2.2" defer></script>
-  <script src="../js/agr/clientes.js?v=4.9.2.2" defer></script>
-  <script src="../js/build-info.js?v=4.9.2.2" defer></script>
+  <script src="../js/auth/auth.js?v=4.9.9"></script>
+  <script src="../js/auth/protected-ui.js?v=4.9.9"></script>
+  <script src="../js/app.js?v=4.9.9" defer></script>
+  <script src="../js/agr/clientes.js?v=4.9.9" defer></script>
+  <script src="../js/core/atlas-core.js?v=4.9.9" defer></script>
+  <script src="../js/agr/acdm.js?v=4.9.9" defer></script>
+  <script src="../js/build-info.js?v=4.9.9" defer></script>
 </body>
 </html>
