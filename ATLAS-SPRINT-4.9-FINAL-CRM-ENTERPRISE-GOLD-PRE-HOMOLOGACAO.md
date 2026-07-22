@@ -2,7 +2,7 @@
 
 ## Sprint 4.9 FINAL — CRM Enterprise Gold
 
-**Versão técnica:** 4.9.13  
+**Versão técnica:** 4.9.12  
 **Situação:** Pacote de pré-homologação final  
 **Data:** 22/07/2026  
 **Responsável:** Marcos Henrique Pedroza

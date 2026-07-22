@@ -362,8 +362,7 @@
       mode: "cors",
       cache: "no-store",
       headers: {
-        Accept: "application/json",
-        "Cache-Control": "no-cache"
+        Accept: "application/json"
       },
       signal
     });
@@ -425,10 +424,10 @@
 
       resultadoCard.className = "resultado-card status-erro";
       resultadoIcone.textContent = "!";
-      resultadoCategoria.textContent = "Serviço temporariamente indisponível";
+      resultadoCategoria.textContent = "Falha de comunicação";
       resultadoTitulo.textContent = "Não foi possível concluir a consulta";
       resultadoMensagem.textContent =
-        "Tente novamente em alguns instantes ou fale com nosso atendimento pelo WhatsApp.";
+        "O Atlas não conseguiu acessar o serviço de consulta. Tente novamente ou fale com nosso atendimento.";
 
       resultadoDados.hidden = true;
       resultadoWhatsapp.textContent = "Falar com atendimento";

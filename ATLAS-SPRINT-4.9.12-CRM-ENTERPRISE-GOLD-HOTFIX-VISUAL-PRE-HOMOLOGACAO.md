@@ -1,4 +1,4 @@
-# Atlas — Sprint 4.9.13 — Hotfix Visual e Operacional
+# Atlas — Sprint 4.9.12 — Hotfix Visual e Operacional
 
 ## Objetivo
 Uniformizar os cards da Central de Clientes com o padrão visual aprovado do Dashboard, corrigir os ícones internos e tornar a exclusão lógica diretamente acessível na Ficha 360º.
@@ -12,7 +12,7 @@ Uniformizar os cards da Central de Clientes com o padrão visual aprovado do Das
 - Abertura direta do fluxo protegido de exclusão lógica;
 - Bloqueio quando houver certificado ativo;
 - Motivo, confirmação, Timeline e auditoria preservados;
-- Versão ABIS 4.9.13.
+- Versão ABIS 4.9.12.
 
 ## Arquitetura
 Nenhuma alteração na Atlas API, Apps Script, estrutura do banco ou IDs públicos.

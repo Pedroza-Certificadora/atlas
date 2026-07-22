@@ -1,4 +1,4 @@
-# Atlas — Sprint 4.9.13 — AEVS Consulta Segura Hotfix
+# Atlas — Sprint 4.9.14 — AEVS Consulta Segura Hotfix
 
 ## Objetivo
 Eliminar a permanência visual de dados de uma consulta anterior na Área do Cliente e tornar cada pesquisa isolada, validada e resistente a respostas atrasadas ou incompletas.
@@ -18,4 +18,4 @@ Eliminar a permanência visual de dados de uma consulta anterior na Área do Cli
 Nenhuma alteração na Atlas API, estrutura do Google Sheets, login, auditoria, backup, IDs públicos ou Apps Script.
 
 ## Versão
-4.9.13 — Pré-homologação.
+4.9.14 — Pré-homologação.
