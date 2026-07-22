@@ -405,6 +405,11 @@
   font-size: 13px;
 }
 
+.resultado-dados[hidden],
+.resultado-section[hidden] {
+  display: none !important;
+}
+
 .resultado-dados {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -30,6 +30,9 @@
   const resultadoWhatsapp = document.querySelector("#resultado-whatsapp");
   const novaConsulta = document.querySelector("#nova-consulta");
 
+  let consultaSequencia = 0;
+  let consultaController = null;
+
   if (!form || !inputDocumento) {
     return;
   }
@@ -113,6 +116,55 @@
     return padrao;
   }
 
+  function limparResultadoAnterior() {
+    resultadoSection.hidden = true;
+    resultadoDados.hidden = true;
+    resultadoCard.className = "resultado-card";
+    resultadoIcone.textContent = "";
+    resultadoCategoria.textContent = "Resultado da consulta";
+    resultadoTitulo.textContent = "";
+    resultadoMensagem.textContent = "";
+    resultadoTitular.textContent = "—";
+    resultadoDocumento.textContent = "—";
+    resultadoTipo.textContent = "—";
+    resultadoValidade.textContent = "—";
+    resultadoSituacao.textContent = "—";
+    resultadoPrazo.textContent = "—";
+    resultadoWhatsapp.textContent = "Falar com atendimento";
+    resultadoWhatsapp.href = `https://wa.me/${whatsapp}`;
+  }
+
+  function possuiDadosDeCertificado(dados) {
+    if (!dados || typeof dados !== "object") return false;
+
+    const chavesCertificado = [
+      "titularMascarado", "nomeMascarado", "titular", "nome", "razaoSocial",
+      "documentoMascarado", "cpfCnpjMascarado", "documento", "cpfCnpj",
+      "tipoCertificado", "tipo", "produto", "certificado",
+      "validadeFormatada", "validade", "dataValidade", "vencimento",
+      "diasRestantes", "dias", "diasParaVencer", "prazo", "situacao", "status"
+    ];
+
+    return chavesCertificado.some((chave) => {
+      const valor = dados[chave];
+      return valor !== undefined && valor !== null && String(valor).trim() !== "";
+    });
+  }
+
+  function retornoEncontrado(dados) {
+    const flags = ["encontrado", "found", "localizado"];
+    for (const chave of flags) {
+      if (Object.prototype.hasOwnProperty.call(dados || {}, chave)) {
+        const valor = String(dados[chave]).trim().toLowerCase();
+        return !["false", "0", "não", "nao", "no", "null", "undefined", ""].includes(valor);
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(dados || {}, "success") && dados.success === false) return false;
+    if (Object.prototype.hasOwnProperty.call(dados || {}, "ok") && dados.ok === false) return false;
+    return possuiDadosDeCertificado(dados);
+  }
+
   function normalizarStatus(valor, dias) {
     const status = String(valor || "").trim().toLowerCase();
 
@@ -178,17 +230,7 @@
   }
 
   function exibirResultado(dados, documentoDigitado) {
-    const encontradoRaw = primeiroValor(
-      dados,
-      ["encontrado", "found", "success", "localizado", "ok"],
-      true
-    );
-
-    const encontrado =
-      encontradoRaw !== false &&
-      String(encontradoRaw).toLowerCase() !== "false" &&
-      String(encontradoRaw).toLowerCase() !== "não" &&
-      String(encontradoRaw).toLowerCase() !== "nao";
+    const encontrado = retornoEncontrado(dados);
 
     if (!encontrado) {
       exibirNaoEncontrado(
@@ -305,7 +347,7 @@
     });
   }
 
-  async function consultar(documento) {
+  async function consultar(documento, signal) {
     if (!endpoint || endpoint.includes("__ENDPOINT")) {
       throw new Error("O endereço do serviço de consulta ainda não foi configurado.");
     }
@@ -320,8 +362,10 @@
       mode: "cors",
       cache: "no-store",
       headers: {
-        Accept: "application/json"
-      }
+        Accept: "application/json",
+        "Cache-Control": "no-cache"
+      },
+      signal
     });
 
     if (!resposta.ok) {
@@ -336,6 +380,8 @@
       throw new Error("O serviço retornou uma resposta inválida.");
     }
   }
+
+  limparResultadoAnterior();
 
   inputDocumento.addEventListener("input", () => {
     inputDocumento.value = formatarDocumento(inputDocumento.value);
@@ -360,14 +406,21 @@
       return;
     }
 
-    resultadoSection.hidden = true;
+    limparResultadoAnterior();
+    consultaSequencia += 1;
+    const sequenciaAtual = consultaSequencia;
+    consultaController?.abort();
+    consultaController = new AbortController();
     alternarCarregamento(true);
 
     try {
-      const retorno = await consultar(documento);
+      const retorno = await consultar(documento, consultaController.signal);
+      if (sequenciaAtual !== consultaSequencia) return;
+
       const dados = retorno?.dados || retorno?.data || retorno?.resultado || retorno;
       exibirResultado(dados, documento);
     } catch (erro) {
+      if (erro?.name === "AbortError" || sequenciaAtual !== consultaSequencia) return;
       console.error("AEVS:", erro);
 
       resultadoCard.className = "resultado-card status-erro";
@@ -387,13 +440,18 @@
       resultadoSection.hidden = false;
       resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
     } finally {
-      alternarCarregamento(false);
+      if (sequenciaAtual === consultaSequencia) {
+        alternarCarregamento(false);
+        consultaController = null;
+      }
     }
   });
 
   novaConsulta?.addEventListener("click", () => {
-    resultadoSection.hidden = true;
-    resultadoDados.hidden = false;
+    consultaSequencia += 1;
+    consultaController?.abort();
+    consultaController = null;
+    limparResultadoAnterior();
     inputDocumento.value = "";
     consentimento.checked = false;
     limparErro();

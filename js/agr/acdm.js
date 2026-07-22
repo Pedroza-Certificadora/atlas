@@ -1,4 +1,4 @@
-/* ACDM - Administracao segura de clientes | Atlas Core 4.9.12 */
+/* ACDM - Administracao segura de clientes | Atlas Core 4.9.13 */
 (function(w,d){"use strict";
 var current=null,clients=[],certificates=[],selected=null;
 function id(x){return d.getElementById(x)}

@@ -1,5 +1,5 @@
 /*
- * Atlas CRM Enterprise Gold - Sprint 4.9.12 FINAL
+ * Atlas CRM Enterprise Gold - Sprint 4.9.13 FINAL
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
 (function (w, d) {
@@ -212,7 +212,7 @@
 
   function auditView() {
     if (!state.current || !w.AtlasAPI || !w.AtlasAPI.audit) return;
-    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.12" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
+    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.13" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
   }
 
   function copySummary() {
@@ -289,7 +289,7 @@
     id("crm-bulk-export").addEventListener("click", function () {
       var selectedClients = state.clients.filter(function (client) { return state.selected.has(String(client.id)); });
       var csv = ["ID;NOME;DOCUMENTO;EMAIL;TELEFONE;SITUACAO"].concat(selectedClients.map(function (client) { return [client.id, client.nome, client.cpfCnpj, client.email, client.telefone || client.whatsapp, client.situacao || client.status].map(function (value) { return '"' + String(value || "").replace(/"/g, '""') + '"'; }).join(";"); })).join("\r\n");
-      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.12.csv"; link.click(); URL.revokeObjectURL(link.href);
+      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.13.csv"; link.click(); URL.revokeObjectURL(link.href);
     });
     id("crm-bulk-clear").addEventListener("click", function () { state.selected.clear(); d.querySelectorAll(".crm-row-selector input").forEach(function (input) { input.checked = false; }); updateBulk(); });
 
