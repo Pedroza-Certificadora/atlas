@@ -12,19 +12,19 @@
   <meta name="theme-color" content="#071b36">
   <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
   <link rel="manifest" href="../site.webmanifest">
-  <link rel="stylesheet" href="../css/style.css?v=4.9.2">
-  <link rel="stylesheet" href="../css/agr.css?v=4.9.2">
-  <link rel="stylesheet" href="../css/auth.css?v=4.9.2">
-  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.2">
-  <script src="../js/auth/config.js?v=4.9.2"></script>
-  <script src="../js/api/atlas-api.js?v=4.9.2"></script>
-  <script src="../js/auth/storage.js?v=4.9.2"></script>
-  <script src="../js/auth/crypto.js?v=4.9.2"></script>
-  <script src="../js/auth/users.mock.js?v=4.9.2"></script>
-  <script src="../js/auth/audit.js?v=4.9.2"></script>
-  <script src="../js/auth/permissions.js?v=4.9.2"></script>
-  <script src="../js/auth/session.js?v=4.9.2"></script>
-  <script src="../js/auth/guards.js?v=4.9.2"></script>
+  <link rel="stylesheet" href="../css/style.css?v=4.9.2.2">
+  <link rel="stylesheet" href="../css/agr.css?v=4.9.2.2">
+  <link rel="stylesheet" href="../css/auth.css?v=4.9.2.2">
+  <link rel="stylesheet" href="../css/crm-clientes.css?v=4.9.2.2">
+  <script src="../js/auth/config.js?v=4.9.2.2"></script>
+  <script src="../js/api/atlas-api.js?v=4.9.2.2"></script>
+  <script src="../js/auth/storage.js?v=4.9.2.2"></script>
+  <script src="../js/auth/crypto.js?v=4.9.2.2"></script>
+  <script src="../js/auth/users.mock.js?v=4.9.2.2"></script>
+  <script src="../js/auth/audit.js?v=4.9.2.2"></script>
+  <script src="../js/auth/permissions.js?v=4.9.2.2"></script>
+  <script src="../js/auth/session.js?v=4.9.2.2"></script>
+  <script src="../js/auth/guards.js?v=4.9.2.2"></script>
 </head>
 <body class="agr-page crm-clientes-page">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -60,7 +60,7 @@
             <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
             <a href="../auth/minha-conta.html"><span aria-hidden="true">○</span> Minha conta</a>
           </nav>
-          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.2</small></span></div>
+          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>ACMS 4.9.2.2</small></span></div>
         </aside>
 
         <div class="atlas-admin-content">
@@ -70,11 +70,14 @@
           </div>
 
           <div class="crm-kpi-grid" aria-label="Indicadores da Central de Clientes">
-            <article><span>◉</span><div><small>Total de clientes</small><strong id="crm-kpi-total">—</strong><em>Base oficial</em></div></article>
-            <article><span>✓</span><div><small>Clientes ativos</small><strong id="crm-kpi-active">—</strong><em>Cadastros operacionais</em></div></article>
-            <article><span>▤</span><div><small>Certificados ativos</small><strong id="crm-kpi-certificates">—</strong><em>Vínculos vigentes</em></div></article>
-            <article><span>!</span><div><small>Vencendo em 30 dias</small><strong id="crm-kpi-30">—</strong><em>Prioridade imediata</em></div></article>
-            <article><span>↻</span><div><small>Em renovação</small><strong id="crm-kpi-renewals">—</strong><em>Acompanhamento</em></div></article>
+            <button class="crm-kpi-card" type="button" data-kpi-filter="all" aria-label="Exibir todos os clientes"><span>◉</span><div><small>Total de clientes</small><strong id="crm-kpi-total">—</strong><em>Base oficial</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card" type="button" data-kpi-filter="active" aria-label="Exibir clientes ativos"><span>✓</span><div><small>Clientes ativos</small><strong id="crm-kpi-active">—</strong><em>Cadastros operacionais</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card" type="button" data-kpi-filter="certificate-active" aria-label="Exibir clientes com certificados ativos"><span>▤</span><div><small>Certificados ativos</small><strong id="crm-kpi-certificates">—</strong><em>Vínculos vigentes</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card crm-kpi-card-danger" type="button" data-kpi-filter="today" aria-label="Exibir certificados vencendo hoje"><span>!</span><div><small>Vencendo hoje</small><strong id="crm-kpi-today">—</strong><em>Atenção imediata</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card crm-kpi-card-warning" type="button" data-kpi-filter="30" aria-label="Exibir certificados vencendo em 30 dias"><span>◷</span><div><small>Vencendo em 30 dias</small><strong id="crm-kpi-30">—</strong><em>Próximos vencimentos</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card crm-kpi-card-success" type="button" data-kpi-filter="60" aria-label="Exibir certificados vencendo em 60 dias"><span>↻</span><div><small>Renovações em 60 dias</small><strong id="crm-kpi-60">—</strong><em>Previsão operacional</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card crm-kpi-card-danger" type="button" data-kpi-filter="expired" aria-label="Exibir certificados vencidos"><span>×</span><div><small>Certificados vencidos</small><strong id="crm-kpi-expired">—</strong><em>Regularização necessária</em></div><b aria-hidden="true">›</b></button>
+            <button class="crm-kpi-card crm-kpi-card-renewal" type="button" data-kpi-filter="renewal" aria-label="Exibir renovações em andamento"><span>↻</span><div><small>Em renovação</small><strong id="crm-kpi-renewals">—</strong><em>Acompanhamento</em></div><b aria-hidden="true">›</b></button>
           </div>
 
           <section class="crm-panel" aria-labelledby="crm-list-title">
@@ -90,7 +93,10 @@
             <div class="crm-filter-bar" id="crm-filters" aria-label="Filtros rápidos">
               <button class="active" data-filter="all" type="button">Todos <b id="count-all">0</b></button>
               <button data-filter="active" type="button">Ativos <b id="count-active">0</b></button>
+              <button data-filter="certificate-active" type="button">Certificados ativos <b id="count-certificate-active">0</b></button>
               <button data-filter="inactive" type="button">Inativos <b id="count-inactive">0</b></button>
+              <button data-filter="today" type="button">Vence hoje <b id="count-today">0</b></button>
+              <button data-filter="expired" type="button">Vencidos <b id="count-expired">0</b></button>
               <button data-filter="30" type="button">30 dias <b id="count-30">0</b></button>
               <button data-filter="60" type="button">60 dias <b id="count-60">0</b></button>
               <button data-filter="90" type="button">90 dias <b id="count-90">0</b></button>
@@ -164,12 +170,12 @@
     </div>
   </aside>
 
-  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.2</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
+  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 • ACMS Interface • v4.9.2.2</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
   <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden><div class="auth-session-dialog"><span class="auth-card-badge">Segurança da sessão</span><h2 id="auth-session-title">Sua sessão está prestes a expirar</h2><p>Por segurança, acessos inativos são encerrados automaticamente.</p><div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div><div class="auth-session-actions"><button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button><button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button></div></div></div>
-  <script src="../js/auth/auth.js?v=4.9.2"></script>
-  <script src="../js/auth/protected-ui.js?v=4.9.2"></script>
-  <script src="../js/app.js?v=4.9.2" defer></script>
-  <script src="../js/agr/clientes.js?v=4.9.2" defer></script>
-  <script src="../js/build-info.js?v=4.9.2.1" defer></script>
+  <script src="../js/auth/auth.js?v=4.9.2.2"></script>
+  <script src="../js/auth/protected-ui.js?v=4.9.2.2"></script>
+  <script src="../js/app.js?v=4.9.2.2" defer></script>
+  <script src="../js/agr/clientes.js?v=4.9.2.2" defer></script>
+  <script src="../js/build-info.js?v=4.9.2.2" defer></script>
 </body>
 </html>
