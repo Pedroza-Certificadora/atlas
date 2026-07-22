@@ -34,7 +34,7 @@
         } catch (error) { return ""; }
       })(),
       client: {
-        version: config.version || "4.7.4",
+        version: config.version || "4.8.1",
         path: window.location.pathname,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo"
       }
@@ -78,6 +78,19 @@
     listCertificates: function () { return request("certificates.list"); },
     createCertificate: function (data) { return request("certificates.create", data); },
     updateCertificate: function (id, data) { return request("certificates.update", { id: id, data: data }); },
-    dashboard: function () { return request("dashboard.summary"); }
+    dashboard: function () { return request("dashboard.summary"); },
+    getClient: function (id) { return request("clients.get", { id: id }); },
+    listTimeline: function (filters) { return request("timeline.list", filters || {}); },
+    addTimeline: function (data) { return request("timeline.add", data); },
+    listCommunications: function (filters) { return request("communications.list", filters || {}); },
+    createCommunication: function (data) { return request("communications.create", data); },
+    listModels: function () { return request("models.list"); },
+    listCampaigns: function () { return request("campaigns.list"); },
+    createCampaign: function (data) { return request("campaigns.create", data); },
+    previewCampaign: function (filtro) { return request("campaigns.preview", { filtro: filtro || {} }); },
+    generateInvite: function (data) { return request("invites.generate", data); },
+    validateInvite: function (token) { return request("invites.validate", { token: token }); },
+    listSectors: function () { return request("sectors.list"); },
+    listTags: function () { return request("tags.list"); }
   });
 })(window);

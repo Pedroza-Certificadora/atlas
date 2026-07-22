@@ -3,17 +3,30 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.7.4';
+const ATLAS_VERSION = '4.8.1';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
-  CLIENTES: ['ID','CPF_CNPJ','NOME','EMAIL','TELEFONE','SITUACAO','HISTORICO_JSON','RESPONSAVEL','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
-  CERTIFICADOS: ['ID','CLIENTE_ID','TIPO','AUTORIDADE_CERTIFICADORA','NUMERO_SERIE','EMISSAO','VENCIMENTO','STATUS_CERTIFICADO','HISTORICO_RENOVACOES_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  CLIENTES: ['ID','CPF_CNPJ','NOME','EMAIL','TELEFONE','SITUACAO','HISTORICO_JSON','RESPONSAVEL','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR','EMPRESA','EMAIL_SECUNDARIO','WHATSAPP','ENDERECO','NUMERO','COMPLEMENTO','BAIRRO','CIDADE','UF','CEP','SETOR_ID','SUBSETOR_ID','HORARIO_PREFERENCIAL','PRIORIDADE'],
+  CERTIFICADOS: ['ID','CLIENTE_ID','TIPO','AUTORIDADE_CERTIFICADORA','NUMERO_SERIE','EMISSAO','VENCIMENTO','STATUS_CERTIFICADO','HISTORICO_RENOVACOES_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR','MODELO','RENOVADO_DE','EM_RENOVACAO'],
   PERMISSOES: ['ID','PERFIL','PERMISSAO','ATIVO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   AUDITORIA: ['ID','USUARIO_ID','USUARIO_LOGIN','ACAO','DETALHES_JSON','CAMINHO','USER_AGENT','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   CONFIGURACOES: ['ID','CHAVE','VALOR_JSON','DESCRICAO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   AGENDA: ['ID','CLIENTE_ID','TITULO','INICIO','FIM','RESPONSAVEL','SITUACAO','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
-  LOGS: ['ID','NIVEL','ORIGEM','MENSAGEM','CONTEXTO_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR']
+  LOGS: ['ID','NIVEL','ORIGEM','MENSAGEM','CONTEXTO_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  TIMELINE: ['ID','CLIENTE_ID','TIPO_EVENTO','TITULO','DESCRICAO','ORIGEM','USUARIO_ID','USUARIO_LOGIN','DADOS_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  COMUNICACOES: ['ID','CLIENTE_ID','CAMPANHA_ID','MODELO_ID','CANAL','DESTINO','ASSUNTO','CONTEUDO_HTML','STATUS_ENVIO','TENTATIVAS','ERRO','AGENDADO_PARA','ENVIADO_EM','ENTREGUE_EM','LIDO_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  MODELOS_EMAIL: ['ID','NOME','TIPO','ASSUNTO','HTML','VARIAVEIS_JSON','ATIVO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  CAMPANHAS: ['ID','NOME','DESCRICAO','CANAL','MODELO_ID','FILTRO_JSON','SITUACAO','AGENDADO_PARA','INICIADO_EM','FINALIZADO_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  CAMPANHA_DESTINATARIOS: ['ID','CAMPANHA_ID','CLIENTE_ID','DESTINO','CANAL','STATUS_ENVIO','COMUNICACAO_ID','ERRO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  PREFERENCIAS_COMUNICACAO: ['ID','CLIENTE_ID','AVISO_VENCIMENTO','CAMPANHAS','NOVIDADES','COMUNICADOS_GERAIS','EMAIL','WHATSAPP','HORARIO_PREFERENCIAL','CONSENTIMENTO_EM','ORIGEM_CONSENTIMENTO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  CONVITES: ['ID','CLIENTE_ID','USUARIO_ID','EMAIL','TOKEN_HASH','EXPIRA_EM','ACEITO_EM','SITUACAO','TENTATIVAS','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  FILA_ENVIO: ['ID','COMUNICACAO_ID','TIPO','DESTINO','PRIORIDADE','SITUACAO','TENTATIVAS','PROXIMA_EXECUCAO','ULTIMO_ERRO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  SETORES: ['ID','NOME','DESCRICAO','ORDEM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  SUBSETORES: ['ID','SETOR_ID','NOME','DESCRICAO','ORDEM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  TAGS: ['ID','NOME','DESCRICAO','COR','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  CLIENTE_TAGS: ['ID','CLIENTE_ID','TAG_ID','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  IA_PROFILE: ['ID','CLIENTE_ID','PERFIL_JSON','ULTIMA_ANALISE_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR']
 });
 
 function doGet() { return json_({ok:true,data:{service:'Atlas API',version:ATLAS_VERSION,status:'online'}}); }
@@ -34,11 +47,12 @@ function configurarAtlasDataFoundation() {
   Object.keys(SHEETS).forEach(name => ensureSheet_(ss,name,SHEETS[name]));
   seedConfig_();
   seedUsers_();
+  seedCrmCatalogs_();
   return 'Atlas Data Foundation ' + ATLAS_VERSION + ' configurada com sucesso.';
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -59,6 +73,19 @@ function route_(action,payload,client,authToken) {
     case 'certificates.update': return updateCertificate_(payload);
     case 'audit.record': return recordAudit_(payload,client);
     case 'dashboard.summary': return dashboardSummary_();
+    case 'clients.get': return getClient_(payload);
+    case 'timeline.list': return listTimeline_(payload);
+    case 'timeline.add': return addTimeline_(payload);
+    case 'communications.list': return listCommunications_(payload);
+    case 'communications.create': return createCommunication_(payload);
+    case 'models.list': return rows_('MODELOS_EMAIL');
+    case 'campaigns.list': return rows_('CAMPANHAS');
+    case 'campaigns.create': return createCampaign_(payload);
+    case 'campaigns.preview': return previewCampaign_(payload);
+    case 'invites.generate': return generateInvite_(payload);
+    case 'invites.validate': return validateInvite_(payload);
+    case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
+    case 'tags.list': return rows_('TAGS');
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
   }
 }
@@ -132,7 +159,7 @@ function createCertificate_(data) {
   return publicCertificate_(findById_('CERTIFICADOS',id));
 }
 function updateCertificate_(p) { const d=p.data||{};return updateRow_('CERTIFICADOS',p.id,{TIPO:String(d.tipo||''),AUTORIDADE_CERTIFICADORA:String(d.autoridadeCertificadora||''),NUMERO_SERIE:String(d.numeroSerie||''),EMISSAO:String(d.emissao||''),VENCIMENTO:String(d.vencimento||''),STATUS_CERTIFICADO:String(d.statusCertificado||'ATIVO')},d.actor||'ATLAS',publicCertificate_); }
-function publicClient_(r){return{id:r.ID,cpfCnpj:String(r.CPF_CNPJ||''),nome:String(r.NOME||''),email:String(r.EMAIL||''),telefone:String(r.TELEFONE||''),situacao:String(r.SITUACAO||''),responsavel:String(r.RESPONSAVEL||''),observacoes:String(r.OBSERVACOES||''),active:String(r.STATUS||'').toUpperCase()==='ATIVO'};}
+function publicClient_(r){return{id:r.ID,cpfCnpj:String(r.CPF_CNPJ||''),nome:String(r.NOME||''),empresa:String(r.EMPRESA||''),email:String(r.EMAIL||''),emailSecundario:String(r.EMAIL_SECUNDARIO||''),telefone:String(r.TELEFONE||''),whatsapp:String(r.WHATSAPP||''),endereco:String(r.ENDERECO||''),numero:String(r.NUMERO||''),complemento:String(r.COMPLEMENTO||''),bairro:String(r.BAIRRO||''),cidade:String(r.CIDADE||''),uf:String(r.UF||''),cep:String(r.CEP||''),setorId:String(r.SETOR_ID||''),subsetorId:String(r.SUBSETOR_ID||''),horarioPreferencial:String(r.HORARIO_PREFERENCIAL||''),prioridade:String(r.PRIORIDADE||'NORMAL'),situacao:String(r.SITUACAO||''),responsavel:String(r.RESPONSAVEL||''),observacoes:String(r.OBSERVACOES||''),active:String(r.STATUS||'').toUpperCase()==='ATIVO'};}
 function publicCertificate_(r){return{id:r.ID,clienteId:String(r.CLIENTE_ID||''),tipo:String(r.TIPO||''),autoridadeCertificadora:String(r.AUTORIDADE_CERTIFICADORA||''),numeroSerie:String(r.NUMERO_SERIE||''),emissao:r.EMISSAO,vencimento:r.VENCIMENTO,statusCertificado:String(r.STATUS_CERTIFICADO||''),active:String(r.STATUS||'').toUpperCase()==='ATIVO'};}
 
 function recordAudit_(p,client) {
@@ -145,6 +172,85 @@ function dashboardSummary_() {
   const limit=new Date();limit.setDate(limit.getDate()+60);
   const renewalsDue=certs.filter(r=>{const d=new Date(r.VENCIMENTO);return !isNaN(d.getTime())&&d>=new Date()&&d<=limit&&String(r.STATUS).toUpperCase()==='ATIVO';}).length;
   return {users:users.length,activeClients:clients.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,activeAgr:users.filter(r=>String(r.PERFIL).toUpperCase()==='AGR'&&String(r.STATUS).toUpperCase()==='ATIVO').length,certificates:certs.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,renewalsDue:renewalsDue,recentAudit:audit.slice(-10).reverse()};
+}
+
+
+function getClient_(p) {
+  const client=findById_('CLIENTES',p.id);
+  if(!client) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+  return {
+    cliente:publicClient_(client),
+    certificados:rows_('CERTIFICADOS').filter(r=>String(r.CLIENTE_ID)===String(p.id)).map(publicCertificate_),
+    timeline:rows_('TIMELINE').filter(r=>String(r.CLIENTE_ID)===String(p.id)).slice(-100).reverse(),
+    comunicacoes:rows_('COMUNICACOES').filter(r=>String(r.CLIENTE_ID)===String(p.id)).slice(-100).reverse(),
+    tags:rows_('CLIENTE_TAGS').filter(r=>String(r.CLIENTE_ID)===String(p.id))
+  };
+}
+function listTimeline_(p) {
+  let items=rows_('TIMELINE');
+  if(p.clienteId) items=items.filter(r=>String(r.CLIENTE_ID)===String(p.clienteId));
+  if(p.tipoEvento) items=items.filter(r=>String(r.TIPO_EVENTO)===String(p.tipoEvento));
+  return items.slice(-Number(p.limit||200)).reverse();
+}
+function addTimeline_(p) {
+  if(!p.clienteId||!findById_('CLIENTES',p.clienteId)) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+  const now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('TIMELINE','TML');
+  appendObject_('TIMELINE',{ID:id,CLIENTE_ID:String(p.clienteId),TIPO_EVENTO:String(p.tipoEvento||'ATIVIDADE'),TITULO:String(p.titulo||'Atividade'),DESCRICAO:String(p.descricao||''),ORIGEM:String(p.origem||'CRM'),USUARIO_ID:String(p.usuarioId||''),USUARIO_LOGIN:actor,DADOS_JSON:JSON.stringify(p.dados||{}),DATA_HORA:now,STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  return findById_('TIMELINE',id);
+}
+function listCommunications_(p) {
+  let items=rows_('COMUNICACOES');
+  if(p.clienteId) items=items.filter(r=>String(r.CLIENTE_ID)===String(p.clienteId));
+  return items.slice(-Number(p.limit||200)).reverse();
+}
+function createCommunication_(p) {
+  if(!p.clienteId||!findById_('CLIENTES',p.clienteId)) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+  const now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('COMUNICACOES','COM');
+  appendObject_('COMUNICACOES',{ID:id,CLIENTE_ID:String(p.clienteId),CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:String(p.modeloId||''),CANAL:String(p.canal||'EMAIL').toUpperCase(),DESTINO:String(p.destino||''),ASSUNTO:String(p.assunto||''),CONTEUDO_HTML:String(p.conteudoHtml||''),STATUS_ENVIO:'RASCUNHO',TENTATIVAS:0,ERRO:'',AGENDADO_PARA:p.agendadoPara||'',ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  addTimeline_({clienteId:p.clienteId,tipoEvento:'COMUNICACAO_CRIADA',titulo:'Comunicacao preparada',descricao:String(p.assunto||p.canal||''),origem:'CENTRO_COMUNICACAO',actor:actor,dados:{comunicacaoId:id}});
+  return findById_('COMUNICACOES',id);
+}
+function createCampaign_(p) {
+  if(!String(p.nome||'').trim()) throw apiError_('VALIDATION','Informe o nome da campanha.');
+  const now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('CAMPANHAS','CAM');
+  appendObject_('CAMPANHAS',{ID:id,NOME:String(p.nome).trim(),DESCRICAO:String(p.descricao||''),CANAL:String(p.canal||'EMAIL').toUpperCase(),MODELO_ID:String(p.modeloId||''),FILTRO_JSON:JSON.stringify(p.filtro||{}),SITUACAO:'RASCUNHO',AGENDADO_PARA:p.agendadoPara||'',INICIADO_EM:'',FINALIZADO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  return findById_('CAMPANHAS',id);
+}
+function previewCampaign_(p) {
+  const f=p.filtro||{};
+  let clients=rows_('CLIENTES').filter(r=>String(r.STATUS).toUpperCase()==='ATIVO');
+  if(f.setorId) clients=clients.filter(r=>String(r.SETOR_ID)===String(f.setorId));
+  if(f.subsetorId) clients=clients.filter(r=>String(r.SUBSETOR_ID)===String(f.subsetorId));
+  if(Array.isArray(f.clienteIds)&&f.clienteIds.length) clients=clients.filter(r=>f.clienteIds.indexOf(String(r.ID))>=0);
+  const valid=clients.filter(r=>normalize_(r.EMAIL));
+  return {clientes:clients.length,emailsValidos:valid.length,semEmail:clients.length-valid.length,destinatarios:valid.map(r=>({id:r.ID,nome:r.NOME,email:r.EMAIL}))};
+}
+function generateInvite_(p) {
+  const client=findById_('CLIENTES',p.clienteId);
+  if(!client) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+  const token=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');
+  const hash=sha256Hex_(token), now=new Date(), expiry=new Date(now.getTime()+Number(p.ttlHours||72)*3600000), actor=String(p.actor||'ATLAS'), id=nextId_('CONVITES','CNV');
+  appendObject_('CONVITES',{ID:id,CLIENTE_ID:client.ID,USUARIO_ID:String(p.usuarioId||''),EMAIL:String(p.email||client.EMAIL||''),TOKEN_HASH:hash,EXPIRA_EM:expiry,ACEITO_EM:'',SITUACAO:'PENDENTE',TENTATIVAS:0,STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  addTimeline_({clienteId:client.ID,tipoEvento:'CONVITE_GERADO',titulo:'Convite de primeiro acesso gerado',descricao:'Convite valido ate '+expiry.toISOString(),origem:'PORTAL',actor:actor,dados:{conviteId:id}});
+  return {id:id,token:token,expiraEm:expiry};
+}
+function validateInvite_(p) {
+  const hash=sha256Hex_(String(p.token||''));
+  const invite=rows_('CONVITES').find(r=>String(r.TOKEN_HASH)===hash&&String(r.STATUS).toUpperCase()==='ATIVO');
+  if(!invite) throw apiError_('INVALID_INVITE','Convite invalido.');
+  if(String(invite.SITUACAO).toUpperCase()!=='PENDENTE') throw apiError_('INVALID_INVITE','Convite ja utilizado ou cancelado.');
+  if(new Date(invite.EXPIRA_EM)<new Date()) throw apiError_('EXPIRED_INVITE','Convite expirado.');
+  return {valido:true,conviteId:invite.ID,clienteId:invite.CLIENTE_ID,email:invite.EMAIL,expiraEm:invite.EXPIRA_EM};
+}
+function sha256Hex_(value){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(value),Utilities.Charset.UTF_8).map(b=>(b+256)%256).map(b=>('0'+b.toString(16)).slice(-2)).join('');}
+function seedCrmCatalogs_() {
+  const now=new Date();
+  if(!rows_('SETORES').length){
+    ['Medicina','Advocacia','Condominio','Contabilidade','Engenharia','Comercio','Servicos','Pessoa Fisica','Outros'].forEach((nome,i)=>appendObject_('SETORES',{ID:'SET-'+String(i+1).padStart(6,'0'),NOME:nome,DESCRICAO:'Setor padrao ACMS',ORDEM:i+1,STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'SETUP-4.8.1',ALTERADO_EM:now,ALTERADO_POR:'SETUP-4.8.1'}));
+  }
+  if(!rows_('TAGS').length){
+    ['Cliente VIP','Parceiro','Recorrente','Renovacao Prioritaria','Origem Google','Origem Indicacao','Origem Instagram'].forEach((nome,i)=>appendObject_('TAGS',{ID:'TAG-'+String(i+1).padStart(6,'0'),NOME:nome,DESCRICAO:'Tag padrao ACMS',COR:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'SETUP-4.8.1',ALTERADO_EM:now,ALTERADO_POR:'SETUP-4.8.1'}));
+  }
 }
 
 function createSession_(user) {
@@ -169,7 +275,19 @@ function seedUsers_() {
 
 function rows_(name) { const s=sheet_(name), values=s.getDataRange().getValues(); if(values.length<2)return[]; const h=values[0]; return values.slice(1).filter(r=>r.some(v=>v!=='' )).map(r=>h.reduce((o,k,i)=>(o[k]=r[i],o),{})); }
 function sheet_(name) { const s=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name); if(!s) throw apiError_('SHEET_NOT_FOUND','Aba '+name+' nao encontrada. Execute configurarAtlasDataFoundation().'); return s; }
-function ensureSheet_(ss,name,headers) { let s=ss.getSheetByName(name); if(!s)s=ss.insertSheet(name); if(s.getLastRow()===0)s.getRange(1,1,1,headers.length).setValues([headers]); else s.getRange(1,1,1,headers.length).setValues([headers]); s.setFrozenRows(1); s.getRange(1,1,1,headers.length).setFontWeight('bold'); }
+function ensureSheet_(ss,name,headers) {
+  let s=ss.getSheetByName(name);
+  if(!s) s=ss.insertSheet(name);
+  const existing=s.getLastColumn()>0?s.getRange(1,1,1,s.getLastColumn()).getValues()[0].filter(String):[];
+  if(!existing.length){
+    s.getRange(1,1,1,headers.length).setValues([headers]);
+  } else {
+    const missing=headers.filter(h=>existing.indexOf(h)===-1);
+    if(missing.length) s.getRange(1,existing.length+1,1,missing.length).setValues([missing]);
+  }
+  s.setFrozenRows(1);
+  s.getRange(1,1,1,s.getLastColumn()).setFontWeight('bold');
+}
 function appendObject_(name,obj) { const s=sheet_(name), headers=s.getRange(1,1,1,s.getLastColumn()).getValues()[0]; s.appendRow(headers.map(h=>obj[h]!==undefined?obj[h]:'')); }
 function findById_(name,id) { return rows_(name).find(r=>String(r.ID)===String(id))||null; }
 function updateRow_(name,id,changes,actor,mapper) { const s=sheet_(name), data=s.getDataRange().getValues(), headers=data[0], idCol=headers.indexOf('ID'); for(let i=1;i<data.length;i++){ if(String(data[i][idCol])===String(id)){ Object.keys(changes).forEach(k=>{const c=headers.indexOf(k);if(c>=0)s.getRange(i+1,c+1).setValue(changes[k]);}); ['ALTERADO_EM','ALTERADO_POR'].forEach((k,j)=>{const c=headers.indexOf(k);if(c>=0)s.getRange(i+1,c+1).setValue(j===0?new Date():actor);}); const row=headers.reduce((o,k,c)=>(o[k]=s.getRange(i+1,c+1).getValue(),o),{}); return mapper?mapper(row):row; }} throw apiError_('NOT_FOUND','Registro nao encontrado.'); }

@@ -1,4 +1,4 @@
-/* Atlas Data Foundation v1.0 - Dashboard Administrativo 4.7.4 */
+/* Atlas Data Foundation v1.0 - Dashboard Administrativo 4.8.1 */
 (function(window,document){
   "use strict";
   function safeUsers(){try{return window.AtlasAuth.userProvider.list();}catch(e){return[];}}
