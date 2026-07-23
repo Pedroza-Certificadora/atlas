@@ -6,8 +6,8 @@
   <meta name="description" content="Atlas Communication Center Premium da Pedroza Certificadora.">
   <meta name="author" content="Marcos Henrique Pedroza"><meta name="designer" content="Marcos Henrique Pedroza"><meta name="robots" content="noindex,nofollow">
   <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
-  <link rel="stylesheet" href="../css/style.css?v=5.0.2"><link rel="stylesheet" href="../css/agr.css?v=5.0.2"><link rel="stylesheet" href="../css/auth.css?v=5.0.2"><link rel="stylesheet" href="../css/acc.css?v=5.0.2">
-  <script src="../js/auth/config.js?v=5.0.2"></script><script src="../js/api/atlas-api.js?v=5.0.2"></script><script src="../js/auth/storage.js?v=5.0.2"></script><script src="../js/auth/crypto.js?v=5.0.2"></script><script src="../js/auth/users.mock.js?v=5.0.2"></script><script src="../js/auth/audit.js?v=5.0.2"></script><script src="../js/auth/permissions.js?v=5.0.2"></script><script src="../js/auth/session.js?v=5.0.2"></script><script src="../js/auth/guards.js?v=5.0.2"></script>
+  <link rel="stylesheet" href="../css/style.css?v=5.0.4"><link rel="stylesheet" href="../css/agr.css?v=5.0.4"><link rel="stylesheet" href="../css/auth.css?v=5.0.4"><link rel="stylesheet" href="../css/acc.css?v=5.0.4">
+  <script src="../js/auth/config.js?v=5.0.4"></script><script src="../js/api/atlas-api.js?v=5.0.4"></script><script src="../js/auth/storage.js?v=5.0.4"></script><script src="../js/auth/crypto.js?v=5.0.4"></script><script src="../js/auth/users.mock.js?v=5.0.4"></script><script src="../js/auth/audit.js?v=5.0.4"></script><script src="../js/auth/permissions.js?v=5.0.4"></script><script src="../js/auth/session.js?v=5.0.4"></script><script src="../js/auth/guards.js?v=5.0.4"></script>
 </head>
 <body class="agr-page acc-page">
 <header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img src="../images/logo/pedroza-certificadora-header.svg?v=3.9.4" alt="Pedroza Certificadora" width="279" height="154"></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-principal" aria-label="Abrir menu"><span></span><span></span><span></span></button><nav class="main-nav" id="menu-principal"><a href="../">Início</a><a href="../cliente/">Área do Cliente</a><a class="active" href="./">Área AGR</a><a href="clientes.html">Clientes</a><a href="comunicacao.html">Comunicação</a></nav><div class="header-actions"><div class="auth-user-chip"><span><strong data-auth-user-name>Usuário Atlas</strong><small data-auth-user-role>Perfil</small></span></div><a class="button button-outline auth-logout-button" href="../auth/logout.html" data-auth-logout>Sair</a></div></div></header>
@@ -16,7 +16,7 @@
 <div class="atlas-admin-content acc-content">
 <div class="acc-heading"><div><span class="agr-eyebrow">ACC • Atlas Communication Center</span><h1>Central de Comunicação</h1><p>Crie comunicações profissionais, visualize o resultado final e acompanhe cada interação registrada no Atlas.</p></div><div class="acc-heading-actions"><button id="acc-refresh" class="acc-secondary" type="button">Atualizar dados</button><button id="acc-new" class="acc-primary acc-primary-inline" type="button">+ Novo e-mail</button></div></div>
 <section class="acc-kpis" aria-label="Indicadores"><article><div class="acc-kpi-icon">@</div><div><small>Clientes com e-mail</small><strong id="acc-kpi-email">—</strong><span>aptos para envio</span></div></article><article><div class="acc-kpi-icon">✓</div><div><small>Enviados</small><strong id="acc-kpi-sent">—</strong><span>histórico registrado</span></div></article><article><div class="acc-kpi-icon">!</div><div><small>Com erro</small><strong id="acc-kpi-error">—</strong><span>requerem atenção</span></div></article><article><div class="acc-kpi-icon">▤</div><div><small>Templates</small><strong id="acc-kpi-models">—</strong><span>modelos ativos</span></div></article></section>
-<nav class="acc-tabs" aria-label="Seções do ACC"><button class="active" data-acc-tab="compose" type="button">Novo e-mail</button><button data-acc-tab="history" type="button">Histórico</button><button data-acc-tab="campaigns" type="button">Campanhas</button></nav>
+<nav class="acc-tabs" aria-label="Seções do ACC"><button class="active" data-acc-tab="compose" type="button">Novo e-mail</button><button data-acc-tab="history" type="button">Histórico</button><button data-acc-tab="campaigns" type="button">Campanhas</button><button data-acc-tab="automation" type="button">Automação</button></nav>
 <section class="acc-panel active" data-acc-panel="compose">
 <div class="acc-compose-layout">
 <section class="acc-card acc-compose"><header><span>Envio manual premium</span><h2>Preparar comunicação</h2><p>Escolha o cliente, personalize o conteúdo e confira a prévia antes de enviar.</p></header><form id="acc-form">
@@ -30,7 +30,32 @@
 </div></section>
 <section class="acc-panel" data-acc-panel="history"><section class="acc-card acc-history"><header><span>Rastreabilidade</span><h2>Histórico de comunicações</h2><p>Timeline completa de envios, erros e rascunhos registrados na Atlas Data Foundation.</p></header><div class="acc-filters"><input id="acc-search" type="search" placeholder="Buscar cliente, assunto ou destino"><select id="acc-filter"><option value="all">Todos os status</option><option value="ENVIADO">Enviados</option><option value="ERRO">Com erro</option><option value="RASCUNHO">Rascunhos</option></select></div><div id="acc-history-list" class="acc-history-list"><div class="acc-empty">Carregando histórico...</div></div></section></section>
 <section class="acc-panel" data-acc-panel="campaigns"><div class="acc-campaign-grid"><section class="acc-card"><header><span>Campanhas</span><h2>Nova campanha</h2><p>Prepare uma campanha segmentada e deixe-a registrada como rascunho para uma etapa futura de disparo.</p></header><form id="acc-campaign-form"><label>Nome da campanha<input id="acc-campaign-name" required maxlength="120" placeholder="Ex.: Renovação agosto 2026"></label><label>Descrição<textarea id="acc-campaign-description" rows="4" placeholder="Objetivo e público desta campanha"></textarea></label><label>Template<select id="acc-campaign-model"><option value="">Selecione um template</option></select></label><div class="acc-actions"><button id="acc-campaign-preview" class="acc-secondary" type="button">Calcular público</button><button class="acc-primary" type="submit">Salvar campanha</button></div><div id="acc-campaign-status" class="acc-status" role="status"></div></form></section><section class="acc-card"><header><span>Visão operacional</span><h2>Campanhas registradas</h2><p>Planejamento preservado na Atlas Data Foundation.</p></header><div id="acc-campaign-summary" class="acc-campaign-summary"><div class="acc-empty">Carregando campanhas...</div></div></section></div></section>
-</div></div></section></main>
+</div></div></section>
+<section class="acc-panel" data-acc-panel="automation">
+  <div class="acc-automation-grid">
+    <section class="acc-card">
+      <header><span>ACC Automation Engine</span><h2>Envio automático</h2><p>Configure o modo de homologação antes de ativar os envios reais.</p></header>
+      <form id="acc-automation-form">
+        <label class="acc-switch-row"><span><strong>Automação ativa</strong><small>Permite a execução pelo gatilho diário.</small></span><input id="acc-auto-enabled" type="checkbox"></label>
+        <label class="acc-switch-row"><span><strong>Modo de homologação</strong><small>Redireciona todos os avisos para o e-mail de teste.</small></span><input id="acc-auto-test-mode" type="checkbox" checked></label>
+        <label>E-mail de teste<input id="acc-auto-test-email" type="email" placeholder="seuemail@gmail.com"></label>
+        <div class="acc-two-cols"><label>Limite diário<input id="acc-auto-daily-limit" type="number" min="1" max="500" value="40"></label><label>Lote por execução<input id="acc-auto-batch-size" type="number" min="1" max="100" value="20"></label></div>
+        <label>E-mail para resposta<input id="acc-auto-reply-to" type="email" value="certificadodigital@pedroza.com.br"></label>
+        <div class="acc-actions"><button class="acc-secondary" id="acc-auto-test" type="button">Enviar teste</button><button class="acc-primary" type="submit">Salvar configuração</button></div>
+        <div id="acc-auto-status" class="acc-status" role="status"></div>
+      </form>
+    </section>
+    <section class="acc-card">
+      <header><span>Operação</span><h2>Status da automação</h2><p>Monitore fila, cota do Gmail e gatilhos instalados.</p></header>
+      <div class="acc-auto-kpis"><div><small>Fila pendente</small><strong id="acc-auto-pending">0</strong></div><div><small>Erros</small><strong id="acc-auto-errors">0</strong></div><div><small>Enviados hoje</small><strong id="acc-auto-sent">0</strong></div><div><small>Cota restante</small><strong id="acc-auto-quota">0</strong></div></div>
+      <div id="acc-auto-trigger-state" class="acc-trigger-state">Gatilhos ainda não verificados.</div>
+      <div class="acc-actions acc-actions-stack"><button class="acc-primary" id="acc-auto-install" type="button">Instalar gatilhos</button><button class="acc-secondary" id="acc-auto-run" type="button">Processar agora</button><button class="acc-danger" id="acc-auto-remove" type="button">Remover gatilhos</button></div>
+      <div class="acc-auto-note"><strong>Marcos automáticos:</strong> 90, 60, 30, 15 e 7 dias, vencimento hoje e certificado vencido.</div>
+    </section>
+  </div>
+</section>
+
+</main>
 <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 5.0 • ACC Premium • v5.0.2</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
-<script src="../js/auth/auth.js?v=5.0.2"></script><script src="../js/auth/protected-ui.js?v=5.0.2"></script><script src="../js/app.js?v=5.0.2" defer></script><script src="../js/agr/acc.js?v=5.0.2" defer></script><script src="../js/core/atlas-core.js?v=5.0.2" defer></script><script src="../js/build-info.js?v=5.0.2" defer></script>
+<script src="../js/auth/auth.js?v=5.0.4"></script><script src="../js/auth/protected-ui.js?v=5.0.4"></script><script src="../js/app.js?v=5.0.4" defer></script><script src="../js/agr/acc.js?v=5.0.4" defer></script><script src="../js/core/atlas-core.js?v=5.0.4" defer></script><script src="../js/build-info.js?v=5.0.4" defer></script>
 </body></html>

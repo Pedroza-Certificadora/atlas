@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.1';
+const ATLAS_VERSION = '5.0.4';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -65,7 +65,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.test','automation.run','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -97,6 +97,12 @@ function route_(action,payload,client,authToken) {
     case 'campaigns.list': return rows_('CAMPANHAS');
     case 'campaigns.create': return createCampaign_(payload);
     case 'campaigns.preview': return previewCampaign_(payload);
+    case 'automation.status': return automationStatus_();
+    case 'automation.configure': return configureAutomation_(payload);
+    case 'automation.test': return sendAutomationTest_(payload,client);
+    case 'automation.run': return runAccAutomation_(payload);
+    case 'automation.installTriggers': return installAccAutomationTriggers_();
+    case 'automation.removeTriggers': return removeAccAutomationTriggers_();
     case 'invites.generate': return generateInvite_(payload);
     case 'invites.validate': return validateInvite_(payload);
     case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
@@ -873,3 +879,131 @@ function writeImportReport_(report) {
   sh.autoResizeColumns(1,2); sh.setFrozenRows(1);
   return report;
 }
+
+
+/* Sprint 5.0.4 - ACC Automation Engine */
+const ACC_AUTOMATION_DEFAULTS = Object.freeze({
+  enabled:false,
+  testMode:true,
+  testRecipient:'',
+  dailyLimit:40,
+  batchSize:20,
+  replyTo:'certificadodigital@pedroza.com.br',
+  senderName:'Pedroza Certificadora',
+  milestones:[90,60,30,15,7,0,-1]
+});
+
+function getAccAutomationConfig_() {
+  const props=PropertiesService.getScriptProperties();
+  let saved={};
+  try { saved=JSON.parse(props.getProperty('ACC_AUTOMATION_CONFIG')||'{}'); } catch(_){ saved={}; }
+  return Object.assign({},ACC_AUTOMATION_DEFAULTS,saved||{});
+}
+function saveAccAutomationConfig_(cfg) {
+  PropertiesService.getScriptProperties().setProperty('ACC_AUTOMATION_CONFIG',JSON.stringify(cfg));
+  return cfg;
+}
+function automationStatus_() {
+  const cfg=getAccAutomationConfig_();
+  const queue=rows_('FILA_ENVIO').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});
+  const comm=rows_('COMUNICACOES');
+  const today=Utilities.formatDate(new Date(),Session.getScriptTimeZone()||'America/Sao_Paulo','yyyy-MM-dd');
+  const sentToday=comm.filter(function(r){
+    if(!r.ENVIADO_EM) return false;
+    try{return Utilities.formatDate(new Date(r.ENVIADO_EM),Session.getScriptTimeZone()||'America/Sao_Paulo','yyyy-MM-dd')===today;}catch(_){return false;}
+  }).length;
+  return {config:cfg,queue:{pending:queue.filter(r=>String(r.SITUACAO)==='PENDENTE').length,error:queue.filter(r=>String(r.SITUACAO)==='ERRO').length,total:queue.length},sentToday:sentToday,remainingQuota:MailApp.getRemainingDailyQuota(),triggers:ScriptApp.getProjectTriggers().map(function(t){return {handler:t.getHandlerFunction(),eventType:String(t.getEventType())};})};
+}
+function configureAutomation_(p) {
+  const cfg=getAccAutomationConfig_();
+  if(Object.prototype.hasOwnProperty.call(p,'enabled')) cfg.enabled=Boolean(p.enabled);
+  if(Object.prototype.hasOwnProperty.call(p,'testMode')) cfg.testMode=Boolean(p.testMode);
+  if(Object.prototype.hasOwnProperty.call(p,'testRecipient')) cfg.testRecipient=normalize_(p.testRecipient||'');
+  if(Object.prototype.hasOwnProperty.call(p,'dailyLimit')) cfg.dailyLimit=Math.max(1,Math.min(500,Number(p.dailyLimit)||40));
+  if(Object.prototype.hasOwnProperty.call(p,'batchSize')) cfg.batchSize=Math.max(1,Math.min(100,Number(p.batchSize)||20));
+  if(Object.prototype.hasOwnProperty.call(p,'replyTo')) cfg.replyTo=normalize_(p.replyTo||ACC_AUTOMATION_DEFAULTS.replyTo);
+  saveAccAutomationConfig_(cfg);
+  recordAudit_({action:'ACC_AUTOMATION_CONFIG_UPDATED',details:{enabled:cfg.enabled,testMode:cfg.testMode,dailyLimit:cfg.dailyLimit,batchSize:cfg.batchSize}},{});
+  return automationStatus_();
+}
+function installAccAutomationTriggers_() {
+  removeAccAutomationTriggers_();
+  ScriptApp.newTrigger('accDailyAutomationTrigger').timeBased().everyDays(1).atHour(8).create();
+  ScriptApp.newTrigger('accQueueProcessorTrigger').timeBased().everyHours(1).create();
+  return automationStatus_();
+}
+function removeAccAutomationTriggers_() {
+  ScriptApp.getProjectTriggers().forEach(function(t){if(['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0) ScriptApp.deleteTrigger(t);});
+  return automationStatus_();
+}
+function accDailyAutomationTrigger(){ return runAccAutomation_({source:'TRIGGER'}); }
+function accQueueProcessorTrigger(){ return processAccQueue_(); }
+function runAccAutomation_(p) {
+  const lock=LockService.getScriptLock();
+  if(!lock.tryLock(1000)) return {ok:false,skipped:true,reason:'LOCKED'};
+  try {
+    const cfg=getAccAutomationConfig_();
+    if(!cfg.enabled && String((p||{}).source||'')==='TRIGGER') return {ok:true,skipped:true,reason:'DISABLED'};
+    const certs=rows_('CERTIFICADOS').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO' && r.VENCIMENTO;});
+    let queued=0, skipped=0;
+    certs.forEach(function(cert){
+      let expiry; try{expiry=new Date(cert.VENCIMENTO);}catch(_){skipped++;return;}
+      if(isNaN(expiry.getTime())){skipped++;return;}
+      const days=Math.ceil((new Date(expiry.getFullYear(),expiry.getMonth(),expiry.getDate())-new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()))/86400000);
+      if(cfg.milestones.indexOf(days)<0){skipped++;return;}
+      const client=findById_('CLIENTES',cert.CLIENTE_ID); if(!client){skipped++;return;}
+      const email=normalize_(client.EMAIL||client.EMAIL_SECUNDARIO||''); if(!email||email.indexOf('@')<1){skipped++;return;}
+      if(!clientAllowsAutomaticEmail_(client.ID)){skipped++;return;}
+      const key=String(cert.ID)+'|'+String(days);
+      if(hasAutomationMilestone_(key)){skipped++;return;}
+      const modelId=modelIdForMilestone_(days);
+      const model=findById_('MODELOS_EMAIL',modelId);
+      const subject=renderAccSubject_((model&&model.ASSUNTO)||defaultAutomationSubject_(days),client,cert);
+      const html=renderAccTemplate_((model&&model.HTML)||defaultAutomationHtml_(days),client,{mensagem:'',modeloId:modelId});
+      const communicationId=nextId_('COMUNICACOES','COM'), now=new Date();
+      appendObject_('COMUNICACOES',{ID:communicationId,CLIENTE_ID:String(client.ID),CAMPANHA_ID:'AUTO:'+key,MODELO_ID:modelId,CANAL:'EMAIL',DESTINO:email,ASSUNTO:subject,CONTEUDO_HTML:html,STATUS_ENVIO:'PENDENTE',TENTATIVAS:0,ERRO:'',AGENDADO_PARA:now,ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'ACC_AUTOMATION',ALTERADO_EM:now,ALTERADO_POR:'ACC_AUTOMATION'});
+      appendObject_('FILA_ENVIO',{ID:nextId_('FILA_ENVIO','FIL'),COMUNICACAO_ID:communicationId,TIPO:'EMAIL_AUTOMATICO',DESTINO:email,PRIORIDADE:days<=7?1:2,SITUACAO:'PENDENTE',TENTATIVAS:0,PROXIMA_EXECUCAO:now,ULTIMO_ERRO:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'ACC_AUTOMATION',ALTERADO_EM:now,ALTERADO_POR:'ACC_AUTOMATION'});
+      recordAudit_({action:'ACC_AUTO_EMAIL_QUEUED',details:{clienteId:client.ID,certificadoId:cert.ID,comunicacaoId:communicationId,marcoDias:days}},{}); queued++;
+    });
+    const processed=processAccQueue_();
+    recordAudit_({action:'ACC_TRIGGER_EXECUTED',details:{queued:queued,skipped:skipped,processed:processed}},{});
+    return {ok:true,queued:queued,skipped:skipped,processed:processed};
+  } finally { lock.releaseLock(); }
+}
+function processAccQueue_() {
+  const cfg=getAccAutomationConfig_(), quota=Math.min(MailApp.getRemainingDailyQuota(),cfg.dailyLimit), max=Math.min(cfg.batchSize,quota);
+  if(max<=0) return {sent:0,failed:0,reason:'NO_QUOTA'};
+  const queue=rows_('FILA_ENVIO').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO' && ['PENDENTE','ERRO'].indexOf(String(r.SITUACAO||''))>=0 && Number(r.TENTATIVAS||0)<3;}).slice(0,max);
+  let sent=0,failed=0;
+  queue.forEach(function(item){
+    const comm=findById_('COMUNICACOES',item.COMUNICACAO_ID); if(!comm){updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'IGNORADO',ULTIMO_ERRO:'Comunicacao nao encontrada'},'ACC_AUTOMATION');return;}
+    const to=cfg.testMode&&cfg.testRecipient?cfg.testRecipient:comm.DESTINO;
+    try{
+      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'PROCESSANDO'},'ACC_AUTOMATION');
+      MailApp.sendEmail({to:to,subject:(cfg.testMode?'[TESTE ATLAS] ':'')+comm.ASSUNTO,htmlBody:comm.CONTEUDO_HTML,name:cfg.senderName,replyTo:cfg.replyTo});
+      updateRow_('COMUNICACOES',comm.ID,{STATUS_ENVIO:'ENVIADO',ENVIADO_EM:new Date(),ERRO:'',TENTATIVAS:Number(comm.TENTATIVAS||0)+1},'ACC_AUTOMATION');
+      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'ENVIADO',TENTATIVAS:Number(item.TENTATIVAS||0)+1,ULTIMO_ERRO:''},'ACC_AUTOMATION');
+      addTimeline_({clienteId:comm.CLIENTE_ID,tipoEvento:'EMAIL_AUTOMATICO_ENVIADO',titulo:'Aviso automatico enviado',descricao:comm.ASSUNTO,origem:'ACC_AUTOMATION',actor:'ACC_AUTOMATION',dados:{comunicacaoId:comm.ID,destinoMascarado:mascararEmailPublico_(to)}});
+      recordAudit_({action:'ACC_AUTO_EMAIL_SENT',details:{clienteId:comm.CLIENTE_ID,comunicacaoId:comm.ID,destinoMascarado:mascararEmailPublico_(to),testMode:cfg.testMode}},{}); sent++;
+    }catch(error){
+      const attempts=Number(item.TENTATIVAS||0)+1;
+      updateRow_('COMUNICACOES',comm.ID,{STATUS_ENVIO:'ERRO',ERRO:String(error.message||error),TENTATIVAS:attempts},'ACC_AUTOMATION');
+      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'ERRO',TENTATIVAS:attempts,ULTIMO_ERRO:String(error.message||error)},'ACC_AUTOMATION');
+      recordAudit_({action:'ACC_AUTO_EMAIL_FAILED',details:{clienteId:comm.CLIENTE_ID,comunicacaoId:comm.ID,erro:String(error.message||error)}},{}); failed++;
+    }
+  });
+  return {sent:sent,failed:failed,total:queue.length};
+}
+function sendAutomationTest_(p,clientMeta) {
+  const cfg=getAccAutomationConfig_(), to=normalize_((p||{}).email||cfg.testRecipient||'');
+  if(!to||to.indexOf('@')<1) throw apiError_('VALIDATION','Informe o e-mail de teste.');
+  MailApp.sendEmail({to:to,subject:'Teste de conexao - Atlas ACC',htmlBody:'<div style="font-family:Arial;padding:24px"><h2>Atlas Communication Center</h2><p>A conexao de envio pelo Google Apps Script esta funcionando.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>',name:cfg.senderName,replyTo:cfg.replyTo});
+  recordAudit_({action:'ACC_TEST_EMAIL_SENT',details:{destinoMascarado:mascararEmailPublico_(to)}},clientMeta||{});
+  return {sent:true,destinationMasked:mascararEmailPublico_(to),remainingQuota:MailApp.getRemainingDailyQuota()};
+}
+function clientAllowsAutomaticEmail_(clientId){const pref=rows_('PREFERENCIAS_COMUNICACAO').find(function(r){return String(r.CLIENTE_ID)===String(clientId)&&String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});return !pref || String(pref.AVISO_VENCIMENTO||'SIM').toUpperCase()!=='NAO';}
+function hasAutomationMilestone_(key){return rows_('COMUNICACOES').some(function(r){return String(r.CAMPANHA_ID||'')==='AUTO:'+key && String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});}
+function modelIdForMilestone_(days){if(days===90)return 'ACC-VENC-90';if(days===60)return 'ACC-VENC-60';if(days===30)return 'ACC-VENC-30';if(days===15)return 'ACC-VENC-15';if(days===7)return 'ACC-VENC-7';if(days===0)return 'ACC-VENCE-HOJE';return 'ACC-VENCIDO';}
+function defaultAutomationSubject_(days){if(days>0)return 'Seu certificado digital vence em '+days+' dias';if(days===0)return 'Seu certificado digital vence hoje';return 'Seu certificado digital esta vencido';}
+function defaultAutomationHtml_(days){return '<div style="font-family:Arial,sans-serif;color:#17365d;line-height:1.6"><h2>Ola, {{NOME}}.</h2><p>'+defaultAutomationSubject_(days)+'.</p><p>Validade: <strong>{{VALIDADE}}</strong></p><p>Entre em contato para organizar sua renovacao.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>';}
+function renderAccSubject_(subject,client,cert){return String(subject||'').replace(/\{\{NOME\}\}/g,String(client.NOME||client.EMPRESA||'Cliente')).replace(/\{\{VALIDADE\}\}/g,cert.VENCIMENTO?Utilities.formatDate(new Date(cert.VENCIMENTO),Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):'');}
