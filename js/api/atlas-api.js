@@ -79,6 +79,7 @@
     createCertificate: function (data) { return request("certificates.create", data); },
     updateCertificate: function (id, data) { return request("certificates.update", { id: id, data: data }); },
     dashboard: function () { return request("dashboard.summary"); },
+    cockpit: function (options) { return request("cockpit.summary", options || {}); },
     getClient: function (id) { return request("clients.get", { id: id }); },
     listTimeline: function (filters) { return request("timeline.list", filters || {}); },
     addTimeline: function (data) { return request("timeline.add", data); },

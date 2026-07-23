@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.4C';
+const ATLAS_VERSION = '5.0.5.1';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -65,7 +65,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -87,6 +87,7 @@ function route_(action,payload,client,authToken) {
     case 'certificates.update': return updateCertificate_(payload);
     case 'audit.record': return recordAudit_(payload,client);
     case 'dashboard.summary': return dashboardSummary_();
+    case 'cockpit.summary': return cockpitSummary_(payload);
     case 'clients.get': return getClient_(payload);
     case 'timeline.list': return listTimeline_(payload);
     case 'timeline.add': return addTimeline_(payload);
@@ -386,6 +387,45 @@ function dashboardSummary_() {
   const limit=new Date();limit.setDate(limit.getDate()+60);
   const renewalsDue=certs.filter(r=>{const d=new Date(r.VENCIMENTO);return !isNaN(d.getTime())&&d>=new Date()&&d<=limit&&String(r.STATUS).toUpperCase()==='ATIVO';}).length;
   return {users:users.length,activeClients:clients.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,activeAgr:users.filter(r=>String(r.PERFIL).toUpperCase()==='AGR'&&String(r.STATUS).toUpperCase()==='ATIVO').length,certificates:certs.filter(r=>String(r.STATUS).toUpperCase()==='ATIVO').length,renewalsDue:renewalsDue,recentAudit:audit.slice(-10).reverse()};
+}
+
+
+/**
+ * Sprint 5.0.5.1 - endpoint consolidado do Atlas Cockpit.
+ * Uma unica viagem ao Apps Script, cache curto e payload reduzido.
+ */
+function cockpitSummary_(p) {
+  const force=Boolean(p&&p.forceRefresh);
+  const cache=CacheService.getScriptCache();
+  const key='ATLAS_COCKPIT_5_0_5_1';
+  if(!force){
+    const cached=cache.get(key);
+    if(cached){
+      try { const parsed=JSON.parse(cached); parsed.meta=Object.assign({},parsed.meta||{},{cache:'HIT'}); return parsed; } catch(_){}
+    }
+  }
+  const now=new Date();
+  const clients=rows_('CLIENTES');
+  const certRows=rows_('CERTIFICADOS');
+  const timelineRows=rows_('TIMELINE');
+  const commRows=rows_('COMUNICACOES');
+  const activeClients=clients.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';});
+  const certificates=certRows.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';}).map(publicCertificate_);
+  const timeline=timelineRows.slice(-120).reverse();
+  const communications=commRows.slice(-200).reverse();
+  let automation={config:getAccAutomationConfig_(),queue:{pending:0,error:0,total:0},sentToday:0,remainingQuota:null,triggers:[]};
+  try { automation=automationStatus_(); } catch(error) { automation.error=String(error&&error.message||error); }
+  const payload={
+    summary:{activeClients:activeClients.length,certificates:certificates.length},
+    certificates:certificates,
+    timeline:timeline,
+    communications:communications,
+    automation:automation,
+    health:{api:true,dataFoundation:true,gmail:automation.remainingQuota!==null,triggers:Array.isArray(automation.triggers)&&automation.triggers.length>0},
+    meta:{generatedAt:now.toISOString(),cache:'MISS',ttlSeconds:90,version:ATLAS_VERSION}
+  };
+  try { cache.put(key,JSON.stringify(payload),90); } catch(_){}
+  return payload;
 }
 
 
