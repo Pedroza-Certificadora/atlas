@@ -8,8 +8,8 @@
 
   window.AtlasAuth = window.AtlasAuth || {};
   window.AtlasAuth.config = Object.freeze({
-    version: "5.0.1",
-    apiEndpoint: "https://script.google.com/macros/s/AKfycbzWMMaw7qIegy2TeKa8dc0_0g9mui4TD1xwdc7n9XjxJY4EglSEg_PP6K5lm_TD12RZ3Q/exec",
+    version: "5.0.4A.1",
+    apiEndpoint: "https://script.google.com/macros/s/AKfycbxwFB0nT6bx6SK4DP64fuHNOHPwbLtwGSNeq1A0P5D4LfDuvbTnSQLBUUmnYah6yRtG9w/exec",
     storagePrefix: "atlas_aass_",
     sessionKey: "atlas_aass_session",
     rememberedUserKey: "atlas_aass_remembered_user",
