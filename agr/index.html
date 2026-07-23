@@ -61,7 +61,8 @@
 
   <link rel="stylesheet" href="../css/style.css?v=4.8.1">
   <link rel="stylesheet" href="../css/motion.css?v=4.3.0">
-  <link rel="stylesheet" href="../css/agr.css?v=5.0.1">
+  <link rel="stylesheet" href="../css/agr.css?v=5.0.5">
+  <link rel="stylesheet" href="../css/cockpit.css?v=5.0.5">
   <link rel="stylesheet" href="../css/auth.css?v=4.8.1">
 
   <script src="../js/auth/config.js?v=4.8.1"></script>
@@ -197,7 +198,7 @@
           </div>
 
           <nav class="atlas-admin-nav">
-            <a class="active" href="#dashboard"><span aria-hidden="true">▦</span> Dashboard</a>
+            <a class="active" href="#dashboard"><span aria-hidden="true">▦</span> Cockpit</a>
             <a href="clientes.html" data-auth-permission="CLIENTS_READ"><span aria-hidden="true">◉</span> Clientes</a>
             <a href="comunicacao.html"><span aria-hidden="true">✉</span> Comunicação</a>
             <a href="#certificados" data-auth-permission="CERTIFICATES_READ"><span aria-hidden="true">▤</span> Certificados</a>
@@ -212,88 +213,88 @@
 
           <div class="atlas-admin-system">
             <span class="agr-status-dot agr-status-online"></span>
-            <span><strong>Sistema online</strong><small data-atlas-system-version>ADF 4.8.1</small></span>
+            <span><strong>Sistema online</strong><small data-atlas-system-version>Atlas 5.0.5</small></span>
           </div>
         </aside>
 
-        <div class="atlas-admin-content" id="dashboard">
-          <div class="atlas-admin-welcome">
-            <div class="atlas-admin-welcome-copy">
-              <span class="agr-eyebrow">Portal Atlas • Administração</span>
-              <div class="atlas-admin-title-row">
-                <div>
-                  <h1 id="dashboard-title">Olá, <span data-auth-user-first-name>Marcos</span>.</h1>
-                  <p>Visão geral da operação da Pedroza Certificadora.</p>
-                </div>
-                <div class="atlas-admin-session" aria-label="Status da sessão">
-                  <span class="atlas-session-online"><i aria-hidden="true"></i> Online</span>
-                  <span>Último acesso <strong id="atlas-last-access">Agora</strong></span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="atlas-kpi-grid" aria-label="Indicadores operacionais">
-            <article class="atlas-kpi-card atlas-kpi-primary atlas-kpi-action" id="clientes" data-dashboard-target="clientes.html?filter=all" tabindex="0" role="link" aria-label="Abrir Central de Clientes">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.5" class="fill"></circle></svg></span>
-              <div><small>Clientes</small><strong id="atlas-kpi-clients">0</strong><span>Cadastros ativos</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-success atlas-kpi-action" id="certificados" data-dashboard-target="clientes.html?filter=certificate-active" tabindex="0" role="link" aria-label="Abrir clientes com certificados ativos">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="4.5" width="12" height="15" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg></span>
-              <div><small>Certificados</small><strong id="atlas-kpi-certificates">0</strong><span>Vínculos ativos</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-warning atlas-kpi-action" data-dashboard-target="clientes.html?filter=renewal" tabindex="0" role="link" aria-label="Abrir renovações">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18.5 8A7.5 7.5 0 106 18"></path><path d="M18.5 4v4h-4"></path></svg></span>
-              <div><small>Renovações</small><strong id="atlas-kpi-renewals">0</strong><span>Próximos 60 dias</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-neutral atlas-kpi-action" data-dashboard-target="usuarios.html" tabindex="0" role="link" aria-label="Abrir usuários">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"></circle><path d="M6.5 19a5.5 5.5 0 0111 0"></path></svg></span>
-              <div><small>Usuários</small><strong id="atlas-kpi-users">0</strong><span id="atlas-kpi-agr">0 AGR ativos</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-danger atlas-kpi-action" data-dashboard-target="clientes.html?filter=today" tabindex="0" role="link" aria-label="Abrir certificados vencendo hoje">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 7v6"></path><circle cx="12" cy="17" r="1" class="fill"></circle><circle cx="12" cy="12" r="8.5"></circle></svg></span>
-              <div><small>Vencendo hoje</small><strong id="atlas-kpi-due-today">0</strong><span>Prioridade imediata</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-warning atlas-kpi-action" data-dashboard-target="clientes.html?filter=30" tabindex="0" role="link" aria-label="Abrir certificados vencendo em 30 dias">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4.5" y="6" width="15" height="13" rx="2"></rect><path d="M8 4v4M16 4v4M4.5 10h15M12 13v3l2 1"></path></svg></span>
-              <div><small>Vence em 30 dias</small><strong id="atlas-kpi-due-30">0</strong><span>Acompanhamento preventivo</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-danger atlas-kpi-action" data-dashboard-target="clientes.html?filter=expired" tabindex="0" role="link" aria-label="Abrir certificados vencidos">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M9 9l6 6M15 9l-6 6"></path></svg></span>
-              <div><small>Vencidos</small><strong id="atlas-kpi-expired">0</strong><span>Certificados ativos na base</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-            <article class="atlas-kpi-card atlas-kpi-info atlas-kpi-action" data-dashboard-target="#auditoria" tabindex="0" role="link" aria-label="Abrir atividades de hoje">
-              <span class="atlas-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M10 7h7v7"></path></svg></span>
-              <div><small>Atividades hoje</small><strong id="atlas-kpi-activity-today">0</strong><span>Eventos registrados</span></div><span class="atlas-kpi-arrow" aria-hidden="true">›</span>
-            </article>
-          </div>
+<div class="atlas-admin-content atlas-cockpit" id="dashboard">
+  <section class="cockpit-hero" aria-labelledby="dashboard-title">
+    <div>
+      <span class="cockpit-kicker">Atlas Cockpit Enterprise</span>
+      <h1 id="dashboard-title"><span id="atlas-greeting">Olá</span>, <span data-auth-user-first-name>Marcos</span>.</h1>
+      <p>Prioridades, comunicação e saúde operacional em uma única visão.</p>
+    </div>
+    <div class="cockpit-session">
+      <span class="cockpit-live"><i></i> Operação online</span>
+      <small>Atualizado <strong id="atlas-last-refresh">agora</strong></small>
+      <button type="button" id="atlas-refresh" class="cockpit-refresh">Atualizar</button>
+    </div>
+  </section>
 
-          <section class="atlas-admin-panel" aria-labelledby="quick-actions-title">
-            <div class="atlas-panel-heading">
-              <div><span>Ações rápidas</span><h2 id="quick-actions-title">O que deseja fazer?</h2></div>
-              <small>Atalhos operacionais</small>
-            </div>
-            <div class="atlas-quick-grid">
-              <a href="clientes.html" data-auth-permission="CLIENTS_READ"><b>◉</b><span>Central de Clientes<small>Pesquisar e acompanhar a base CRM</small></span></a>
-              <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><b>＋</b><span>Novo AGR<small>Criar usuário operacional</small></span></a>
-              <a href="#emissao"><b>◇</b><span>Emitir certificado<small>Acessar sistemas de emissão</small></span></a>
-              <a href="#agenda" data-auth-permission="AGENDA_READ"><b>□</b><span>Agenda<small>Preparada para a Sprint 4.9</small></span></a>
-              <a href="#auditoria" data-auth-permission="AUDIT_READ"><b>◎</b><span>Auditoria<small>Consultar atividades da sessão</small></span></a>
-              <a href="usuarios.html#configuracoes" data-auth-permission="SETTINGS_MANAGE"><b>⚙</b><span>Configurações<small>Perfis, permissões e segurança</small></span></a>
-            </div>
-          </section>
+  <nav class="cockpit-actions" aria-label="Ações rápidas">
+    <a href="clientes.html?action=new"><b>＋</b><span>Novo cliente<small>Cadastrar na base</small></span></a>
+    <a href="clientes.html?action=certificate"><b>▤</b><span>Novo certificado<small>Vincular validade</small></span></a>
+    <a href="comunicacao.html"><b>✉</b><span>Enviar e-mail<small>Abrir comunicação</small></span></a>
+    <a href="#agenda"><b>□</b><span>Agenda<small>Próximos atendimentos</small></span></a>
+    <a href="usuarios.html#configuracoes"><b>⚙</b><span>Configurações<small>Administração</small></span></a>
+  </nav>
 
-          <div class="atlas-admin-lower-grid">
-            <section class="atlas-admin-panel" id="agenda" aria-labelledby="agenda-title">
-              <div class="atlas-panel-heading"><div><span>Agenda</span><h2 id="agenda-title">Próximos atendimentos</h2></div></div>
-              <div class="atlas-empty-state"><b>□</b><p>A agenda definitiva será conectada na Sprint 4.9.</p><small>A estrutura visual já está pronta para receber os dados reais.</small></div>
-            </section>
-            <section class="atlas-admin-panel" id="auditoria" aria-labelledby="activity-title">
-              <div class="atlas-panel-heading"><div><span>Segurança</span><h2 id="activity-title">Atividade recente</h2></div></div>
-              <div class="atlas-activity-list" id="atlas-activity-list"><p>Carregando registros locais...</p></div>
-            </section>
-          </div>
-        </div>
+  <section class="cockpit-kpis" aria-label="Prioridades operacionais">
+    <article class="cockpit-kpi danger" data-dashboard-target="clientes.html?filter=expired" tabindex="0" role="link"><span>Vencidos</span><strong id="atlas-kpi-expired">—</strong><small>Exigem contato imediato</small></article>
+    <article class="cockpit-kpi warning" data-dashboard-target="clientes.html?filter=7" tabindex="0" role="link"><span>Próximos 7 dias</span><strong id="atlas-kpi-due-7">—</strong><small>Prioridade alta</small></article>
+    <article class="cockpit-kpi info" data-dashboard-target="clientes.html?filter=30" tabindex="0" role="link"><span>Próximos 30 dias</span><strong id="atlas-kpi-due-30">—</strong><small>Acompanhamento preventivo</small></article>
+    <article class="cockpit-kpi success" data-dashboard-target="clientes.html?filter=certificate-active" tabindex="0" role="link"><span>Certificados ativos</span><strong id="atlas-kpi-certificates">—</strong><small>Base acompanhada</small></article>
+    <article class="cockpit-kpi purple" data-dashboard-target="comunicacao.html" tabindex="0" role="link"><span>Comunicações</span><strong id="atlas-kpi-communications">—</strong><small>Enviadas hoje</small></article>
+    <article class="cockpit-kpi neutral" data-dashboard-target="clientes.html?filter=all" tabindex="0" role="link"><span>Clientes ativos</span><strong id="atlas-kpi-clients">—</strong><small>Cadastros no CRM</small></article>
+  </section>
+
+  <div class="cockpit-main-grid">
+    <section class="cockpit-panel cockpit-ai" aria-labelledby="atlas-ai-title">
+      <div class="cockpit-panel-head"><div><span>Atlas IA</span><h2 id="atlas-ai-title">Próximas melhores ações</h2></div><span class="cockpit-badge">Inteligência operacional</span></div>
+      <div id="atlas-ai-list" class="cockpit-ai-list"><div class="cockpit-skeleton"></div><div class="cockpit-skeleton"></div></div>
+    </section>
+
+    <section class="cockpit-panel" aria-labelledby="communication-title">
+      <div class="cockpit-panel-head"><div><span>ACC</span><h2 id="communication-title">Comunicação</h2></div><a href="comunicacao.html">Abrir central</a></div>
+      <div class="cockpit-comm-grid">
+        <div><strong id="atlas-comm-today">—</strong><small>Enviados hoje</small></div>
+        <div><strong id="atlas-comm-pending">—</strong><small>Pendentes</small></div>
+        <div><strong id="atlas-comm-errors">—</strong><small>Falhas</small></div>
+        <div><strong id="atlas-gmail-quota">—</strong><small>Cota Gmail</small></div>
+      </div>
+      <div id="atlas-comm-status" class="cockpit-status-line">Carregando automação...</div>
+    </section>
+  </div>
+
+  <div class="cockpit-secondary-grid">
+    <section class="cockpit-panel" id="agenda" aria-labelledby="agenda-title">
+      <div class="cockpit-panel-head"><div><span>Agenda</span><h2 id="agenda-title">Próximos atendimentos</h2></div><button type="button" class="cockpit-link-button">Novo</button></div>
+      <div id="atlas-agenda-list" class="cockpit-empty"><b>□</b><p>Nenhum atendimento agendado para hoje.</p><small>A agenda será conectada ao módulo de agendamentos da versão 5.0.</small></div>
+    </section>
+
+    <section class="cockpit-panel" aria-labelledby="portal-title">
+      <div class="cockpit-panel-head"><div><span>Portal do Cliente</span><h2 id="portal-title">Ativação da base</h2></div><a href="comunicacao.html">Enviar convites</a></div>
+      <div class="cockpit-progress"><div><span id="atlas-portal-progress" style="width:0%"></span></div><strong id="atlas-portal-rate">0%</strong></div>
+      <div class="cockpit-portal-stats"><span><b id="atlas-portal-invited">0</b> convites enviados</span><span><b id="atlas-portal-pending">0</b> pendentes</span></div>
+    </section>
+
+    <section class="cockpit-panel" aria-labelledby="health-title">
+      <div class="cockpit-panel-head"><div><span>Infraestrutura</span><h2 id="health-title">Saúde do Atlas</h2></div><span id="atlas-health-summary" class="cockpit-health-pill loading">Verificando</span></div>
+      <div class="cockpit-health-list">
+        <div><span>Atlas API</span><i id="health-api"></i></div>
+        <div><span>Data Foundation</span><i id="health-data"></i></div>
+        <div><span>Gmail</span><i id="health-gmail"></i></div>
+        <div><span>Gatilhos</span><i id="health-triggers"></i></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="cockpit-panel" id="auditoria" aria-labelledby="activity-title">
+    <div class="cockpit-panel-head"><div><span>Timeline global</span><h2 id="activity-title">Últimas atividades</h2></div><span id="atlas-kpi-activity-today">— hoje</span></div>
+    <div class="cockpit-timeline" id="atlas-activity-list"><div class="cockpit-skeleton"></div></div>
+  </section>
+</div>
       </div>
     </section>
     <section
@@ -1617,7 +1618,7 @@
 
   <script src="../js/auth/auth.js?v=4.8.1"></script>
   <script src="../js/auth/protected-ui.js?v=4.8.1"></script>
-  <script src="../js/agr/dashboard.js?v=5.0.1" defer></script>
+  <script src="../js/agr/dashboard.js?v=5.0.5" defer></script>
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
   <script src="../js/agr/agr.js?v=4.4.0" defer></script>

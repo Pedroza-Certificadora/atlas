@@ -1,163 +1,19 @@
-/* Atlas ACMS Interface - Dashboard Administrativo 5.0.1 */
-(function (window, document) {
-  "use strict";
 
-  function safeUsers() {
-    try { return window.AtlasAuth.userProvider.list(); } catch (error) { return []; }
-  }
-
-  function text(id, value) {
-    var element = document.getElementById(id);
-    if (element) element.textContent = String(value);
-  }
-
-  function formatDate(value) {
-    try {
-      return new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-        timeStyle: "short"
-      }).format(new Date(value));
-    } catch (error) {
-      return "Agora";
-    }
-  }
-
-  function parseDate(value) {
-    if (!value) return null;
-    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-    var raw = String(value).trim();
-    var br = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
-    if (br) {
-      var parsed = new Date(Number(br[3]), Number(br[2]) - 1, Number(br[1]), Number(br[4] || 0), Number(br[5] || 0), Number(br[6] || 0));
-      return isNaN(parsed.getTime()) ? null : parsed;
-    }
-    var date = new Date(raw);
-    return isNaN(date.getTime()) ? null : date;
-  }
-
-  function dayStart(value) {
-    var date = new Date(value);
-    date.setHours(0, 0, 0, 0);
-    return date;
-  }
-
-  function isSameDay(left, right) {
-    return dayStart(left).getTime() === dayStart(right).getTime();
-  }
-
-  function renderActivity(records) {
-    var list = document.getElementById("atlas-activity-list");
-    if (!list) return;
-    if (!records.length) {
-      list.innerHTML = '<div class="atlas-empty-state"><p>Nenhum evento recente.</p><small>As próximas atividades aparecerão aqui.</small></div>';
-      return;
-    }
-    list.innerHTML = records.slice(0, 4).map(function (item) {
-      var label = item.ACAO || item.TIPO_EVENTO || item.type || item.action || "ATIVIDADE";
-      var detail = item.USUARIO_LOGIN || item.username || item.user || item.TITULO || (item.details && item.details.username) || "Sistema Atlas";
-      var when = item.DATA_HORA || item.createdAt || item.timestamp || Date.now();
-      return '<div class="atlas-activity-item"><i></i><span><strong>' + String(label).replace(/_/g, " ") + '</strong><small>' + String(detail) + '</small></span><time>' + formatDate(when) + '</time></div>';
-    }).join("");
-  }
-
-  function renderCertificateIndicators(certificates) {
-    var today = dayStart(new Date());
-    var in30 = new Date(today);
-    in30.setDate(in30.getDate() + 30);
-    var dueToday = 0;
-    var due30 = 0;
-    var expired = 0;
-
-    certificates.forEach(function (certificate) {
-      if (certificate.active === false) return;
-      var expiry = parseDate(certificate.vencimento);
-      if (!expiry) return;
-      var day = dayStart(expiry);
-      if (day.getTime() < today.getTime()) expired += 1;
-      if (day.getTime() === today.getTime()) dueToday += 1;
-      if (day.getTime() >= today.getTime() && day.getTime() <= in30.getTime()) due30 += 1;
-    });
-
-    text("atlas-kpi-due-today", dueToday);
-    text("atlas-kpi-due-30", due30);
-    text("atlas-kpi-expired", expired);
-  }
-
-  function renderTimelineIndicators(timeline) {
-    var today = new Date();
-    var count = timeline.filter(function (item) {
-      var date = parseDate(item.DATA_HORA || item.createdAt || item.timestamp);
-      return date && isSameDay(date, today);
-    }).length;
-    text("atlas-kpi-activity-today", count);
-  }
-
-
-  function bindDashboardCards() {
-    function activate(card) {
-      var target = card && card.getAttribute("data-dashboard-target");
-      if (!target) return;
-      if (target.charAt(0) === "#") {
-        var section = document.querySelector(target);
-        if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-      window.location.href = target;
-    }
-    document.querySelectorAll("[data-dashboard-target]").forEach(function (card) {
-      card.addEventListener("click", function () { activate(card); });
-      card.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(card); }
-      });
-    });
-  }
-
-  async function render() {
-    var session = window.AtlasAuth && window.AtlasAuth.session ? window.AtlasAuth.session.getActive() : null;
-    if (session) {
-      document.querySelectorAll("[data-auth-user-first-name]").forEach(function (element) {
-        element.textContent = String(session.user.displayName || "Usuário").split(" ")[0];
-      });
-      text("atlas-last-access", formatDate(session.createdAt || Date.now()));
-    }
-
-    if (window.AtlasAPI && window.AtlasAPI.isConfigured()) {
-      try {
-        var results = await Promise.all([
-          window.AtlasAPI.dashboard(),
-          window.AtlasAPI.listCertificates(),
-          window.AtlasAPI.listTimeline({ limit: 500 })
-        ]);
-        var summary = results[0] || {};
-        var certificates = Array.isArray(results[1]) ? results[1] : [];
-        var timeline = Array.isArray(results[2]) ? results[2] : [];
-
-        text("atlas-kpi-clients", summary.activeClients || 0);
-        text("atlas-kpi-users", summary.users || 0);
-        text("atlas-kpi-certificates", summary.certificates || 0);
-        text("atlas-kpi-renewals", summary.renewalsDue || 0);
-        var agrs = summary.activeAgr || 0;
-        text("atlas-kpi-agr", agrs + " AGR ativo" + (agrs === 1 ? "" : "s"));
-        renderCertificateIndicators(certificates);
-        renderTimelineIndicators(timeline);
-        renderActivity(summary.recentAudit || timeline.slice(0, 10));
-        return;
-      } catch (error) {
-        console.warn("Atlas Dashboard: indicadores complementares indisponíveis.", error);
-      }
-    }
-
-    var users = safeUsers();
-    var clients = users.filter(function (user) { return user.role === "CLIENTE" && user.active; }).length;
-    var agrs = users.filter(function (user) { return user.role === "AGR" && user.active; }).length;
-    text("atlas-kpi-clients", clients);
-    text("atlas-kpi-users", users.length);
-    text("atlas-kpi-agr", agrs + " AGR ativo" + (agrs === 1 ? "" : "s"));
-    var records = [];
-    try { records = window.AtlasAuth.audit.list().slice(0, 4); } catch (error) { records = []; }
-    renderActivity(records);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { bindDashboardCards(); render(); });
-  else { bindDashboardCards(); render(); }
-})(window, document);
+/* Atlas Cockpit Enterprise 5.0.5 | Marcos Henrique Pedroza */
+(function(window,document){"use strict";
+var cache={};
+function el(id){return document.getElementById(id)}function set(id,v){var n=el(id);if(n)n.textContent=String(v)}
+function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function date(v){if(!v)return null;if(v instanceof Date)return v;var r=String(v).trim(),m=r.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);if(m)return new Date(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0));var d=new Date(r);return isNaN(d)?null:d}
+function start(d){d=new Date(d);d.setHours(0,0,0,0);return d}function daysTo(v){var d=date(v);return d?Math.round((start(d)-start(new Date()))/86400000):null}
+function format(v){var d=date(v);return d?new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(d):"Agora"}
+function values(o){return Object.keys(o||{}).map(function(k){return o[k]})}function find(o,names,def){for(var i=0;i<names.length;i++){if(o&&o[names[i]]!==undefined&&o[names[i]]!=="")return o[names[i]]}return def}
+function activateCards(){document.querySelectorAll('[data-dashboard-target]').forEach(function(n){function go(){var t=n.getAttribute('data-dashboard-target');if(t)location.href=t}n.onclick=go;n.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}})}
+function renderCertificates(list){var counts={expired:0,d7:0,d30:0,active:0};var ranked=[];(list||[]).forEach(function(c){if(c.active===false)return;var d=daysTo(find(c,['vencimento','VALIDADE','DATA_VENCIMENTO','validade']));if(d===null)return;if(d<0)counts.expired++;else{counts.active++;if(d<=7)counts.d7++;if(d<=30)counts.d30++}ranked.push({c:c,d:d})});set('atlas-kpi-expired',counts.expired);set('atlas-kpi-due-7',counts.d7);set('atlas-kpi-due-30',counts.d30);set('atlas-kpi-certificates',counts.active);ranked.sort(function(a,b){return a.d-b.d});var box=el('atlas-ai-list');if(!box)return;var items=ranked.filter(function(x){return x.d<=30}).slice(0,4);if(!items.length){box.innerHTML='<div class="cockpit-empty"><p>Nenhuma prioridade crítica.</p><small>A operação está em dia.</small></div>';return}box.innerHTML=items.map(function(x){var name=find(x.c,['clienteNome','NOME_CLIENTE','nome','razaoSocial'],'Cliente');var msg=x.d<0?'Certificado vencido há '+Math.abs(x.d)+' dia(s)':x.d===0?'Certificado vence hoje':'Certificado vence em '+x.d+' dia(s)';return '<div class="cockpit-ai-item '+(x.d<=0?'danger':'')+'"><i></i><span><strong>'+esc(name)+'</strong><small>'+esc(msg)+' • ação recomendada: contatar cliente</small></span><a href="comunicacao.html">Enviar</a></div>'}).join('')}
+function renderTimeline(list){var box=el('atlas-activity-list'),today=start(new Date()),todayCount=0;if(!box)return;var rows=(list||[]).slice(0,8);rows.forEach(function(x){var d=date(find(x,['DATA_HORA','createdAt','timestamp']));if(d&&start(d).getTime()===today.getTime())todayCount++});set('atlas-kpi-activity-today',todayCount+' hoje');box.innerHTML=rows.length?rows.map(function(x){var a=find(x,['ACAO','TIPO_EVENTO','type','action'],'ATIVIDADE'),u=find(x,['USUARIO_LOGIN','username','user','TITULO'],'Sistema Atlas'),w=find(x,['DATA_HORA','createdAt','timestamp'],Date.now());return '<div class="cockpit-activity"><i></i><span><strong>'+esc(String(a).replace(/_/g,' '))+'</strong><small>'+esc(u)+'</small></span><time>'+format(w)+'</time></div>'}).join(''):'<div class="cockpit-empty"><p>Nenhuma atividade recente.</p></div>'}
+function renderComms(list){var today=start(new Date()),sent=0,pending=0,errors=0,invites=0;(list||[]).forEach(function(x){var d=date(find(x,['DATA_HORA','ENVIADO_EM','createdAt','timestamp'])),st=String(find(x,['STATUS','status'],'')).toUpperCase(),tpl=String(find(x,['MODELO_ID','templateId','ASSUNTO','subject'],'')).toUpperCase();if(d&&start(d).getTime()===today.getTime()&&/ENVIADO|SENT|SUCESSO/.test(st))sent++;if(/PENDENTE|QUEUE|FILA/.test(st))pending++;if(/ERRO|FALHA|FAILED/.test(st))errors++;if(/PORTAL|CONVITE/.test(tpl)&&/ENVIADO|SENT|SUCESSO/.test(st))invites++});set('atlas-kpi-communications',sent);set('atlas-comm-today',sent);set('atlas-comm-pending',pending);set('atlas-comm-errors',errors);set('atlas-portal-invited',invites);var clients=+((el('atlas-kpi-clients')||{}).textContent||0),p=Math.max(0,clients-invites),rate=clients?Math.min(100,Math.round(invites/clients*100)):0;set('atlas-portal-pending',p);set('atlas-portal-rate',rate+'%');var bar=el('atlas-portal-progress');if(bar)bar.style.width=rate+'%'}
+function mark(id,ok){var n=el(id);if(n)n.className=ok?'ok':'error'}
+async function load(){var session=window.AtlasAuth&&window.AtlasAuth.session?window.AtlasAuth.session.getActive():null;if(session){document.querySelectorAll('[data-auth-user-first-name]').forEach(function(n){n.textContent=String(session.user.displayName||'Usuário').split(' ')[0]})}var h=new Date().getHours();set('atlas-greeting',h<12?'Bom dia':h<18?'Boa tarde':'Boa noite');set('atlas-last-refresh','agora');if(!window.AtlasAPI||!window.AtlasAPI.isConfigured()){set('atlas-health-summary','API não configurada');return}var jobs=[window.AtlasAPI.dashboard(),window.AtlasAPI.listCertificates(),window.AtlasAPI.listTimeline({limit:120}),window.AtlasAPI.listCommunications({limit:200}),window.AtlasAPI.health(),window.AtlasAPI.automationStatus()];var r=await Promise.allSettled(jobs),summary=r[0].status==='fulfilled'?r[0].value:{},certs=r[1].status==='fulfilled'?r[1].value:[],timeline=r[2].status==='fulfilled'?r[2].value:[],comms=r[3].status==='fulfilled'?r[3].value:[],health=r[4].status==='fulfilled',auto=r[5].status==='fulfilled'?r[5].value:{};set('atlas-kpi-clients',summary.activeClients||0);renderCertificates(Array.isArray(certs)?certs:values(certs));renderTimeline(Array.isArray(timeline)?timeline:values(timeline));renderComms(Array.isArray(comms)?comms:values(comms));mark('health-api',health);mark('health-data',health);var quota=find(auto,['gmailQuota','quota','remainingQuota'],'—');set('atlas-gmail-quota',quota);mark('health-gmail',r[5].status==='fulfilled');var triggers=find(auto,['triggers','triggerCount'],[]),triggerOk=Array.isArray(triggers)?triggers.length>0:Number(triggers)>0;mark('health-triggers',triggerOk);var status=el('atlas-health-summary');if(status){status.textContent=health&&r[5].status==='fulfilled'?'Operacional':'Atenção';status.className='cockpit-health-pill '+(health&&r[5].status==='fulfilled'?'ok':'error')}set('atlas-comm-status',triggerOk?'Automação ativa e pronta para processar a fila.':'Automação disponível; verifique os gatilhos.');set('atlas-last-refresh',new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date()))}
+function init(){activateCards();var b=el('atlas-refresh');if(b)b.onclick=function(){b.disabled=true;load().finally(function(){b.disabled=false})};load().catch(function(e){console.warn('Atlas Cockpit:',e);var s=el('atlas-health-summary');if(s){s.textContent='Atenção';s.className='cockpit-health-pill error'}})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})(window,document);
