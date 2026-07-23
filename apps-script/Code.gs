@@ -509,6 +509,7 @@ function buildAtlasEmail_(o) {
 }
 
 
+/* TEMPLATE VISUAL CONGELADO — preservar estrutura, responsividade, identidade e rodape sem logo. */
 function buildPortalInviteEmail_(kind) {
   const logo='https://pedrozacertificadora.com.br/images/email/pedroza-email-logo.png';
   const site='https://pedrozacertificadora.com.br';
@@ -553,9 +554,9 @@ function seedAccModels_() {
   ];
   models.forEach(function(m){
     const current=findById_('MODELOS_EMAIL',m.id);
-    const data={NOME:m.name,TIPO:m.type,ASSUNTO:m.subject,HTML:m.html,VARIAVEIS_JSON:JSON.stringify(['NOME','EMPRESA','CPF_CNPJ','TIPO_CERTIFICADO','VALIDADE','MENSAGEM','ASSINATURA','TOKEN_CONVITE']),ATIVO:'SIM',STATUS:'ATIVO',ALTERADO_EM:now,ALTERADO_POR:'SETUP-5.0.4C.1'};
-    if(current) updateRow_('MODELOS_EMAIL',m.id,data,'SETUP-5.0.4C.1');
-    else appendObject_('MODELOS_EMAIL',Object.assign({ID:m.id,CRIADO_EM:now,CRIADO_POR:'SETUP-5.0.4C.1'},data));
+    const data={NOME:m.name,TIPO:m.type,ASSUNTO:m.subject,HTML:m.html,VARIAVEIS_JSON:JSON.stringify(['NOME','EMPRESA','CPF_CNPJ','TIPO_CERTIFICADO','VALIDADE','MENSAGEM','ASSINATURA','TOKEN_CONVITE']),ATIVO:'SIM',STATUS:'ATIVO',ALTERADO_EM:now,ALTERADO_POR:'SETUP-5.0.4D'};
+    if(current) updateRow_('MODELOS_EMAIL',m.id,data,'SETUP-5.0.4D');
+    else appendObject_('MODELOS_EMAIL',Object.assign({ID:m.id,CRIADO_EM:now,CRIADO_POR:'SETUP-5.0.4D'},data));
   });
 }
 
