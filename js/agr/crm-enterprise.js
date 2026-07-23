@@ -1,5 +1,5 @@
 /*
- * Atlas CRM Enterprise Gold - Sprint 4.9.17 FINAL
+ * Atlas CRM Enterprise Gold - Sprint 4.9.19 FINAL
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
 (function (w, d) {
@@ -60,7 +60,9 @@
       '<div class="crm-enterprise-backdrop" id="crm-alerts-backdrop" hidden></div>',
       '<aside class="crm-alerts-panel" id="crm-alerts-panel" aria-hidden="true"><header><div><span>Central de alertas</span><h2>Atenção operacional</h2></div><button id="crm-alerts-close" type="button">×</button></header><nav id="crm-alert-filters"><button class="active" data-filter="all" type="button">Todos</button><button data-filter="expired" type="button">Vencidos</button><button data-filter="30" type="button">30 dias</button><button data-filter="duplicate" type="button">Duplicidades</button></nav><div id="crm-alert-list" class="crm-alert-list"></div></aside>',
       '<div class="crm-enterprise-backdrop" id="crm-communication-backdrop" hidden></div>',
-      '<section class="crm-communication-admin" id="crm-communication-admin" role="dialog" aria-modal="true" hidden><header><div><span>Infraestrutura preparada</span><h2>Central de Comunicação</h2><p>Sem disparos automáticos nesta Sprint.</p></div><button id="crm-communication-close" type="button">×</button></header><nav><button class="active" data-comm-view="templates" type="button">Templates</button><button data-comm-view="preferences" type="button">Preferências</button><button data-comm-view="queue" type="button">Fila</button><button data-comm-view="history" type="button">Histórico</button></nav><div id="crm-communication-content"></div></section>'
+      '<section class="crm-communication-admin" id="crm-communication-admin" role="dialog" aria-modal="true" hidden><header><div><span>Infraestrutura preparada</span><h2>Central de Comunicação</h2><p>Sem disparos automáticos nesta Sprint.</p></div><button id="crm-communication-close" type="button">×</button></header><nav><button class="active" data-comm-view="templates" type="button">Templates</button><button data-comm-view="preferences" type="button">Preferências</button><button data-comm-view="queue" type="button">Fila</button><button data-comm-view="history" type="button">Histórico</button></nav><div id="crm-communication-content"></div></section>',
+      '<div class="crm-enterprise-backdrop" id="crm-edit-backdrop" hidden></div>',
+      '<section class="crm-edit-modal" id="crm-edit-modal" role="dialog" aria-modal="true" aria-labelledby="crm-edit-title" hidden><header><div><span>Ficha 360º • edição operacional</span><h2 id="crm-edit-title">Editar cliente</h2><p>Atualize o cadastro e informe manualmente a validade do certificado.</p></div><button id="crm-edit-close" type="button" aria-label="Fechar">×</button></header><form id="crm-edit-form"><div class="crm-edit-grid"><label class="wide">Nome<input id="crm-edit-name" required></label><label>E-mail<input id="crm-edit-email" type="email"></label><label>Telefone<input id="crm-edit-phone"></label><label>Responsável<input id="crm-edit-owner"></label><label>Situação<select id="crm-edit-status"><option value="ATIVO">Ativo</option><option value="INATIVO">Inativo</option><option value="ARQUIVADO">Arquivado</option></select></label><label class="wide">Observações<textarea id="crm-edit-notes" rows="3"></textarea></label></div><div class="crm-edit-cert"><div><strong>Certificado</strong><small>Selecione um certificado existente ou cadastre uma validade manual.</small></div><label>Registro<select id="crm-edit-certificate"></select></label><label>Tipo<input id="crm-edit-cert-type" placeholder="Ex.: e-CNPJ A1"></label><label>Data de vencimento<input id="crm-edit-expiry" type="date"></label><label>Situação<select id="crm-edit-cert-status"><option value="ATIVO">Ativo</option><option value="EM RENOVACAO">Em renovação</option><option value="VENCIDO">Vencido</option></select></label></div><footer><button id="crm-edit-cancel" type="button">Cancelar</button><button class="primary" type="submit">Salvar alterações</button></footer></form></section>'
     ].join(""));
   }
 
@@ -68,7 +70,7 @@
     var actions = d.querySelector(".crm-drawer-actions");
     var tabs = id("crm-drawer-tabs");
     if (actions && !id("crm-enterprise-actions")) {
-      actions.insertAdjacentHTML("beforeend", '<div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="duplicate" type="button">⌕ Localizar e unificar duplicidade</button><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button><span class="crm-popover-divider" aria-hidden="true"></span><button class="crm-enterprise-danger" data-enterprise-action="delete-client" type="button">🗑 Excluir cliente</button></div></div>');
+      actions.insertAdjacentHTML("beforeend", '<button class="crm-edit-client-button" id="crm-edit-client-open" type="button">✎ Editar cliente</button><div class="crm-enterprise-menu"><button id="crm-enterprise-actions" type="button">⚙ Ações ▾</button><div class="crm-enterprise-popover" id="crm-actions-popover"><button data-enterprise-action="communication" type="button">✉ Preparar comunicação</button><button data-enterprise-action="relation" type="button">⇄ Relacionar cliente</button><button data-enterprise-action="alert" type="button">⚠ Ver alertas deste cliente</button></div></div><div class="crm-enterprise-menu"><button id="crm-enterprise-more" type="button">⋮ Mais opções</button><div class="crm-enterprise-popover" id="crm-more-popover"><button data-enterprise-action="duplicate" type="button">⌕ Localizar e unificar duplicidade</button><button data-enterprise-action="print" type="button">Imprimir ficha</button><button data-enterprise-action="copy-summary" type="button">Copiar resumo</button><button data-enterprise-action="audit" type="button">Registrar consulta</button><span class="crm-popover-divider" aria-hidden="true"></span><button class="crm-enterprise-danger" data-enterprise-action="delete-client" type="button">🗑 Excluir cliente</button></div></div>');
     }
     if (tabs && !tabs.querySelector('[data-tab="administracao"]')) tabs.insertAdjacentHTML("beforeend", '<button data-tab="administracao" type="button">Administração</button>');
     var body = d.querySelector(".crm-drawer-body");
@@ -212,7 +214,7 @@
 
   function auditView() {
     if (!state.current || !w.AtlasAPI || !w.AtlasAPI.audit) return;
-    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.17" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
+    w.AtlasAPI.audit("CRM_360_VIEW", { clientId: state.current.id, username: actor(), version: "4.9.19" }).then(function () { notify("Consulta registrada na auditoria."); }).catch(function () { notify("Não foi possível registrar a consulta.", "warning"); });
   }
 
   function copySummary() {
@@ -220,6 +222,34 @@
     var clientCertificates = state.certificates.filter(function (item) { return clientId(item) === String(state.current.id); });
     var summary = ["Cliente: " + (state.current.nome || ""), "ID: " + (state.current.id || ""), "Documento: " + (state.current.cpfCnpj || ""), "E-mail: " + (state.current.email || ""), "Telefone: " + (state.current.telefone || state.current.whatsapp || ""), "Certificados: " + clientCertificates.length].join("\n");
     navigator.clipboard.writeText(summary).then(function () { notify("Resumo da Ficha 360º copiado."); });
+  }
+
+  function isoDate(value) { var date = parseDate(value); if (!date) return ""; var y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,"0"),day=String(date.getDate()).padStart(2,"0"); return y+"-"+m+"-"+day; }
+  async function openEditClient() {
+    if (!state.current || !w.AtlasAPI) return notify("Abra uma Ficha 360º primeiro.", "warning");
+    try {
+      var data = await w.AtlasAPI.getClient(state.current.id), client=data.cliente||state.current, certs=Array.isArray(data.certificados)?data.certificados:[];
+      state.editData=data;
+      id("crm-edit-name").value=client.nome||""; id("crm-edit-email").value=client.email||""; id("crm-edit-phone").value=client.telefone||client.whatsapp||""; id("crm-edit-owner").value=client.responsavel||""; id("crm-edit-status").value=String(client.situacao||"ATIVO").toUpperCase(); id("crm-edit-notes").value=client.observacoes||"";
+      var select=id("crm-edit-certificate"); select.innerHTML='<option value="">Novo certificado / validade manual</option>'+certs.map(function(cert){return '<option value="'+esc(cert.id)+'">'+esc((cert.tipo||"Certificado")+' • '+(isoDate(cert.vencimento)||"sem vencimento"))+'</option>';}).join("");
+      function fillCert(){var cert=certs.find(function(item){return String(item.id)===String(select.value);})||{};id("crm-edit-cert-type").value=cert.tipo||"";id("crm-edit-expiry").value=isoDate(cert.vencimento);id("crm-edit-cert-status").value=String(cert.statusCertificado||"ATIVO").toUpperCase();}
+      select.onchange=fillCert; if(certs.length){select.value=certs[0].id;fillCert();} else fillCert();
+      openModal("crm-edit"); setTimeout(function(){id("crm-edit-name").focus();},40);
+    } catch(error){notify(error.message||"Não foi possível carregar os dados para edição.","warning");}
+  }
+  async function saveEditClient(event) {
+    event.preventDefault(); if(!state.current||!state.editData)return;
+    var submit=event.submitter||id("crm-edit-form").querySelector('button[type="submit"]'); submit.disabled=true; submit.textContent="Salvando...";
+    try {
+      var clientPayload={nome:id("crm-edit-name").value.trim(),email:id("crm-edit-email").value.trim(),telefone:id("crm-edit-phone").value.trim(),responsavel:id("crm-edit-owner").value.trim(),situacao:id("crm-edit-status").value,observacoes:id("crm-edit-notes").value.trim(),actor:actor()};
+      await w.AtlasAPI.updateClient(state.current.id,clientPayload);
+      var expiry=id("crm-edit-expiry").value, certId=id("crm-edit-certificate").value, certType=id("crm-edit-cert-type").value.trim();
+      if(expiry){var existingCert=(state.editData.certificados||[]).find(function(item){return String(item.id)===String(certId);})||{}; var certPayload={tipo:certType||existingCert.tipo||"Certificado digital",autoridadeCertificadora:existingCert.autoridadeCertificadora||"",numeroSerie:existingCert.numeroSerie||"",emissao:existingCert.emissao||"",vencimento:expiry,statusCertificado:id("crm-edit-cert-status").value,actor:actor()}; if(certId) await w.AtlasAPI.updateCertificate(certId,certPayload); else await w.AtlasAPI.createCertificate(Object.assign({clienteId:state.current.id},certPayload));}
+      if(w.AtlasAPI.addTimeline) await w.AtlasAPI.addTimeline({clienteId:state.current.id,tipoEvento:"CADASTRO_ATUALIZADO",titulo:"Cliente editado na Ficha 360º",descricao:expiry?"Dados cadastrais e validade do certificado atualizados manualmente.":"Dados cadastrais atualizados manualmente.",origem:"CRM_360",actor:actor()}).catch(function(){});
+      if(w.AtlasAPI.audit) await w.AtlasAPI.audit("CRM_CLIENT_EDIT",{clientId:state.current.id,username:actor(),certificateId:certId||"NOVO",expiry:expiry,version:"4.9.19"}).catch(function(){});
+      closeModal("crm-edit"); notify("Cliente atualizado com sucesso."); d.dispatchEvent(new CustomEvent("atlas:client-refresh",{detail:{clientId:state.current.id}})); setTimeout(function(){location.reload();},700);
+    } catch(error){notify(error.message||"Não foi possível salvar as alterações.","warning");}
+    finally{submit.disabled=false;submit.textContent="Salvar alterações";}
   }
 
   function bind() {
@@ -250,6 +280,12 @@
         if (adminAction.dataset.adminAction === "audit") auditView();
       }
     });
+
+    id("crm-edit-client-open").addEventListener("click", openEditClient);
+    id("crm-edit-close").addEventListener("click", function(){closeModal("crm-edit");});
+    id("crm-edit-cancel").addEventListener("click", function(){closeModal("crm-edit");});
+    id("crm-edit-backdrop").addEventListener("click", function(){closeModal("crm-edit");});
+    id("crm-edit-form").addEventListener("submit", saveEditClient);
 
     id("crm-universal-open").addEventListener("click", function () { openModal("crm-universal"); setTimeout(function () { id("crm-universal-input").focus(); }, 50); });
     id("crm-universal-close").addEventListener("click", function () { closeModal("crm-universal"); });
@@ -289,13 +325,13 @@
     id("crm-bulk-export").addEventListener("click", function () {
       var selectedClients = state.clients.filter(function (client) { return state.selected.has(String(client.id)); });
       var csv = ["ID;NOME;DOCUMENTO;EMAIL;TELEFONE;SITUACAO"].concat(selectedClients.map(function (client) { return [client.id, client.nome, client.cpfCnpj, client.email, client.telefone || client.whatsapp, client.situacao || client.status].map(function (value) { return '"' + String(value || "").replace(/"/g, '""') + '"'; }).join(";"); })).join("\r\n");
-      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.17.csv"; link.click(); URL.revokeObjectURL(link.href);
+      var link = d.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); link.download = "atlas-clientes-selecionados-4.9.19.csv"; link.click(); URL.revokeObjectURL(link.href);
     });
     id("crm-bulk-clear").addEventListener("click", function () { state.selected.clear(); d.querySelectorAll(".crm-row-selector input").forEach(function (input) { input.checked = false; }); updateBulk(); });
 
     d.addEventListener("change", function (event) { var input = event.target.closest(".crm-row-selector input"); if (!input) return; if (input.checked) state.selected.add(input.value); else state.selected.delete(input.value); updateBulk(); event.stopPropagation(); });
     d.addEventListener("click", function (event) { if (event.target.closest(".crm-row-selector")) event.stopPropagation(); });
-    d.addEventListener("keydown", function (event) { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); openModal("crm-universal"); id("crm-universal-input").focus(); } if (event.key === "Escape") { closeFloating(); ["crm-universal", "crm-alerts", "crm-communication"].forEach(closeModal); } });
+    d.addEventListener("keydown", function (event) { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); openModal("crm-universal"); id("crm-universal-input").focus(); } if (event.key === "Escape") { closeFloating(); ["crm-universal", "crm-alerts", "crm-communication", "crm-edit"].forEach(closeModal); } });
 
     d.addEventListener("atlas:client-opened", function (event) { state.current = event.detail && event.detail.client; renderClientHeader(state.current); });
     id("crm-drawer-tabs").addEventListener("click", function (event) { var button = event.target.closest('button[data-tab="administracao"]'); if (button) renderAdmin(state.current); });
