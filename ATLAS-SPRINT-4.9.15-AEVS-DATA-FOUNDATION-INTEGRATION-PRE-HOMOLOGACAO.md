@@ -1,6 +1,6 @@
 # Projeto Atlas — Pedroza Certificadora
 
-## Sprint 4.9.16 — AEVS Data Foundation Integration
+## Sprint 4.9.17 — AEVS Data Foundation Integration
 
 ### Objetivo
 
@@ -17,7 +17,7 @@ Integrar a consulta pública da Área do Cliente à base oficial Atlas Data Foun
 - não retorna telefone, e-mail, endereço, número de série ou outros dados pessoais;
 - Área do Cliente passa a usar o mesmo endpoint da Atlas API;
 - proteção contra cache, respostas antigas e vazamento do resultado anterior permanece ativa;
-- versão uniformizada para 4.9.16.
+- versão uniformizada para 4.9.17.
 
 ### Arquitetura preservada
 
@@ -33,7 +33,7 @@ Integrar a consulta pública da Área do Cliente à base oficial Atlas Data Foun
 ### Publicação obrigatória em duas etapas
 
 1. Atualizar o projeto Apps Script da Atlas Data Foundation com o arquivo `apps-script/Code.gs` deste pacote e criar uma nova versão da implantação existente.
-2. Publicar o site com o script PowerShell da Sprint 4.9.16.
+2. Publicar o site com o script PowerShell da Sprint 4.9.17.
 
 A URL da implantação deve permanecer:
 

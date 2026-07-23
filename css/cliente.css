@@ -1363,7 +1363,7 @@
   .aics-privacy h2 { font-size: 25px; }
 }
 
-/* Sprint 4.9.16 — consulta publica e envio seguro */
+/* Sprint 4.9.17 — consulta publica e envio seguro */
 .resultado-email-status{margin-top:16px;padding:13px 16px;border-radius:12px;font-weight:700;background:#eef6ff;color:#12365f;border:1px solid #cfe2f7}
 .resultado-email-status.sucesso{background:#e9fbf2;color:#087443;border-color:#bcebd3}
 .resultado-email-status.erro{background:#fff0f2;color:#a61f37;border-color:#f2c5ce}

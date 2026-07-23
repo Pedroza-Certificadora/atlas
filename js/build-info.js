@@ -4,7 +4,7 @@
  */
 (function (window, document) {
   "use strict";
-  var build = Object.freeze({ product: "Portal Atlas", sprint: "4.9 FINAL", module: "CRM Enterprise Gold", version: "4.9.16", environment: "Homologação Final", publishedAt: "22/07/2026" });
+  var build = Object.freeze({ product: "Portal Atlas", sprint: "4.9 FINAL", module: "CRM Enterprise Gold", version: "4.9.17", environment: "Homologação Final", publishedAt: "22/07/2026" });
   window.ATLAS_BUILD = build;
   function label(){ return "Atlas • Sprint " + build.sprint + " • " + build.module + " • v" + build.version; }
   function ensureGlobalStamp(){ var stamp=document.getElementById("atlas-build-stamp"); if(!stamp){ stamp=document.createElement("div"); stamp.id="atlas-build-stamp"; stamp.className="atlas-build-stamp"; stamp.setAttribute("role","status"); stamp.setAttribute("aria-label","Versão atual do Portal Atlas"); document.body.appendChild(stamp); } stamp.textContent=label(); }

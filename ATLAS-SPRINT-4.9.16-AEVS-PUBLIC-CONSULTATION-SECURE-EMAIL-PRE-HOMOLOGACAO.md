@@ -1,4 +1,4 @@
-# Projeto Atlas — Sprint 4.9.16
+# Projeto Atlas — Sprint 4.9.17
 
 ## AEVS Public Consultation & Secure Email
 
@@ -34,4 +34,4 @@ A página pública não expõe nome, documento ou e-mail completos. O e-mail det
 8. Consultar documento inexistente e confirmar ausência de dados residuais.
 
 ### Versão
-`4.9.16`
+`4.9.17`
