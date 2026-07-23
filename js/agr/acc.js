@@ -1,4 +1,4 @@
-/* Atlas Communication Center Premium | Sprint 5.0.4D.1 | Marcos Henrique Pedroza */
+/* Atlas Communication Center Premium | Sprint 5.0.4D.2 | Marcos Henrique Pedroza */
 (function(w,d){"use strict";
 var state={clients:[],models:[],communications:[],campaigns:[],previewAudience:null,automation:null};
 function $(id){return d.getElementById(id)}
