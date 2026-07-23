@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.4';
+const ATLAS_VERSION = '5.0.4A';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -65,7 +65,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.test','automation.run','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -98,9 +98,15 @@ function route_(action,payload,client,authToken) {
     case 'campaigns.create': return createCampaign_(payload);
     case 'campaigns.preview': return previewCampaign_(payload);
     case 'automation.status': return automationStatus_();
-    case 'automation.configure': return configureAutomation_(payload);
+    case 'automation.configure':
+    case 'automation.saveConfig': return configureAutomation_(payload);
+    case 'automation.loadConfig': return getAccAutomationConfig_();
     case 'automation.test': return sendAutomationTest_(payload,client);
     case 'automation.run': return runAccAutomation_(payload);
+    case 'automation.processQueue': return processAccQueue_();
+    case 'automation.gmailQuota': return {remainingQuota:MailApp.getRemainingDailyQuota()};
+    case 'automation.listTriggers': return listAccAutomationTriggers_();
+    case 'automation.backendHealth': return accBackendHealth_();
     case 'automation.installTriggers': return installAccAutomationTriggers_();
     case 'automation.removeTriggers': return removeAccAutomationTriggers_();
     case 'invites.generate': return generateInvite_(payload);
@@ -904,6 +910,7 @@ function saveAccAutomationConfig_(cfg) {
   return cfg;
 }
 function automationStatus_() {
+  ensureAccAutomationFoundation_();
   const cfg=getAccAutomationConfig_();
   const queue=rows_('FILA_ENVIO').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});
   const comm=rows_('COMUNICACOES');
@@ -927,15 +934,23 @@ function configureAutomation_(p) {
   return automationStatus_();
 }
 function installAccAutomationTriggers_() {
+  ensureAccAutomationFoundation_();
   removeAccAutomationTriggers_();
   ScriptApp.newTrigger('accDailyAutomationTrigger').timeBased().everyDays(1).atHour(8).create();
   ScriptApp.newTrigger('accQueueProcessorTrigger').timeBased().everyHours(1).create();
+  recordAudit_({action:'ACC_TRIGGERS_INSTALLED',details:{handlers:['accDailyAutomationTrigger','accQueueProcessorTrigger']}},{});
   return automationStatus_();
 }
 function removeAccAutomationTriggers_() {
-  ScriptApp.getProjectTriggers().forEach(function(t){if(['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0) ScriptApp.deleteTrigger(t);});
+  let removed=0;
+  ScriptApp.getProjectTriggers().forEach(function(t){if(['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0){ScriptApp.deleteTrigger(t);removed++;}});
+  try{recordAudit_({action:'ACC_TRIGGERS_REMOVED',details:{removed:removed}},{});}catch(_){}
   return automationStatus_();
 }
+function listAccAutomationTriggers_(){
+  return ScriptApp.getProjectTriggers().filter(function(t){return ['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0;}).map(function(t){return {handler:t.getHandlerFunction(),eventType:String(t.getEventType()),uniqueId:t.getUniqueId?t.getUniqueId():''};});
+}
+
 function accDailyAutomationTrigger(){ return runAccAutomation_({source:'TRIGGER'}); }
 function accQueueProcessorTrigger(){ return processAccQueue_(); }
 function runAccAutomation_(p) {
@@ -947,8 +962,8 @@ function runAccAutomation_(p) {
     const certs=rows_('CERTIFICADOS').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO' && r.VENCIMENTO;});
     let queued=0, skipped=0;
     certs.forEach(function(cert){
-      let expiry; try{expiry=new Date(cert.VENCIMENTO);}catch(_){skipped++;return;}
-      if(isNaN(expiry.getTime())){skipped++;return;}
+      const expiry=parseAtlasDate_(cert.VENCIMENTO);
+      if(!expiry){skipped++;return;}
       const days=Math.ceil((new Date(expiry.getFullYear(),expiry.getMonth(),expiry.getDate())-new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()))/86400000);
       if(cfg.milestones.indexOf(days)<0){skipped++;return;}
       const client=findById_('CLIENTES',cert.CLIENTE_ID); if(!client){skipped++;return;}
@@ -1001,9 +1016,48 @@ function sendAutomationTest_(p,clientMeta) {
   recordAudit_({action:'ACC_TEST_EMAIL_SENT',details:{destinoMascarado:mascararEmailPublico_(to)}},clientMeta||{});
   return {sent:true,destinationMasked:mascararEmailPublico_(to),remainingQuota:MailApp.getRemainingDailyQuota()};
 }
+
+function ensureAccAutomationFoundation_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  ['COMUNICACOES','MODELOS_EMAIL','CAMPANHAS','CAMPANHA_DESTINATARIOS','PREFERENCIAS_COMUNICACAO','FILA_ENVIO','TIMELINE','AUDITORIA','LOGS'].forEach(function(name){ensureSheet_(ss,name,SHEETS[name]);});
+  seedAccModels_();
+  return true;
+}
+function parseAtlasDate_(value){
+  if(value instanceof Date && !isNaN(value.getTime())) return new Date(value.getTime());
+  if(value===null || typeof value==='undefined' || value==='') return null;
+  const text=String(value).trim();
+  let m=text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(m){const d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));return isNaN(d.getTime())?null:d;}
+  m=text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/);
+  if(m){const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));return isNaN(d.getTime())?null:d;}
+  const d=new Date(text); return isNaN(d.getTime())?null:d;
+}
+function accBackendHealth_(){
+  ensureAccAutomationFoundation_();
+  const required=['automation.status','automation.configure','automation.test','automation.run','automation.processQueue','automation.installTriggers','automation.removeTriggers'];
+  const sheets=['CLIENTES','CERTIFICADOS','COMUNICACOES','MODELOS_EMAIL','PREFERENCIAS_COMUNICACAO','FILA_ENVIO','TIMELINE','AUDITORIA'];
+  return {
+    service:'ACC Backend Engine',
+    version:ATLAS_VERSION,
+    status:'online',
+    actions:required,
+    sheets:sheets.map(function(name){const sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);return {name:name,ok:!!sh,rows:sh?Math.max(0,sh.getLastRow()-1):0};}),
+    triggers:listAccAutomationTriggers_(),
+    remainingQuota:MailApp.getRemainingDailyQuota(),
+    config:getAccAutomationConfig_(),
+    timestamp:new Date()
+  };
+}
+function testarAccBackend(){
+  const result=accBackendHealth_();
+  Logger.log(JSON.stringify(result,null,2));
+  return result;
+}
+
 function clientAllowsAutomaticEmail_(clientId){const pref=rows_('PREFERENCIAS_COMUNICACAO').find(function(r){return String(r.CLIENTE_ID)===String(clientId)&&String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});return !pref || String(pref.AVISO_VENCIMENTO||'SIM').toUpperCase()!=='NAO';}
 function hasAutomationMilestone_(key){return rows_('COMUNICACOES').some(function(r){return String(r.CAMPANHA_ID||'')==='AUTO:'+key && String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});}
 function modelIdForMilestone_(days){if(days===90)return 'ACC-VENC-90';if(days===60)return 'ACC-VENC-60';if(days===30)return 'ACC-VENC-30';if(days===15)return 'ACC-VENC-15';if(days===7)return 'ACC-VENC-7';if(days===0)return 'ACC-VENCE-HOJE';return 'ACC-VENCIDO';}
 function defaultAutomationSubject_(days){if(days>0)return 'Seu certificado digital vence em '+days+' dias';if(days===0)return 'Seu certificado digital vence hoje';return 'Seu certificado digital esta vencido';}
 function defaultAutomationHtml_(days){return '<div style="font-family:Arial,sans-serif;color:#17365d;line-height:1.6"><h2>Ola, {{NOME}}.</h2><p>'+defaultAutomationSubject_(days)+'.</p><p>Validade: <strong>{{VALIDADE}}</strong></p><p>Entre em contato para organizar sua renovacao.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>';}
-function renderAccSubject_(subject,client,cert){return String(subject||'').replace(/\{\{NOME\}\}/g,String(client.NOME||client.EMPRESA||'Cliente')).replace(/\{\{VALIDADE\}\}/g,cert.VENCIMENTO?Utilities.formatDate(new Date(cert.VENCIMENTO),Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):'');}
+function renderAccSubject_(subject,client,cert){const d=parseAtlasDate_(cert.VENCIMENTO);return String(subject||'').replace(/\{\{NOME\}\}/g,String(client.NOME||client.EMPRESA||'Cliente')).replace(/\{\{VALIDADE\}\}/g,d?Utilities.formatDate(d,Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):'');}
