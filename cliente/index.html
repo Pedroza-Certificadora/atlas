@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="auth-check-pending" data-auth-protected data-auth-permission="CLIENT_ACCESS">
+<html lang="pt-BR">
 <head>
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KKLWZ21C87"></script>
@@ -45,9 +45,7 @@
 
   <link rel="stylesheet" href="../css/style.css?v=4.5.0">
   <link rel="stylesheet" href="../css/motion.css?v=4.5.0">
-  <link rel="stylesheet" href="../css/cliente.css?v=4.5.0">
-  <link rel="stylesheet" href="../css/auth.css?v=4.8.1">
-  <script src="../js/auth/config.js?v=4.8.1"></script>
+  <link rel="stylesheet" href="../css/cliente.css?v=4.9.16">
   <script src="../js/api/atlas-api.js?v=4.8.1"></script>
   <script src="../js/auth/storage.js?v=4.8.1"></script>
   <script src="../js/auth/crypto.js?v=4.8.1"></script>
@@ -111,10 +109,6 @@
       </nav>
 
       <div class="header-actions">
-        <div class="auth-user-chip"><span><strong data-auth-user-name>Cliente</strong><small data-auth-user-role>CLIENTE</small></span></div>
-        <a class="button button-outline auth-account-button" href="../auth/minha-conta.html">Minha conta</a>
-
-        <a class="button button-outline auth-logout-button" href="../auth/logout.html" data-auth-logout>Sair</a>
         <a
           class="header-phone"
           href="https://wa.me/5521991674117"
@@ -217,7 +211,7 @@
           <div class="consulta-privacidade">
             <span aria-hidden="true">♢</span>
             <p>
-              A Pedroza Certificadora não exibe CPF, CNPJ, telefone ou e-mail completos.
+              A consulta é pública, exibe somente dados mascarados e envia detalhes apenas ao e-mail já cadastrado.
             </p>
           </div>
         </section>
@@ -279,10 +273,16 @@
               Renovar pelo WhatsApp
             </a>
 
+            <button id="resultado-email" class="button button-secondary" type="button" hidden>
+              Enviar detalhes por e-mail
+            </button>
+
             <button id="nova-consulta" class="button button-outline-dark" type="button">
               Fazer nova consulta
             </button>
           </div>
+
+          <div id="resultado-email-status" class="resultado-email-status" role="status" hidden></div>
         </article>
       </div>
     </section>
@@ -403,8 +403,8 @@
 
     <section id="seguranca" class="aics-privacy" aria-labelledby="privacy-title">
       <div class="container aics-privacy-inner">
-        <div><span>Privacidade e LGPD</span><h2 id="privacy-title">Você mantém o controle dos dados locais</h2><p>Esta página não é uma área autenticada. Nenhum dado interno da Central AGR é exibido e nenhum CPF ou CNPJ completo é salvo no navegador.</p></div>
-        <ul><li>Documento sempre mascarado</li><li>Limpeza de histórico e favoritos</li><li>Dados restritos ao navegador utilizado</li><li>Sem cadastro ou login nesta Sprint</li></ul>
+        <div><span>Privacidade e LGPD</span><h2 id="privacy-title">Você mantém o controle dos dados locais</h2><p>Esta consulta pública mostra somente dados mascarados. Os detalhes completos são enviados exclusivamente ao e-mail previamente cadastrado no Atlas.</p></div>
+        <ul><li>Documento sempre mascarado</li><li>Limpeza de histórico e favoritos</li><li>Dados restritos ao navegador utilizado</li><li>Sem senha para a consulta mascarada</li></ul>
       </div>
     </section>
 
@@ -640,7 +640,7 @@
 
   <script>
     window.ATLAS_AEVS_CONFIG = {
-      endpoint: "https://script.google.com/macros/s/AKfycbzWMMaw7qIegy2TeKa8dc0_0g9mui4TD1xwdc7n9XjxJY4EglSEg_PP6K5lm_TD12RZ3Q/exec",
+      endpoint: "https://script.google.com/macros/s/AKfycbz_s7voCfYXJqkKZHn70luVdfnqPN1_WEL9e-wzInGca-l0jmkVU3KNs04isFn37eQGFA/exec",
       whatsapp: "5521991674117"
     };
   </script>
@@ -648,11 +648,9 @@
   <script src="../js/app.js?v=4.5.0" defer></script>
   <script src="../js/motion.js?v=4.5.0" defer></script>
   <script src="../js/cliente/aics-data.js?v=4.5.0" defer></script>
-  <script src="../js/cliente/cliente.js?v=4.5.0" defer></script>
+  <script src="../js/cliente/cliente.js?v=4.9.16" defer></script>
   <script src="../js/cliente/aics.js?v=4.5.0" defer></script>
-  <script src="../js/auth/auth.js?v=4.8.1"></script>
-  <script src="../js/auth/protected-ui.js?v=4.8.1"></script>
-  <script src="../js/build-info.js?v=4.9.15" defer></script>
+  <script src="../js/build-info.js?v=4.9.16" defer></script>
 </body>
 </html>
 

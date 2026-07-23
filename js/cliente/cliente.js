@@ -28,10 +28,13 @@
   const resultadoSituacao = document.querySelector("#resultado-situacao");
   const resultadoPrazo = document.querySelector("#resultado-prazo");
   const resultadoWhatsapp = document.querySelector("#resultado-whatsapp");
+  const resultadoEmail = document.querySelector("#resultado-email");
+  const resultadoEmailStatus = document.querySelector("#resultado-email-status");
   const novaConsulta = document.querySelector("#nova-consulta");
 
   let consultaSequencia = 0;
   let consultaController = null;
+  let documentoConsultaAtual = "";
 
   if (!form || !inputDocumento) {
     return;
@@ -132,6 +135,17 @@
     resultadoPrazo.textContent = "—";
     resultadoWhatsapp.textContent = "Falar com atendimento";
     resultadoWhatsapp.href = `https://wa.me/${whatsapp}`;
+    documentoConsultaAtual = "";
+    if (resultadoEmail) {
+      resultadoEmail.hidden = true;
+      resultadoEmail.disabled = false;
+      resultadoEmail.textContent = "Enviar detalhes por e-mail";
+    }
+    if (resultadoEmailStatus) {
+      resultadoEmailStatus.hidden = true;
+      resultadoEmailStatus.className = "resultado-email-status";
+      resultadoEmailStatus.textContent = "";
+    }
   }
 
   function possuiDadosDeCertificado(dados) {
@@ -327,6 +341,16 @@
       mascararDocumento(documentoDigitado)
     );
 
+    documentoConsultaAtual = somenteNumeros(documentoDigitado);
+    if (resultadoEmail) {
+      const envioDisponivel = dados.envioEmailDisponivel !== false && Boolean(dados.emailMascarado);
+      resultadoEmail.hidden = !envioDisponivel;
+      resultadoEmail.dataset.destino = dados.emailMascarado || "";
+      resultadoEmail.textContent = envioDisponivel
+        ? `Enviar detalhes para ${dados.emailMascarado}`
+        : "E-mail não cadastrado";
+    }
+
     resultadoSection.hidden = false;
     resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -345,6 +369,27 @@
       status,
       validade
     });
+  }
+
+  async function enviarDetalhesPorEmail(documento) {
+    if (!documento) throw new Error("Realize uma consulta válida antes do envio.");
+
+    const resposta = await fetch(endpoint, {
+      method: "POST",
+      mode: "cors",
+      cache: "no-store",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      body: JSON.stringify({
+        action: "aevs.sendEmail",
+        payload: { documento, origem: "AREA_CLIENTE_PUBLICA" },
+        client: { path: window.location.pathname, userAgent: navigator.userAgent }
+      })
+    });
+
+    if (!resposta.ok) throw new Error(`Falha no envio. Código ${resposta.status}.`);
+    const retorno = await resposta.json();
+    if (!retorno?.ok) throw new Error(retorno?.message || "Não foi possível enviar o e-mail.");
+    return retorno.data || {};
   }
 
   async function consultar(documento, signal) {
@@ -380,6 +425,31 @@
       throw new Error("O serviço retornou uma resposta inválida.");
     }
   }
+
+  resultadoEmail?.addEventListener("click", async () => {
+    if (!documentoConsultaAtual) return;
+    resultadoEmail.disabled = true;
+    resultadoEmail.textContent = "Enviando...";
+    if (resultadoEmailStatus) resultadoEmailStatus.hidden = true;
+
+    try {
+      const retorno = await enviarDetalhesPorEmail(documentoConsultaAtual);
+      resultadoEmail.textContent = "E-mail enviado";
+      if (resultadoEmailStatus) {
+        resultadoEmailStatus.className = "resultado-email-status sucesso";
+        resultadoEmailStatus.textContent = retorno.mensagem || `Detalhes enviados para ${retorno.emailMascarado || "o e-mail cadastrado"}.`;
+        resultadoEmailStatus.hidden = false;
+      }
+    } catch (erro) {
+      resultadoEmail.disabled = false;
+      resultadoEmail.textContent = "Tentar enviar novamente";
+      if (resultadoEmailStatus) {
+        resultadoEmailStatus.className = "resultado-email-status erro";
+        resultadoEmailStatus.textContent = erro.message || "Não foi possível enviar. Fale com nosso atendimento.";
+        resultadoEmailStatus.hidden = false;
+      }
+    }
+  });
 
   limparResultadoAnterior();
 

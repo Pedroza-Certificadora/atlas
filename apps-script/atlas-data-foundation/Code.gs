@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '4.9.15';
+const ATLAS_VERSION = '4.9.16';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -56,6 +56,7 @@ function route_(action,payload,client,authToken) {
   switch(action) {
     case 'health': return {service:'Atlas API',version:ATLAS_VERSION,status:'online'};
     case 'auth.login': return login_(payload,client);
+    case 'aevs.sendEmail': return enviarDetalhesCertificadoEmail_(payload,client);
     case 'users.list': return listUsers_();
     case 'users.create': return createUser_(payload);
     case 'users.setActive': return setUserActive_(payload);
@@ -134,8 +135,96 @@ function consultarCertificadoPublico_(params) {
     situacao:situacao,
     diasRestantes:dias,
     referenciaConsulta:String(params.requestId || params._ || ''),
+    emailMascarado:mascararEmailPublico_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || ''),
+    envioEmailDisponivel:Boolean(normalize_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || '')),
     fonte:'ATLAS_DATA_FOUNDATION'
   };
+}
+
+
+function enviarDetalhesCertificadoEmail_(payload,client) {
+  const documento = digits_(payload.documento || payload.cpfCnpj || '');
+  if ([11,14].indexOf(documento.length) === -1 || /^(\d)\1+$/.test(documento)) {
+    throw apiError_('VALIDATION','Documento invalido.');
+  }
+
+  const cache = CacheService.getScriptCache();
+  const chaveLimite = 'aevs-email:' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, documento)).slice(0,32);
+  if (cache.get(chaveLimite)) {
+    throw apiError_('RATE_LIMIT','Aguarde alguns minutos antes de solicitar um novo envio.');
+  }
+
+  const cliente = rows_('CLIENTES').find(function(row) {
+    return digits_(row.CPF_CNPJ) === documento && String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
+  });
+  if (!cliente) throw apiError_('NOT_FOUND','Nao foi possivel enviar os detalhes. Fale com nosso atendimento.');
+
+  const email = normalize_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || '');
+  if (!email || email.indexOf('@') < 1) {
+    throw apiError_('EMAIL_NOT_FOUND','Nao ha e-mail valido cadastrado. Fale com nosso atendimento para atualizar o cadastro.');
+  }
+
+  const consulta = consultarCertificadoPublico_({documento:documento});
+  if (!consulta.encontrado) throw apiError_('NOT_FOUND','Nao foi localizado certificado para envio.');
+
+  const assunto = 'Informacoes do seu certificado digital - Pedroza Certificadora';
+  const html = templateEmailCertificado_(cliente,consulta);
+  MailApp.sendEmail({
+    to: email,
+    subject: assunto,
+    htmlBody: html,
+    name: 'Pedroza Certificadora',
+    replyTo: 'certificadodigital@pedroza.com.br'
+  });
+
+  const now = new Date();
+  const comunicacaoId = nextId_('COMUNICACOES','COM');
+  appendObject_('COMUNICACOES',{
+    ID:comunicacaoId,CLIENTE_ID:String(cliente.ID),CAMPANHA_ID:'',MODELO_ID:'AEVS-DETALHES-CERTIFICADO',CANAL:'EMAIL',
+    DESTINO:email,ASSUNTO:assunto,CONTEUDO_HTML:html,STATUS_ENVIO:'ENVIADO',TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',
+    ENVIADO_EM:now,ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'AEVS_PUBLICO',ALTERADO_EM:now,ALTERADO_POR:'AEVS_PUBLICO'
+  });
+  addTimeline_({clienteId:cliente.ID,tipoEvento:'AEVS_EMAIL_ENVIADO',titulo:'Detalhes do certificado enviados por e-mail',descricao:'Envio solicitado pela Area do Cliente publica.',origem:'AEVS_PUBLICO',actor:'AEVS_PUBLICO',dados:{comunicacaoId:comunicacaoId,destinoMascarado:mascararEmailPublico_(email)}});
+  recordAudit_({action:'AEVS_EMAIL_SENT',details:{clienteId:cliente.ID,documentoMascarado:mascararDocumentoPublico_(documento),destinoMascarado:mascararEmailPublico_(email)}},client || {});
+  cache.put(chaveLimite,'1',300);
+
+  return {enviado:true,emailMascarado:mascararEmailPublico_(email),mensagem:'Detalhes enviados para ' + mascararEmailPublico_(email) + '.'};
+}
+
+function templateEmailCertificado_(cliente,dados) {
+  const nome = escaparHtml_(String(cliente.NOME || cliente.EMPRESA || 'Cliente'));
+  const tipo = escaparHtml_(dados.tipoCertificado || 'Certificado digital');
+  const situacao = escaparHtml_(dados.situacao || 'Nao informada');
+  const validade = escaparHtml_(dados.validadeFormatada || 'Nao informada');
+  const prazo = dados.diasRestantes === null || dados.diasRestantes === undefined ? 'Nao informado' : (Number(dados.diasRestantes) < 0 ? 'Vencido ha ' + Math.abs(Number(dados.diasRestantes)) + ' dia(s)' : Number(dados.diasRestantes) + ' dia(s) restante(s)');
+  const mensagem = Number(dados.diasRestantes) <= 30 ? 'Recomendamos iniciar a renovacao com antecedencia para evitar interrupcoes.' : 'Seu certificado permanece dentro do prazo de validade informado.';
+  const whatsapp = 'https://wa.me/5521991674117?text=' + encodeURIComponent('Ola! Recebi o resumo do meu certificado e gostaria de orientacao sobre renovacao.');
+  return '<!doctype html><html><body style="margin:0;background:#eef4fb;font-family:Arial,sans-serif;color:#102f57">' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4fb;padding:28px 12px"><tr><td align="center">' +
+    '<table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;width:100%;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 32px rgba(15,47,87,.12)">' +
+    '<tr><td style="background:linear-gradient(135deg,#06264d,#0d5d9f);padding:30px;color:#fff"><div style="font-size:13px;letter-spacing:1px;text-transform:uppercase;opacity:.8">Pedroza Certificadora</div><h1 style="margin:8px 0 0;font-size:27px">Informacoes do seu certificado digital</h1></td></tr>' +
+    '<tr><td style="padding:30px"><p style="font-size:17px;margin-top:0">Ola, <strong>' + nome + '</strong>.</p><p style="line-height:1.6;color:#526b89">Segue o resumo solicitado na Area do Cliente.</p>' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;border-collapse:separate;border-spacing:10px"><tr>' +
+    '<td style="background:#f4f8fd;border:1px solid #dbe8f5;border-radius:12px;padding:16px"><small style="color:#6b819c">TIPO</small><br><strong>' + tipo + '</strong></td>' +
+    '<td style="background:#f4f8fd;border:1px solid #dbe8f5;border-radius:12px;padding:16px"><small style="color:#6b819c">SITUACAO</small><br><strong>' + situacao + '</strong></td></tr><tr>' +
+    '<td style="background:#f4f8fd;border:1px solid #dbe8f5;border-radius:12px;padding:16px"><small style="color:#6b819c">VALIDADE</small><br><strong>' + validade + '</strong></td>' +
+    '<td style="background:#f4f8fd;border:1px solid #dbe8f5;border-radius:12px;padding:16px"><small style="color:#6b819c">PRAZO</small><br><strong>' + escaparHtml_(prazo) + '</strong></td></tr></table>' +
+    '<p style="background:#fff7df;border-left:4px solid #eda900;padding:15px;border-radius:8px;line-height:1.5">' + mensagem + '</p>' +
+    '<p style="text-align:center;margin:28px 0"><a href="' + whatsapp + '" style="display:inline-block;background:#08b956;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:9px">Solicitar renovacao pelo WhatsApp</a></p>' +
+    '<p style="font-size:12px;line-height:1.5;color:#71839a;border-top:1px solid #e3ebf5;padding-top:18px">Mensagem enviada porque houve uma solicitacao na Area do Cliente. Os detalhes foram encaminhados somente ao e-mail previamente cadastrado no Atlas.</p>' +
+    '</td></tr></table></td></tr></table></body></html>';
+}
+
+function mascararEmailPublico_(email) {
+  const valor = normalize_(email);
+  const partes = valor.split('@');
+  if (partes.length !== 2 || !partes[0] || !partes[1]) return '';
+  const usuario = partes[0];
+  const visivel = usuario.slice(0,1);
+  return visivel + '*'.repeat(Math.max(usuario.length - 1,3)) + '@' + partes[1];
+}
+function escaparHtml_(valor) {
+  return String(valor || '').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
 
 function dataAtlas_(valor) {
