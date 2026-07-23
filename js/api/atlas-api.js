@@ -84,6 +84,7 @@
     addTimeline: function (data) { return request("timeline.add", data); },
     listCommunications: function (filters) { return request("communications.list", filters || {}); },
     createCommunication: function (data) { return request("communications.create", data); },
+    sendCommunication: function (data) { return request("communications.send", data); },
     listModels: function () { return request("models.list"); },
     listCampaigns: function () { return request("campaigns.list"); },
     createCampaign: function (data) { return request("campaigns.create", data); },

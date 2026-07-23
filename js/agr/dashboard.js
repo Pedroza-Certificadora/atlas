@@ -1,4 +1,4 @@
-/* Atlas ACMS Interface - Dashboard Administrativo 4.9.19 */
+/* Atlas ACMS Interface - Dashboard Administrativo 5.0.1 */
 (function (window, document) {
   "use strict";
 
