@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.4B.2';
+const ATLAS_VERSION = '5.0.4C';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -505,6 +505,20 @@ function buildAtlasEmail_(o) {
     '</table></td></tr></table></body></html>';
 }
 
+
+function buildPortalInviteEmail_(kind) {
+  const logo='https://pedrozacertificadora.com.br/assets/img/logo-pedroza-certificadora.png';
+  const site='https://pedrozacertificadora.com.br';
+  const portal=site+'/cliente/';
+  const whatsapp='https://wa.me/5521991674117';
+  const welcome=kind==='WELCOME';
+  const title=welcome?'Seja bem-vindo à Pedroza Certificadora':'Seu certificado, sempre ao seu alcance';
+  const intro=welcome?'É um prazer ter você conosco. Nosso atendimento combina tecnologia, segurança e acompanhamento humano em todas as etapas do seu certificado digital.':'Criamos uma área exclusiva para você acompanhar a validade do certificado, receber avisos, consultar seu histórico e solicitar atendimento com mais praticidade.';
+  const button=welcome?'CONHECER NOSSOS SERVIÇOS':'CRIAR MEU ACESSO';
+  const buttonUrl=welcome?site:portal+'ativar?convite={{TOKEN_CONVITE}}';
+  return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>@media(max-width:620px){.shell{width:100%!important}.pad{padding-left:22px!important;padding-right:22px!important}.benefit{display:block!important;width:100%!important;border-right:0!important}.title{font-size:31px!important}.logo{width:220px!important}}</style></head><body style="margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#102f57"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef3f8"><tr><td align="center" style="padding:22px 10px"><table role="presentation" class="shell" width="640" cellspacing="0" cellpadding="0" style="width:640px;max-width:640px;background:#fff;border:1px solid #dce6ef"><tr><td class="pad" style="padding:24px 34px;border-bottom:4px solid #52a82d"><img class="logo" src="'+logo+'" width="255" alt="Pedroza Certificadora" style="display:block;max-width:100%;height:auto;border:0"></td></tr><tr><td class="pad" style="padding:38px 42px 24px;background:linear-gradient(135deg,#f8fbff,#eef8f2)"><div style="font-size:12px;letter-spacing:1.7px;font-weight:800;color:#52a82d">PEDROZA CERTIFICADORA</div><h1 class="title" style="margin:10px 0 16px;font-size:40px;line-height:1.08;color:#092e5b">'+title+'</h1><p style="margin:0 0 13px;font-size:17px;line-height:1.55;color:#183c66">Olá, <strong>{{NOME}}</strong>.</p><p style="margin:0;font-size:16px;line-height:1.65;color:#405873">'+intro+'</p></td></tr><tr><td class="pad" style="padding:28px 42px 10px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #dfe7f0;border-radius:14px;overflow:hidden"><tr><td colspan="2" style="padding:18px;background:#092e5b;color:#fff;font-size:17px;font-weight:800">'+(welcome?'VOCÊ PODE CONTAR COM A GENTE':'NO PORTAL DO CLIENTE VOCÊ PODERÁ')+'</td></tr><tr><td class="benefit" width="50%" style="padding:17px;border-right:1px solid #e5edf4;border-bottom:1px solid #e5edf4;color:#244662">✓ Avisos automáticos de vencimento</td><td class="benefit" width="50%" style="padding:17px;border-bottom:1px solid #e5edf4;color:#244662">✓ Consulta da validade do certificado</td></tr><tr><td class="benefit" width="50%" style="padding:17px;border-right:1px solid #e5edf4;color:#244662">✓ Atendimento humano e suporte remoto</td><td class="benefit" width="50%" style="padding:17px;color:#244662">✓ Histórico e solicitação de renovação</td></tr></table></td></tr><tr><td class="pad" align="center" style="padding:24px 42px 32px"><a href="'+buttonUrl+'" style="display:inline-block;background:#52a82d;color:#fff;text-decoration:none;font-size:15px;font-weight:900;padding:17px 30px;border-radius:8px">'+button+'</a><div style="margin-top:14px"><a href="'+whatsapp+'" style="color:#0b5f96;text-decoration:none;font-size:14px;font-weight:700">Prefere falar com nossa equipe? Acesse o WhatsApp</a></div></td></tr><tr><td class="pad" style="padding:22px 42px;background:#eef5fb;border-top:1px solid #dfe7f0;font-size:14px;line-height:1.65;color:#405873"><strong style="color:#092e5b">Segurança em primeiro lugar</strong><br>O cadastro é gratuito e seus dados são tratados de acordo com a LGPD. Nunca solicitaremos senha ou código de instalação do certificado por e-mail.</td></tr><tr><td class="pad" style="padding:22px 42px;font-size:14px;line-height:1.6;color:#405873">Atenciosamente,<br><strong style="font-size:16px;color:#092e5b">Equipe Pedroza Certificadora</strong></td></tr><tr><td style="padding:18px 34px;background:#092e5b;border-top:4px solid #52a82d;color:#fff;font-size:12px;line-height:1.5">CERTIFICAÇÃO DIGITAL É SEGURANÇA, AGILIDADE E CONFIANÇA.<br><span style="color:#cbd8e7">pedrozacertificadora.com.br • (21) 99167-4117</span></td></tr></table></td></tr></table></body></html>';
+}
+
 function seedAccModels_() {
   const now=new Date();
   const detailRows=[
@@ -529,13 +543,15 @@ function seedAccModels_() {
     model('MOD-000006','Aviso de vencimento — 60 dias','VENCIMENTO_60','Seu certificado digital vence em 60 dias','Renovação recomendada','60 DIAS','Seu certificado digital está a aproximadamente 60 dias do vencimento. Recomendamos organizar a renovação para evitar imprevistos.','FALAR NO WHATSAPP'),
     model('MOD-000007','Aviso de vencimento — 30 dias','VENCIMENTO_30','Atenção: seu certificado vence em 30 dias','Renove com antecedência','30 DIAS','Faltam aproximadamente 30 dias para o vencimento do seu certificado digital. Nossa equipe já pode conduzir a renovação.','RENOVAR AGORA'),
     model('MOD-000008','Aviso de vencimento — 15 dias','VENCIMENTO_15','Prioridade: seu certificado vence em 15 dias','Renovação prioritária','15 DIAS','Faltam aproximadamente 15 dias para o vencimento. Recomendamos prioridade na renovação para manter seus acessos disponíveis.','RENOVAR AGORA'),
-    model('MOD-000009','Aviso de vencimento — 7 dias','VENCIMENTO_7','Último aviso: seu certificado vence em 7 dias','Último aviso de vencimento','7 DIAS','Seu certificado digital está a aproximadamente 7 dias do vencimento. Entre em contato para realizarmos a renovação o quanto antes.','RENOVAR AGORA')
+    model('MOD-000009','Aviso de vencimento — 7 dias','VENCIMENTO_7','Último aviso: seu certificado vence em 7 dias','Último aviso de vencimento','7 DIAS','Seu certificado digital está a aproximadamente 7 dias do vencimento. Entre em contato para realizarmos a renovação o quanto antes.','RENOVAR AGORA'),
+    {id:'MOD-000010',name:'Boas-vindas à Pedroza Certificadora',type:'BOAS_VINDAS',subject:'{{NOME}}, seja bem-vindo à Pedroza Certificadora',html:buildPortalInviteEmail_('WELCOME')},
+    {id:'MOD-000011',name:'Convite para o Portal do Cliente',type:'CONVITE_PORTAL',subject:'{{NOME}}, acompanhe seu certificado no Portal Pedroza',html:buildPortalInviteEmail_('PORTAL')}
   ];
   models.forEach(function(m){
     const current=findById_('MODELOS_EMAIL',m.id);
-    const data={NOME:m.name,TIPO:m.type,ASSUNTO:m.subject,HTML:m.html,VARIAVEIS_JSON:JSON.stringify(['NOME','EMPRESA','CPF_CNPJ','TIPO_CERTIFICADO','VALIDADE','MENSAGEM','ASSINATURA']),ATIVO:'SIM',STATUS:'ATIVO',ALTERADO_EM:now,ALTERADO_POR:'SETUP-5.0.4B.2'};
-    if(current) updateRow_('MODELOS_EMAIL',m.id,data,'SETUP-5.0.4B.2');
-    else appendObject_('MODELOS_EMAIL',Object.assign({ID:m.id,CRIADO_EM:now,CRIADO_POR:'SETUP-5.0.4B.2'},data));
+    const data={NOME:m.name,TIPO:m.type,ASSUNTO:m.subject,HTML:m.html,VARIAVEIS_JSON:JSON.stringify(['NOME','EMPRESA','CPF_CNPJ','TIPO_CERTIFICADO','VALIDADE','MENSAGEM','ASSINATURA','TOKEN_CONVITE']),ATIVO:'SIM',STATUS:'ATIVO',ALTERADO_EM:now,ALTERADO_POR:'SETUP-5.0.4C'};
+    if(current) updateRow_('MODELOS_EMAIL',m.id,data,'SETUP-5.0.4C');
+    else appendObject_('MODELOS_EMAIL',Object.assign({ID:m.id,CRIADO_EM:now,CRIADO_POR:'SETUP-5.0.4C'},data));
   });
 }
 
