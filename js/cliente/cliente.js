@@ -35,6 +35,7 @@
   let consultaSequencia = 0;
   let consultaController = null;
   let documentoConsultaAtual = "";
+  let ultimaConsultaValida = null;
 
   if (!form || !inputDocumento) {
     return;
@@ -139,6 +140,7 @@
     if (resultadoEmail) {
       resultadoEmail.hidden = true;
       resultadoEmail.disabled = false;
+      resultadoEmail.dataset.destino = "";
       resultadoEmail.textContent = "Enviar detalhes por e-mail";
     }
     if (resultadoEmailStatus) {
@@ -215,6 +217,18 @@
   }
 
   function exibirNaoEncontrado(mensagem, documentoDigitado = "") {
+    documentoConsultaAtual = "";
+    if (resultadoEmail) {
+      resultadoEmail.hidden = true;
+      resultadoEmail.disabled = false;
+      resultadoEmail.dataset.destino = "";
+      resultadoEmail.textContent = "Enviar detalhes por e-mail";
+    }
+    if (resultadoEmailStatus) {
+      resultadoEmailStatus.hidden = true;
+      resultadoEmailStatus.className = "resultado-email-status";
+      resultadoEmailStatus.textContent = "";
+    }
     resultadoCard.className = "resultado-card status-erro";
     resultadoIcone.textContent = "!";
     resultadoCategoria.textContent = "Consulta concluída";
@@ -342,13 +356,16 @@
     );
 
     documentoConsultaAtual = somenteNumeros(documentoDigitado);
+    ultimaConsultaValida = { documento: documentoConsultaAtual, dados: { ...dados } };
     if (resultadoEmail) {
-      const envioDisponivel = dados.envioEmailDisponivel !== false && Boolean(dados.emailMascarado);
+      const emailMascarado = String(dados.emailMascarado || "").trim();
+      const envioDisponivel = dados.envioEmailDisponivel !== false;
       resultadoEmail.hidden = !envioDisponivel;
-      resultadoEmail.dataset.destino = dados.emailMascarado || "";
-      resultadoEmail.textContent = envioDisponivel
-        ? `Enviar detalhes para ${dados.emailMascarado}`
-        : "E-mail não cadastrado";
+      resultadoEmail.disabled = false;
+      resultadoEmail.dataset.destino = emailMascarado;
+      resultadoEmail.textContent = emailMascarado
+        ? `Enviar detalhes para ${emailMascarado}`
+        : "Enviar detalhes por e-mail";
     }
 
     resultadoSection.hidden = false;
@@ -392,7 +409,7 @@
     return retorno.data || {};
   }
 
-  async function consultar(documento, signal) {
+  async function consultar(documento, signal, tentativa = 1) {
     if (!endpoint || endpoint.includes("__ENDPOINT")) {
       throw new Error("O endereço do serviço de consulta ainda não foi configurado.");
     }
@@ -400,7 +417,8 @@
     const url = new URL(endpoint);
     url.searchParams.set("action", "aevs.consult");
     url.searchParams.set("documento", documento);
-    url.searchParams.set("requestId", `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    url.searchParams.set("requestId", `${Date.now()}-${tentativa}-${Math.random().toString(36).slice(2)}`);
+    url.searchParams.set("tentativa", String(tentativa));
     url.searchParams.set("_", Date.now().toString());
 
     const resposta = await fetch(url.toString(), {
@@ -424,6 +442,27 @@
     } catch {
       throw new Error("O serviço retornou uma resposta inválida.");
     }
+  }
+
+  function extrairDadosRetorno(retorno) {
+    return retorno?.dados || retorno?.data || retorno?.resultado || retorno || {};
+  }
+
+  async function consultarComConfirmacao(documento, signal) {
+    const primeiroRetorno = await consultar(documento, signal, 1);
+    const primeirosDados = extrairDadosRetorno(primeiroRetorno);
+    if (retornoEncontrado(primeirosDados)) return primeirosDados;
+
+    await new Promise((resolve, reject) => {
+      const timer = window.setTimeout(resolve, 450);
+      signal?.addEventListener("abort", () => {
+        window.clearTimeout(timer);
+        reject(new DOMException("Consulta cancelada", "AbortError"));
+      }, { once: true });
+    });
+
+    const segundoRetorno = await consultar(documento, signal, 2);
+    return extrairDadosRetorno(segundoRetorno);
   }
 
   resultadoEmail?.addEventListener("click", async () => {
@@ -484,10 +523,8 @@
     alternarCarregamento(true);
 
     try {
-      const retorno = await consultar(documento, consultaController.signal);
+      const dados = await consultarComConfirmacao(documento, consultaController.signal);
       if (sequenciaAtual !== consultaSequencia) return;
-
-      const dados = retorno?.dados || retorno?.data || retorno?.resultado || retorno;
       exibirResultado(dados, documento);
     } catch (erro) {
       if (erro?.name === "AbortError" || sequenciaAtual !== consultaSequencia) return;

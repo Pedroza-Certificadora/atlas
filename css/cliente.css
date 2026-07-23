@@ -1368,3 +1368,6 @@
 .resultado-email-status.sucesso{background:#e9fbf2;color:#087443;border-color:#bcebd3}
 .resultado-email-status.erro{background:#fff0f2;color:#a61f37;border-color:#f2c5ce}
 .resultado-email-status[hidden]{display:none!important}
+
+/* Sprint 4.9.18 — estado seguro do botao de e-mail */
+#resultado-email[hidden]{display:none!important}
