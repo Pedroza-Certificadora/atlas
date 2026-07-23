@@ -12,21 +12,21 @@
   <meta name="theme-color" content="#071b36">
   <link rel="icon" type="image/png" sizes="32x32" href="../images/logo/favicon-32.png">
   <link rel="manifest" href="../site.webmanifest">
-  <link rel="stylesheet" href="../css/style.css?v=5.0.1">
-  <link rel="stylesheet" href="../css/agr.css?v=5.0.1">
-  <link rel="stylesheet" href="../css/auth.css?v=5.0.1">
-  <link rel="stylesheet" href="../css/crm-clientes.css?v=5.0.1">
-  <link rel="stylesheet" href="../css/atlas-core.css?v=5.0.1">
-  <link rel="stylesheet" href="../css/crm-enterprise.css?v=5.0.1">
-  <script src="../js/auth/config.js?v=5.0.1"></script>
-  <script src="../js/api/atlas-api.js?v=5.0.1"></script>
-  <script src="../js/auth/storage.js?v=5.0.1"></script>
-  <script src="../js/auth/crypto.js?v=5.0.1"></script>
-  <script src="../js/auth/users.mock.js?v=5.0.1"></script>
-  <script src="../js/auth/audit.js?v=5.0.1"></script>
-  <script src="../js/auth/permissions.js?v=5.0.1"></script>
-  <script src="../js/auth/session.js?v=5.0.1"></script>
-  <script src="../js/auth/guards.js?v=5.0.1"></script>
+  <link rel="stylesheet" href="../css/style.css?v=5.0.3">
+  <link rel="stylesheet" href="../css/agr.css?v=5.0.3">
+  <link rel="stylesheet" href="../css/auth.css?v=5.0.3">
+  <link rel="stylesheet" href="../css/crm-clientes.css?v=5.0.3">
+  <link rel="stylesheet" href="../css/atlas-core.css?v=5.0.3">
+  <link rel="stylesheet" href="../css/crm-enterprise.css?v=5.0.3">
+  <script src="../js/auth/config.js?v=5.0.3"></script>
+  <script src="../js/api/atlas-api.js?v=5.0.3"></script>
+  <script src="../js/auth/storage.js?v=5.0.3"></script>
+  <script src="../js/auth/crypto.js?v=5.0.3"></script>
+  <script src="../js/auth/users.mock.js?v=5.0.3"></script>
+  <script src="../js/auth/audit.js?v=5.0.3"></script>
+  <script src="../js/auth/permissions.js?v=5.0.3"></script>
+  <script src="../js/auth/session.js?v=5.0.3"></script>
+  <script src="../js/auth/guards.js?v=5.0.3"></script>
 </head>
 <body class="agr-page crm-clientes-page">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -39,7 +39,7 @@
       <nav class="main-nav" id="menu-principal" aria-label="Navegação principal">
         <a href="../">Início</a><a href="../cliente/">Área do Cliente</a><a class="active" href="./">Área AGR</a><a href="clientes.html">Clientes</a><a href="comunicacao.html">Comunicação</a><a href="usuarios.html" data-auth-permission="SETTINGS_MANAGE">Configurações</a>
       </nav>
-      <div class="header-actions">
+      <div class="header-actions"><div class="aie-notification-wrap"><button class="aie-notification-button" id="aie-notification-button" type="button" aria-label="Notificações inteligentes" aria-expanded="false">🔔<b id="aie-notification-count" class="aie-notification-count" hidden>0</b></button><section class="aie-notification-panel" id="aie-notification-panel" hidden><header><strong>Atlas IA</strong><small>Prioridades operacionais</small></header><div class="aie-notification-list" id="aie-notification-list"></div></section></div>
         <div class="auth-user-chip"><span><strong data-auth-user-name>Usuário Atlas</strong><small data-auth-user-role>Perfil</small></span></div>
         <a class="button button-outline auth-account-button" href="../auth/minha-conta.html">Minha conta</a>
         <a class="button button-outline auth-logout-button" href="../auth/logout.html" data-auth-logout>Sair</a>
@@ -62,7 +62,7 @@
             <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
             <a href="../auth/minha-conta.html"><span aria-hidden="true">○</span> Minha conta</a>
           </nav>
-          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>CRM Enterprise Gold 5.0.1</small></span></div>
+          <div class="atlas-admin-system"><span class="agr-status-dot agr-status-online"></span><span><strong>Sistema online</strong><small data-atlas-system-version>Atlas Intelligence Platform 5.0.3</small></span></div>
         </aside>
 
         <div class="atlas-admin-content">
@@ -207,15 +207,16 @@
     </div>
   </section>
 
-  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 FINAL • CRM Enterprise Gold • v5.0.1</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
+  <footer class="site-footer"><div class="container footer-bottom"><p>© <span id="ano-atual"></span> Pedroza Certificadora.<br><small data-atlas-build>Atlas • Sprint 4.9 FINAL • CRM Enterprise Gold • v5.0.3</small></p><p>Concepção, design e desenvolvimento: <strong>Marcos Henrique Pedroza</strong></p></div></footer>
   <div class="auth-session-warning" id="auth-session-warning" role="dialog" aria-modal="true" aria-labelledby="auth-session-title" hidden><div class="auth-session-dialog"><span class="auth-card-badge">Segurança da sessão</span><h2 id="auth-session-title">Sua sessão está prestes a expirar</h2><p>Por segurança, acessos inativos são encerrados automaticamente.</p><div class="auth-session-countdown" id="auth-session-countdown" aria-live="polite">2:00</div><div class="auth-session-actions"><button class="auth-secondary-button" id="auth-session-exit" type="button">Encerrar agora</button><button class="auth-submit" id="auth-session-continue" type="button"><span>Continuar conectado</span></button></div></div></div>
-  <script src="../js/auth/auth.js?v=5.0.1"></script>
-  <script src="../js/auth/protected-ui.js?v=5.0.1"></script>
-  <script src="../js/app.js?v=5.0.1" defer></script>
-  <script src="../js/agr/clientes.js?v=5.0.1" defer></script>
-  <script src="../js/core/atlas-core.js?v=5.0.1" defer></script>
-  <script src="../js/agr/acdm.js?v=5.0.1" defer></script>
-  <script src="../js/agr/crm-enterprise.js?v=5.0.1" defer></script>
-  <script src="../js/build-info.js?v=5.0.1" defer></script>
+  <script src="../js/auth/auth.js?v=5.0.3"></script>
+  <script src="../js/auth/protected-ui.js?v=5.0.3"></script>
+  <script src="../js/app.js?v=5.0.3" defer></script>
+  <script src="../js/agr/clientes.js?v=5.0.3" defer></script>
+  <script src="../js/core/atlas-core.js?v=5.0.3" defer></script>
+  <script src="../js/agr/acdm.js?v=5.0.3" defer></script>
+  <script src="../js/agr/crm-enterprise.js?v=5.0.3" defer></script>
+  <script src="../js/agr/intelligence.js?v=5.0.3" defer></script>
+  <script src="../js/build-info.js?v=5.0.3" defer></script>
 </body>
 </html>
