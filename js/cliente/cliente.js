@@ -28,14 +28,7 @@
   const resultadoSituacao = document.querySelector("#resultado-situacao");
   const resultadoPrazo = document.querySelector("#resultado-prazo");
   const resultadoWhatsapp = document.querySelector("#resultado-whatsapp");
-  const resultadoEmail = document.querySelector("#resultado-email");
-  const resultadoEmailStatus = document.querySelector("#resultado-email-status");
   const novaConsulta = document.querySelector("#nova-consulta");
-
-  let consultaSequencia = 0;
-  let consultaController = null;
-  let documentoConsultaAtual = "";
-  let ultimaConsultaValida = null;
 
   if (!form || !inputDocumento) {
     return;
@@ -120,67 +113,6 @@
     return padrao;
   }
 
-  function limparResultadoAnterior() {
-    resultadoSection.hidden = true;
-    resultadoDados.hidden = true;
-    resultadoCard.className = "resultado-card";
-    resultadoIcone.textContent = "";
-    resultadoCategoria.textContent = "Resultado da consulta";
-    resultadoTitulo.textContent = "";
-    resultadoMensagem.textContent = "";
-    resultadoTitular.textContent = "—";
-    resultadoDocumento.textContent = "—";
-    resultadoTipo.textContent = "—";
-    resultadoValidade.textContent = "—";
-    resultadoSituacao.textContent = "—";
-    resultadoPrazo.textContent = "—";
-    resultadoWhatsapp.textContent = "Falar com atendimento";
-    resultadoWhatsapp.href = `https://wa.me/${whatsapp}`;
-    documentoConsultaAtual = "";
-    if (resultadoEmail) {
-      resultadoEmail.hidden = true;
-      resultadoEmail.disabled = false;
-      resultadoEmail.dataset.destino = "";
-      resultadoEmail.textContent = "Enviar detalhes por e-mail";
-    }
-    if (resultadoEmailStatus) {
-      resultadoEmailStatus.hidden = true;
-      resultadoEmailStatus.className = "resultado-email-status";
-      resultadoEmailStatus.textContent = "";
-    }
-  }
-
-  function possuiDadosDeCertificado(dados) {
-    if (!dados || typeof dados !== "object") return false;
-
-    const chavesCertificado = [
-      "titularMascarado", "nomeMascarado", "titular", "nome", "razaoSocial",
-      "documentoMascarado", "cpfCnpjMascarado", "documento", "cpfCnpj",
-      "tipoCertificado", "tipo", "produto", "certificado",
-      "validadeFormatada", "validade", "dataValidade", "vencimento",
-      "diasRestantes", "dias", "diasParaVencer", "prazo", "situacao", "status"
-    ];
-
-    return chavesCertificado.some((chave) => {
-      const valor = dados[chave];
-      return valor !== undefined && valor !== null && String(valor).trim() !== "";
-    });
-  }
-
-  function retornoEncontrado(dados) {
-    const flags = ["encontrado", "found", "localizado"];
-    for (const chave of flags) {
-      if (Object.prototype.hasOwnProperty.call(dados || {}, chave)) {
-        const valor = String(dados[chave]).trim().toLowerCase();
-        return !["false", "0", "não", "nao", "no", "null", "undefined", ""].includes(valor);
-      }
-    }
-
-    if (Object.prototype.hasOwnProperty.call(dados || {}, "success") && dados.success === false) return false;
-    if (Object.prototype.hasOwnProperty.call(dados || {}, "ok") && dados.ok === false) return false;
-    return possuiDadosDeCertificado(dados);
-  }
-
   function normalizarStatus(valor, dias) {
     const status = String(valor || "").trim().toLowerCase();
 
@@ -217,18 +149,6 @@
   }
 
   function exibirNaoEncontrado(mensagem, documentoDigitado = "") {
-    documentoConsultaAtual = "";
-    if (resultadoEmail) {
-      resultadoEmail.hidden = true;
-      resultadoEmail.disabled = false;
-      resultadoEmail.dataset.destino = "";
-      resultadoEmail.textContent = "Enviar detalhes por e-mail";
-    }
-    if (resultadoEmailStatus) {
-      resultadoEmailStatus.hidden = true;
-      resultadoEmailStatus.className = "resultado-email-status";
-      resultadoEmailStatus.textContent = "";
-    }
     resultadoCard.className = "resultado-card status-erro";
     resultadoIcone.textContent = "!";
     resultadoCategoria.textContent = "Consulta concluída";
@@ -258,7 +178,17 @@
   }
 
   function exibirResultado(dados, documentoDigitado) {
-    const encontrado = retornoEncontrado(dados);
+    const encontradoRaw = primeiroValor(
+      dados,
+      ["encontrado", "found", "success", "localizado", "ok"],
+      true
+    );
+
+    const encontrado =
+      encontradoRaw !== false &&
+      String(encontradoRaw).toLowerCase() !== "false" &&
+      String(encontradoRaw).toLowerCase() !== "não" &&
+      String(encontradoRaw).toLowerCase() !== "nao";
 
     if (!encontrado) {
       exibirNaoEncontrado(
@@ -355,19 +285,6 @@
       mascararDocumento(documentoDigitado)
     );
 
-    documentoConsultaAtual = somenteNumeros(documentoDigitado);
-    ultimaConsultaValida = { documento: documentoConsultaAtual, dados: { ...dados } };
-    if (resultadoEmail) {
-      const emailMascarado = String(dados.emailMascarado || "").trim();
-      const envioDisponivel = dados.envioEmailDisponivel !== false;
-      resultadoEmail.hidden = !envioDisponivel;
-      resultadoEmail.disabled = false;
-      resultadoEmail.dataset.destino = emailMascarado;
-      resultadoEmail.textContent = emailMascarado
-        ? `Enviar detalhes para ${emailMascarado}`
-        : "Enviar detalhes por e-mail";
-    }
-
     resultadoSection.hidden = false;
     resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -388,37 +305,14 @@
     });
   }
 
-  async function enviarDetalhesPorEmail(documento) {
-    if (!documento) throw new Error("Realize uma consulta válida antes do envio.");
-
-    const resposta = await fetch(endpoint, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-store",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      body: JSON.stringify({
-        action: "aevs.sendEmail",
-        payload: { documento, origem: "AREA_CLIENTE_PUBLICA" },
-        client: { path: window.location.pathname, userAgent: navigator.userAgent }
-      })
-    });
-
-    if (!resposta.ok) throw new Error(`Falha no envio. Código ${resposta.status}.`);
-    const retorno = await resposta.json();
-    if (!retorno?.ok) throw new Error(retorno?.message || "Não foi possível enviar o e-mail.");
-    return retorno.data || {};
-  }
-
-  async function consultar(documento, signal, tentativa = 1) {
+  async function consultar(documento) {
     if (!endpoint || endpoint.includes("__ENDPOINT")) {
       throw new Error("O endereço do serviço de consulta ainda não foi configurado.");
     }
 
     const url = new URL(endpoint);
-    url.searchParams.set("action", "aevs.consult");
     url.searchParams.set("documento", documento);
-    url.searchParams.set("requestId", `${Date.now()}-${tentativa}-${Math.random().toString(36).slice(2)}`);
-    url.searchParams.set("tentativa", String(tentativa));
+    url.searchParams.set("cpfCnpj", documento);
     url.searchParams.set("_", Date.now().toString());
 
     const resposta = await fetch(url.toString(), {
@@ -427,8 +321,7 @@
       cache: "no-store",
       headers: {
         Accept: "application/json"
-      },
-      signal
+      }
     });
 
     if (!resposta.ok) {
@@ -443,54 +336,6 @@
       throw new Error("O serviço retornou uma resposta inválida.");
     }
   }
-
-  function extrairDadosRetorno(retorno) {
-    return retorno?.dados || retorno?.data || retorno?.resultado || retorno || {};
-  }
-
-  async function consultarComConfirmacao(documento, signal) {
-    const primeiroRetorno = await consultar(documento, signal, 1);
-    const primeirosDados = extrairDadosRetorno(primeiroRetorno);
-    if (retornoEncontrado(primeirosDados)) return primeirosDados;
-
-    await new Promise((resolve, reject) => {
-      const timer = window.setTimeout(resolve, 450);
-      signal?.addEventListener("abort", () => {
-        window.clearTimeout(timer);
-        reject(new DOMException("Consulta cancelada", "AbortError"));
-      }, { once: true });
-    });
-
-    const segundoRetorno = await consultar(documento, signal, 2);
-    return extrairDadosRetorno(segundoRetorno);
-  }
-
-  resultadoEmail?.addEventListener("click", async () => {
-    if (!documentoConsultaAtual) return;
-    resultadoEmail.disabled = true;
-    resultadoEmail.textContent = "Enviando...";
-    if (resultadoEmailStatus) resultadoEmailStatus.hidden = true;
-
-    try {
-      const retorno = await enviarDetalhesPorEmail(documentoConsultaAtual);
-      resultadoEmail.textContent = "E-mail enviado";
-      if (resultadoEmailStatus) {
-        resultadoEmailStatus.className = "resultado-email-status sucesso";
-        resultadoEmailStatus.textContent = retorno.mensagem || `Detalhes enviados para ${retorno.emailMascarado || "o e-mail cadastrado"}.`;
-        resultadoEmailStatus.hidden = false;
-      }
-    } catch (erro) {
-      resultadoEmail.disabled = false;
-      resultadoEmail.textContent = "Tentar enviar novamente";
-      if (resultadoEmailStatus) {
-        resultadoEmailStatus.className = "resultado-email-status erro";
-        resultadoEmailStatus.textContent = erro.message || "Não foi possível enviar. Fale com nosso atendimento.";
-        resultadoEmailStatus.hidden = false;
-      }
-    }
-  });
-
-  limparResultadoAnterior();
 
   inputDocumento.addEventListener("input", () => {
     inputDocumento.value = formatarDocumento(inputDocumento.value);
@@ -515,27 +360,22 @@
       return;
     }
 
-    limparResultadoAnterior();
-    consultaSequencia += 1;
-    const sequenciaAtual = consultaSequencia;
-    consultaController?.abort();
-    consultaController = new AbortController();
+    resultadoSection.hidden = true;
     alternarCarregamento(true);
 
     try {
-      const dados = await consultarComConfirmacao(documento, consultaController.signal);
-      if (sequenciaAtual !== consultaSequencia) return;
+      const retorno = await consultar(documento);
+      const dados = retorno?.dados || retorno?.data || retorno?.resultado || retorno;
       exibirResultado(dados, documento);
     } catch (erro) {
-      if (erro?.name === "AbortError" || sequenciaAtual !== consultaSequencia) return;
       console.error("AEVS:", erro);
 
       resultadoCard.className = "resultado-card status-erro";
       resultadoIcone.textContent = "!";
-      resultadoCategoria.textContent = "Falha de comunicação";
+      resultadoCategoria.textContent = "Serviço temporariamente indisponível";
       resultadoTitulo.textContent = "Não foi possível concluir a consulta";
       resultadoMensagem.textContent =
-        "O Atlas não conseguiu acessar o serviço de consulta. Tente novamente ou fale com nosso atendimento.";
+        "Tente novamente em alguns instantes ou fale com nosso atendimento pelo WhatsApp.";
 
       resultadoDados.hidden = true;
       resultadoWhatsapp.textContent = "Falar com atendimento";
@@ -547,18 +387,13 @@
       resultadoSection.hidden = false;
       resultadoSection.scrollIntoView({ behavior: "smooth", block: "start" });
     } finally {
-      if (sequenciaAtual === consultaSequencia) {
-        alternarCarregamento(false);
-        consultaController = null;
-      }
+      alternarCarregamento(false);
     }
   });
 
   novaConsulta?.addEventListener("click", () => {
-    consultaSequencia += 1;
-    consultaController?.abort();
-    consultaController = null;
-    limparResultadoAnterior();
+    resultadoSection.hidden = true;
+    resultadoDados.hidden = false;
     inputDocumento.value = "";
     consentimento.checked = false;
     limparErro();

@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.7';
+const ATLAS_VERSION = '4.8.2';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -12,7 +12,7 @@ const SHEETS = Object.freeze({
   PERMISSOES: ['ID','PERFIL','PERMISSAO','ATIVO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   AUDITORIA: ['ID','USUARIO_ID','USUARIO_LOGIN','ACAO','DETALHES_JSON','CAMINHO','USER_AGENT','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   CONFIGURACOES: ['ID','CHAVE','VALOR_JSON','DESCRICAO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
-  AGENDA: ['ID','CLIENTE_ID','CERTIFICADO_ID','TITULO','TIPO_ATENDIMENTO','INICIO','FIM','RESPONSAVEL','SITUACAO','ORIGEM','LOCAL_LINK','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  AGENDA: ['ID','CLIENTE_ID','TITULO','INICIO','FIM','RESPONSAVEL','SITUACAO','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   LOGS: ['ID','NIVEL','ORIGEM','MENSAGEM','CONTEXTO_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   TIMELINE: ['ID','CLIENTE_ID','TIPO_EVENTO','TITULO','DESCRICAO','ORIGEM','USUARIO_ID','USUARIO_LOGIN','DADOS_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   COMUNICACOES: ['ID','CLIENTE_ID','CAMPANHA_ID','MODELO_ID','CANAL','DESTINO','ASSUNTO','CONTEUDO_HTML','STATUS_ENVIO','TENTATIVAS','ERRO','AGENDADO_PARA','ENVIADO_EM','ENTREGUE_EM','LIDO_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -29,19 +29,7 @@ const SHEETS = Object.freeze({
   IA_PROFILE: ['ID','CLIENTE_ID','PERFIL_JSON','ULTIMA_ANALISE_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR']
 });
 
-function doGet(e) {
-  try {
-    const params = (e && e.parameter) || {};
-    const action = String(params.action || '').trim();
-    if (action === 'aevs.consult' || params.documento || params.cpfCnpj) {
-      return json_({ok:true,data:consultarCertificadoPublico_(params)});
-    }
-    return json_({ok:true,data:{service:'Atlas API',version:ATLAS_VERSION,status:'online'}});
-  } catch (error) {
-    try { appendLog_('ERROR','AEVS_PUBLIC',error.message,{stack:error.stack || ''}); } catch (_) {}
-    return json_({ok:false,code:error.code || 'AEVS_ERROR',message:error.message || 'Nao foi possivel concluir a consulta.'});
-  }
-}
+function doGet() { return json_({ok:true,data:{service:'Atlas API',version:ATLAS_VERSION,status:'online'}}); }
 function doPost(e) {
   try {
     const request = JSON.parse((e && e.postData && e.postData.contents) || '{}');
@@ -60,18 +48,16 @@ function configurarAtlasDataFoundation() {
   seedConfig_();
   seedUsers_();
   seedCrmCatalogs_();
-  seedAccModels_();
   return 'Atlas Data Foundation ' + ATLAS_VERSION + ' configurada com sucesso.';
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','agenda.list','agenda.create','agenda.update','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','portal.summary','portal.requestRenewal','portal.requestAppointment','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
     case 'health': return {service:'Atlas API',version:ATLAS_VERSION,status:'online'};
     case 'auth.login': return login_(payload,client);
-    case 'aevs.sendEmail': return enviarDetalhesCertificadoEmail_(payload,client);
     case 'users.list': return listUsers_();
     case 'users.create': return createUser_(payload);
     case 'users.setActive': return setUserActive_(payload);
@@ -87,229 +73,21 @@ function route_(action,payload,client,authToken) {
     case 'certificates.update': return updateCertificate_(payload);
     case 'audit.record': return recordAudit_(payload,client);
     case 'dashboard.summary': return dashboardSummary_();
-    case 'cockpit.summary': return cockpitSummary_(payload);
     case 'clients.get': return getClient_(payload);
     case 'timeline.list': return listTimeline_(payload);
     case 'timeline.add': return addTimeline_(payload);
-    case 'agenda.list': return listAgenda_(payload);
-    case 'agenda.create': return createAppointment_(payload,authToken,client);
-    case 'agenda.update': return updateAppointment_(payload,authToken,client);
     case 'communications.list': return listCommunications_(payload);
     case 'communications.create': return createCommunication_(payload);
-    case 'communications.send': return sendCommunication_(payload,client);
-    case 'models.list': seedAccModels_(); return rows_('MODELOS_EMAIL').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()==='ATIVO' && String(r.ATIVO||'SIM').toUpperCase()!=='NAO';});
+    case 'models.list': return rows_('MODELOS_EMAIL');
     case 'campaigns.list': return rows_('CAMPANHAS');
     case 'campaigns.create': return createCampaign_(payload);
     case 'campaigns.preview': return previewCampaign_(payload);
-    case 'automation.status': return automationStatus_();
-    case 'automation.configure':
-    case 'automation.saveConfig': return configureAutomation_(payload);
-    case 'automation.loadConfig': return getAccAutomationConfig_();
-    case 'automation.test': return sendAutomationTest_(payload,client);
-    case 'automation.run': return runAccAutomation_(payload);
-    case 'automation.processQueue': return processAccQueue_();
-    case 'automation.gmailQuota': return {remainingQuota:MailApp.getRemainingDailyQuota()};
-    case 'automation.listTriggers': return listAccAutomationTriggers_();
-    case 'automation.backendHealth': return accBackendHealth_();
-    case 'automation.installTriggers': return installAccAutomationTriggers_();
-    case 'automation.removeTriggers': return removeAccAutomationTriggers_();
     case 'invites.generate': return generateInvite_(payload);
     case 'invites.validate': return validateInvite_(payload);
-    case 'invites.accept': return acceptInvite_(payload,client);
-    case 'portal.summary': return portalSummary_(authToken);
-    case 'portal.requestRenewal': return portalRequestRenewal_(authToken,payload,client);
-    case 'portal.requestAppointment': return portalRequestAppointment_(authToken,payload,client);
     case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
     case 'tags.list': return rows_('TAGS');
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
   }
-}
-
-
-/**
- * Consulta publica AEVS sobre a Atlas Data Foundation.
- * Retorna somente dados reduzidos e mascarados, sem expor PII completa.
- */
-function consultarCertificadoPublico_(params) {
-  const documento = digits_(params.documento || params.cpfCnpj || '');
-  if ([11,14].indexOf(documento.length) === -1 || /^(\d)\1+$/.test(documento)) {
-    return {encontrado:false,mensagem:'Informe um CPF ou CNPJ valido.'};
-  }
-
-  const cliente = rows_('CLIENTES').find(function(row) {
-    return digits_(row.CPF_CNPJ) === documento && String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
-  });
-  if (!cliente) {
-    return {encontrado:false,mensagem:'Nao encontramos certificado cadastrado para o documento informado.'};
-  }
-
-  const certificados = rows_('CERTIFICADOS').filter(function(row) {
-    return String(row.CLIENTE_ID || '') === String(cliente.ID || '') &&
-      String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
-  });
-  if (!certificados.length) {
-    return {encontrado:false,mensagem:'Nao encontramos certificado cadastrado para o documento informado.'};
-  }
-
-  const hoje = inicioDoDia_(new Date());
-  const ordenados = certificados.map(function(cert) {
-    const vencimento = dataAtlas_(cert.VENCIMENTO);
-    const dias = vencimento ? Math.ceil((inicioDoDia_(vencimento).getTime() - hoje.getTime()) / 86400000) : null;
-    const statusTexto = String(cert.STATUS_CERTIFICADO || '').toUpperCase();
-    const emRenovacao = valorBooleano_(cert.EM_RENOVACAO) || statusTexto.indexOf('RENOV') >= 0;
-    const ativo = String(cert.STATUS || 'ATIVO').toUpperCase() === 'ATIVO';
-    let prioridade = 40;
-    if (ativo && dias !== null && dias >= 0) prioridade = 10;
-    else if (emRenovacao) prioridade = 20;
-    else if (dias !== null && dias < 0) prioridade = 30;
-    return {cert:cert,vencimento:vencimento,dias:dias,prioridade:prioridade};
-  }).sort(function(a,b) {
-    if (a.prioridade !== b.prioridade) return a.prioridade - b.prioridade;
-    if (a.prioridade === 10) return (a.dias === null ? 999999 : a.dias) - (b.dias === null ? 999999 : b.dias);
-    if (a.prioridade === 30) return (b.vencimento ? b.vencimento.getTime() : 0) - (a.vencimento ? a.vencimento.getTime() : 0);
-    return (a.vencimento ? a.vencimento.getTime() : 0) - (b.vencimento ? b.vencimento.getTime() : 0);
-  });
-
-  const escolhido = ordenados[0];
-  const cert = escolhido.cert;
-  const dias = escolhido.dias;
-  const situacao = situacaoPublicaCertificado_(cert,dias);
-  const nome = String(cliente.NOME || cliente.EMPRESA || 'Cliente');
-  return {
-    encontrado:true,
-    titularMascarado:mascararNomePublico_(nome),
-    documentoMascarado:mascararDocumentoPublico_(documento),
-    tipoCertificado:String(cert.TIPO || cert.MODELO || 'Certificado digital'),
-    validadeFormatada:escolhido.vencimento ? Utilities.formatDate(escolhido.vencimento,Session.getScriptTimeZone() || 'America/Sao_Paulo','dd/MM/yyyy') : 'Nao informada',
-    situacao:situacao,
-    diasRestantes:dias,
-    referenciaConsulta:String(params.requestId || params._ || ''),
-    emailMascarado:mascararEmailPublico_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || ''),
-    envioEmailDisponivel:Boolean(normalize_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || '')),
-    fonte:'ATLAS_DATA_FOUNDATION'
-  };
-}
-
-
-function enviarDetalhesCertificadoEmail_(payload,client) {
-  const documento = digits_(payload.documento || payload.cpfCnpj || '');
-  if ([11,14].indexOf(documento.length) === -1 || /^(\d)\1+$/.test(documento)) {
-    throw apiError_('VALIDATION','Documento invalido.');
-  }
-
-  const cache = CacheService.getScriptCache();
-  const chaveLimite = 'aevs-email:' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, documento)).slice(0,32);
-  if (cache.get(chaveLimite)) {
-    throw apiError_('RATE_LIMIT','Aguarde alguns minutos antes de solicitar um novo envio.');
-  }
-
-  const cliente = rows_('CLIENTES').find(function(row) {
-    return digits_(row.CPF_CNPJ) === documento && String(row.STATUS || 'ATIVO').toUpperCase() !== 'EXCLUIDO';
-  });
-  if (!cliente) throw apiError_('NOT_FOUND','Nao foi possivel enviar os detalhes. Fale com nosso atendimento.');
-
-  const email = normalize_(cliente.EMAIL || cliente.EMAIL_SECUNDARIO || '');
-  if (!email || email.indexOf('@') < 1) {
-    throw apiError_('EMAIL_NOT_FOUND','Nao ha e-mail valido cadastrado. Fale com nosso atendimento para atualizar o cadastro.');
-  }
-
-  const consulta = consultarCertificadoPublico_({documento:documento});
-  if (!consulta.encontrado) throw apiError_('NOT_FOUND','Nao foi localizado certificado para envio.');
-
-  const assunto = 'Informacoes do seu certificado digital - Pedroza Certificadora';
-  const html = templateEmailCertificado_(cliente,consulta);
-  MailApp.sendEmail({
-    to: email,
-    subject: assunto,
-    htmlBody: html,
-    name: 'Pedroza Certificadora',
-    replyTo: 'certificadodigital@pedroza.com.br'
-  });
-
-  const now = new Date();
-  const comunicacaoId = nextId_('COMUNICACOES','COM');
-  appendObject_('COMUNICACOES',{
-    ID:comunicacaoId,CLIENTE_ID:String(cliente.ID),CAMPANHA_ID:'',MODELO_ID:'AEVS-DETALHES-CERTIFICADO',CANAL:'EMAIL',
-    DESTINO:email,ASSUNTO:assunto,CONTEUDO_HTML:html,STATUS_ENVIO:'ENVIADO',TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',
-    ENVIADO_EM:now,ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'AEVS_PUBLICO',ALTERADO_EM:now,ALTERADO_POR:'AEVS_PUBLICO'
-  });
-  addTimeline_({clienteId:cliente.ID,tipoEvento:'AEVS_EMAIL_ENVIADO',titulo:'Detalhes do certificado enviados por e-mail',descricao:'Envio solicitado pela Area do Cliente publica.',origem:'AEVS_PUBLICO',actor:'AEVS_PUBLICO',dados:{comunicacaoId:comunicacaoId,destinoMascarado:mascararEmailPublico_(email)}});
-  recordAudit_({action:'AEVS_EMAIL_SENT',details:{clienteId:cliente.ID,documentoMascarado:mascararDocumentoPublico_(documento),destinoMascarado:mascararEmailPublico_(email)}},client || {});
-  cache.put(chaveLimite,'1',300);
-
-  return {enviado:true,emailMascarado:mascararEmailPublico_(email),mensagem:'Detalhes enviados para ' + mascararEmailPublico_(email) + '.'};
-}
-
-function templateEmailCertificado_(cliente,dados) {
-  const dias = dados.diasRestantes === null || dados.diasRestantes === undefined ? '' : Number(dados.diasRestantes);
-  const titulo = dias !== '' && dias < 0 ? 'Seu certificado digital está vencido' : 'Informações do seu certificado digital';
-  const destaque = dias === '' ? 'CONSULTA' : (dias < 0 ? 'VENCIDO' : dias + ' DIAS');
-  const texto = dias !== '' && dias <= 30 ? 'Recomendamos iniciar a renovação o quanto antes para evitar interrupções no acesso a sistemas e serviços.' : 'Confira abaixo os dados do certificado digital cadastrado em nossa plataforma.';
-  return buildAtlasEmail_({
-    title:titulo,
-    eyebrow:'PEDROZA CERTIFICADORA',
-    highlight:destaque,
-    greeting:String(cliente.NOME || cliente.EMPRESA || 'Cliente'),
-    message:texto,
-    rows:[
-      ['Nome completo',String(cliente.NOME || cliente.EMPRESA || 'Cliente')],
-      ['CPF/CNPJ',String(cliente.CPF_CNPJ || dados.documentoMascarado || 'Não informado')],
-      ['Tipo',String(dados.tipoCertificado || 'Certificado digital')],
-      ['Data de vencimento',String(dados.validadeFormatada || 'Não informada')],
-      ['Situação',String(dados.situacao || 'Não informada')],
-      ['Prazo',dias === '' ? 'Não informado' : (dias < 0 ? 'Vencido há ' + Math.abs(dias) + ' dia(s)' : dias + ' dia(s) restante(s)')]
-    ],
-    primaryLabel:'FALAR NO WHATSAPP',
-    primaryUrl:'https://wa.me/5521991674117?text=' + encodeURIComponent('Olá! Recebi o resumo do meu certificado e gostaria de orientação.'),
-    secondaryLabel:'ACESSAR O PORTAL ATLAS',
-    secondaryUrl:'https://pedrozacertificadora.com.br/cliente/'
-  });
-}
-
-function mascararEmailPublico_(email) {
-  const valor = normalize_(email);
-  const partes = valor.split('@');
-  if (partes.length !== 2 || !partes[0] || !partes[1]) return '';
-  const usuario = partes[0];
-  const visivel = usuario.slice(0,1);
-  return visivel + '*'.repeat(Math.max(usuario.length - 1,3)) + '@' + partes[1];
-}
-function escaparHtml_(valor) {
-  return String(valor || '').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
-}
-
-function dataAtlas_(valor) {
-  if (Object.prototype.toString.call(valor) === '[object Date]' && !isNaN(valor.getTime())) return valor;
-  const texto = String(valor || '').trim();
-  if (!texto) return null;
-  let match = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (match) return new Date(Number(match[3]),Number(match[2])-1,Number(match[1]));
-  match = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (match) return new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));
-  const parsed = new Date(texto);
-  return isNaN(parsed.getTime()) ? null : parsed;
-}
-function inicioDoDia_(data) { return new Date(data.getFullYear(),data.getMonth(),data.getDate()); }
-function valorBooleano_(valor) { return ['TRUE','SIM','1','ATIVO','YES'].indexOf(String(valor || '').trim().toUpperCase()) >= 0; }
-function situacaoPublicaCertificado_(cert,dias) {
-  const status = String(cert.STATUS_CERTIFICADO || '').trim();
-  if (dias !== null && dias < 0) return 'Vencido';
-  if (valorBooleano_(cert.EM_RENOVACAO) || status.toUpperCase().indexOf('RENOV') >= 0) return 'Em renovacao';
-  if (dias !== null && dias <= 30) return 'Proximo do vencimento';
-  return status || 'Valido';
-}
-function mascararDocumentoPublico_(documento) {
-  const d = digits_(documento);
-  if (d.length === 11) return '***.'+d.slice(3,6)+'.'+d.slice(6,9)+'-**';
-  if (d.length === 14) return '**.'+d.slice(2,5)+'.'+d.slice(5,8)+'/****-**';
-  return 'Documento protegido';
-}
-function mascararNomePublico_(nome) {
-  return String(nome || '').trim().split(/\s+/).filter(Boolean).map(function(parte,index,lista) {
-    if (parte.length <= 2) return parte.charAt(0) + '*';
-    if (index === 0 || index === lista.length - 1) return parte.charAt(0) + '*'.repeat(Math.max(parte.length-2,1)) + parte.charAt(parte.length-1);
-    return parte.charAt(0) + '*'.repeat(Math.max(parte.length-1,1));
-  }).join(' ');
 }
 
 function login_(payload,client) {
@@ -397,39 +175,6 @@ function dashboardSummary_() {
 }
 
 
-/**
- * Sprint 5.0.5.2 - núcleo rápido do Cockpit.
- * Não consulta Gmail, gatilhos, fila ou histórico de comunicações.
- * Esses blocos são atualizados separadamente pelo navegador.
- */
-function cockpitSummary_(p) {
-  const force=Boolean(p&&p.forceRefresh);
-  const cache=CacheService.getScriptCache();
-  const key='ATLAS_COCKPIT_CORE_5_0_5_2';
-  if(!force){
-    const cached=cache.get(key);
-    if(cached){try{const parsed=JSON.parse(cached);parsed.meta=Object.assign({},parsed.meta||{},{cache:'HIT'});return parsed;}catch(_){}}
-  }
-  const clients=rows_('CLIENTES');
-  const certRows=rows_('CERTIFICADOS');
-  const timelineRows=rows_('TIMELINE');
-  const agendaRows=rows_('AGENDA');
-  const activeClients=clients.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';});
-  const certificates=certRows.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';}).map(publicCertificate_);
-  const payload={
-    summary:{activeClients:activeClients.length,certificates:certificates.length},
-    certificates:certificates,
-    timeline:timelineRows.slice(-120).reverse(),
-    agenda:agendaRows.filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).slice(0,20).map(agendaPublica_),
-    communications:[],
-    health:{api:true,dataFoundation:true},
-    meta:{generatedAt:new Date().toISOString(),cache:'MISS',ttlSeconds:300,version:'5.0.7',mode:'core'}
-  };
-  try{cache.put(key,JSON.stringify(payload),300);}catch(_){}
-  return payload;
-}
-
-
 function getClient_(p) {
   const client=findById_('CLIENTES',p.id);
   if(!client) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
@@ -465,182 +210,6 @@ function createCommunication_(p) {
   addTimeline_({clienteId:p.clienteId,tipoEvento:'COMUNICACAO_CRIADA',titulo:'Comunicacao preparada',descricao:String(p.assunto||p.canal||''),origem:'CENTRO_COMUNICACAO',actor:actor,dados:{comunicacaoId:id}});
   return findById_('COMUNICACOES',id);
 }
-
-function communicationTiming_(certificate) {
-  if(!certificate) throw apiError_('VALIDATION','Certificado nao encontrado para esta comunicacao.');
-  const expiry=parseAtlasDate_(certificate.VENCIMENTO);
-  if(!expiry) throw apiError_('VALIDATION','O certificado nao possui uma data de vencimento valida.');
-  const today=new Date(), start=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-  const end=new Date(expiry.getFullYear(),expiry.getMonth(),expiry.getDate());
-  const days=Math.round((end-start)/86400000);
-  if(days>60) throw apiError_('VALIDATION','O certificado ainda esta fora da janela de comunicacao de 60 dias.');
-  if(days<0) {
-    const late=Math.abs(days);
-    return {days:days,modelId:'MOD-000002',subject:'Aten\u00e7\u00e3o: seu certificado digital venceu h\u00e1 '+late+(late===1?' dia':' dias'),message:'Seu certificado digital venceu h\u00e1 '+late+(late===1?' dia':' dias')+'. Nossa equipe est\u00e1 dispon\u00edvel para orientar e concluir a renova\u00e7\u00e3o com seguran\u00e7a.'};
-  }
-  if(days===0) return {days:0,modelId:'MOD-000013',subject:'Aten\u00e7\u00e3o: seu certificado digital vence hoje',message:'Seu certificado digital vence hoje. Entre em contato com nossa equipe para realizar a renova\u00e7\u00e3o e evitar interrup\u00e7\u00f5es.'};
-  if(days===1) return {days:1,modelId:'MOD-000012',subject:'Aten\u00e7\u00e3o: seu certificado digital vence amanh\u00e3',message:'Falta 1 dia para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
-  const modelId=days<=7?'MOD-000009':days<=15?'MOD-000008':days<=30?'MOD-000007':'MOD-000006';
-  return {days:days,modelId:modelId,subject:'Aten\u00e7\u00e3o: seu certificado digital vence em '+days+' dias',message:'Faltam exatamente '+days+' dias para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
-}
-
-function sendCommunication_(p,clientMeta) {
-  const cliente=findById_('CLIENTES',p.clienteId);
-  if(!cliente) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
-  const destino=normalize_(p.destino||cliente.EMAIL||cliente.EMAIL_SECUNDARIO||'');
-  if(!destino||destino.indexOf('@')<1) throw apiError_('VALIDATION','Informe um e-mail valido para o envio.');
-  const modeloInicial=p.modeloId?findById_('MODELOS_EMAIL',p.modeloId):null;
-  const tipoModelo=String((modeloInicial&&modeloInicial.TIPO)||'').toUpperCase();
-  const avisoVencimento=tipoModelo.indexOf('VENCIMENTO')===0||tipoModelo==='VENCIDO';
-  let certificate=p.certificadoId?findById_('CERTIFICADOS',p.certificadoId):null;
-  if(certificate&&String(certificate.CLIENTE_ID)!==String(cliente.ID)) throw apiError_('VALIDATION','O certificado selecionado nao pertence ao cliente informado.');
-  let assuntoBase=String(p.assunto||'Comunicado da Pedroza Certificadora');
-  if(avisoVencimento) {
-    if(!certificate) throw apiError_('VALIDATION','Selecione um certificado deste cliente para o aviso de vencimento.');
-    const timing=communicationTiming_(certificate);
-    if(String(p.modeloId||'')!==timing.modelId) throw apiError_('VALIDATION','O tipo de aviso nao corresponde aos dias reais para o vencimento.');
-    if(Number(p.diasCalculados)!==timing.days) throw apiError_('VALIDATION','A validade mudou desde a abertura da ficha. Atualize e tente novamente.');
-    p.modeloId=timing.modelId;
-    p.mensagem=timing.message;
-    assuntoBase=timing.subject;
-  }
-  const assunto=renderAccSubject_(assuntoBase,cliente,certificate||{});
-  const actor=String(p.actor||'ATLAS');
-  const modelo=p.modeloId?findById_('MODELOS_EMAIL',p.modeloId):null;
-  let html=String(p.conteudoHtml||(modelo&&modelo.HTML)||'').trim();
-  if(!html) throw apiError_('VALIDATION','Informe o conteudo do e-mail.');
-  if(String((modelo&&modelo.TIPO)||'').toUpperCase()==='CONVITE_PORTAL' || html.indexOf('{{TOKEN_CONVITE}}')>=0) {
-    const convite=generateInvite_({clienteId:cliente.ID,email:destino,ttlHours:72,actor:actor});
-    html=html.split('{{TOKEN_CONVITE}}').join(encodeURIComponent(convite.token));
-  }
-  html=renderAccTemplate_(html,cliente,p);
-  const now=new Date(), id=nextId_('COMUNICACOES','COM');
-  appendObject_('COMUNICACOES',{ID:id,CLIENTE_ID:String(cliente.ID),CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:String(p.modeloId||''),CANAL:'EMAIL',DESTINO:destino,ASSUNTO:assunto,CONTEUDO_HTML:html,STATUS_ENVIO:'PROCESSANDO',TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
-  try {
-    MailApp.sendEmail({to:destino,subject:assunto,htmlBody:html,name:'Pedroza Certificadora',replyTo:'contato@pedrozacertificadora.com.br'});
-    updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ENVIADO',ENVIADO_EM:new Date(),ERRO:'',TENTATIVAS:1},actor);
-    addTimeline_({clienteId:cliente.ID,tipoEvento:'EMAIL_ENVIADO',titulo:'E-mail enviado',descricao:assunto,origem:'ACC',actor:actor,dados:{comunicacaoId:id,modeloId:String(p.modeloId||''),destinoMascarado:mascararEmailPublico_(destino)}});
-    recordAudit_({action:'ACC_EMAIL_SENT',details:{clienteId:cliente.ID,comunicacaoId:id,modeloId:String(p.modeloId||''),assunto:assunto,destinoMascarado:mascararEmailPublico_(destino),username:actor}},clientMeta||{});
-    return {id:id,enviado:true,status:'ENVIADO',destinoMascarado:mascararEmailPublico_(destino)};
-  } catch(error) {
-    updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ERRO',ERRO:String(error.message||error),TENTATIVAS:1},actor);
-    recordAudit_({action:'ACC_EMAIL_FAILED',details:{clienteId:cliente.ID,comunicacaoId:id,erro:String(error.message||error),username:actor}},clientMeta||{});
-    throw apiError_('EMAIL_SEND_FAILED','Nao foi possivel enviar o e-mail. O erro foi registrado no historico.');
-  }
-}
-function renderAccTemplate_(html,cliente,p) {
-  let cert=p&&p.certificadoId?findById_('CERTIFICADOS',p.certificadoId):null;
-  if(!cert||String(cert.CLIENTE_ID)!==String(cliente.ID)) {
-    const certs=rows_('CERTIFICADOS').filter(function(r){return String(r.CLIENTE_ID)===String(cliente.ID)&&String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});
-    certs.sort(function(a,b){return new Date(b.VENCIMENTO||0)-new Date(a.VENCIMENTO||0);});
-    cert=certs[0]||{};
-  }
-  const validade=cert.VENCIMENTO?Utilities.formatDate(new Date(cert.VENCIMENTO),Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):'Nao informada';
-  const vars={
-    NOME:cliente.NOME||cliente.EMPRESA||'Cliente', EMPRESA:cliente.EMPRESA||cliente.NOME||'', CPF_CNPJ:cliente.CPF_CNPJ||'',
-    TIPO_CERTIFICADO:cert.TIPO||cert.MODELO||'Certificado digital', VALIDADE:validade,
-    MENSAGEM:String(p.mensagem||''), ASSINATURA:'Equipe Pedroza Certificadora'
-  };
-  return Object.keys(vars).reduce(function(out,key){return out.split('{{'+key+'}}').join(escaparHtml_(String(vars[key]||'')));},String(html));
-}
-function buildAtlasEmail_(o) {
-  o=o||{};
-  const logo='https://pedrozacertificadora.com.br/images/email/pedroza-email-logo.png';
-  const icon='https://pedrozacertificadora.com.br/images/logo/icon-192.png';
-  const site='https://pedrozacertificadora.com.br';
-  const email='certificadodigital@pedroza.com.br';
-  const phone='(21) 99167-4117';
-  const title=escaparHtml_(o.title||'Comunicado da Pedroza Certificadora');
-  const eyebrow=escaparHtml_(o.eyebrow||'PEDROZA CERTIFICADORA');
-  const highlight=escaparHtml_(o.highlight||'AVISO');
-  const greeting=escaparHtml_(o.greeting||'{{NOME}}');
-  const message=escaparHtml_(o.message||'');
-  const rows=Array.isArray(o.rows)?o.rows:[];
-  let rowsHtml='';
-  rows.forEach(function(row,index){
-    const label=escaparHtml_(row[0]||'');
-    const value=escaparHtml_(row[1]||'');
-    rowsHtml+='<td class="data-cell" width="50%" valign="top" style="width:50%;padding:15px 18px;border-bottom:1px solid #e6edf5;'+(index%2===0?'border-right:1px solid #e6edf5;':'')+'"><div style="font-size:12px;line-height:1.3;color:#60748a;margin-bottom:5px">'+label+'</div><div style="font-size:16px;line-height:1.35;font-weight:700;color:#092e5b">'+value+'</div></td>';
-    if(index%2===1) rowsHtml+='</tr><tr>';
-  });
-  if(rows.length%2===1) rowsHtml+='<td class="data-cell" width="50%" style="width:50%;padding:15px 18px;border-bottom:1px solid #e6edf5">&nbsp;</td></tr><tr>';
-  const primaryUrl=String(o.primaryUrl||'https://wa.me/5521991674117');
-  const secondaryUrl=String(o.secondaryUrl||site);
-  const primaryLabel=escaparHtml_(o.primaryLabel||'FALAR NO WHATSAPP');
-  const secondaryLabel=escaparHtml_(o.secondaryLabel||'VER DETALHES');
-  return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
-    '<style>@media only screen and (max-width:620px){.shell{width:100%!important}.pad{padding-left:20px!important;padding-right:20px!important}.hero-left,.hero-right,.data-cell,.cta-cell,.support-cell{display:block!important;width:100%!important;box-sizing:border-box!important}.hero-right{text-align:left!important;padding-top:20px!important}.cta-cell{padding:6px 0!important}.support-cell{padding:7px 0!important}.mobile-hide{display:none!important}.title{font-size:31px!important}.logo{width:220px!important}}</style></head>'+
-    '<body style="margin:0;padding:0;background:#f3f6fa;font-family:Arial,Helvetica,sans-serif;color:#102b4e">'+
-    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f3f6fa"><tr><td align="center" style="padding:24px 10px">'+
-    '<table role="presentation" class="shell" width="760" cellspacing="0" cellpadding="0" border="0" style="width:760px;max-width:760px;background:#ffffff;border:1px solid #dfe7f0">'+
-    '<tr><td class="pad" style="padding:24px 34px 20px;border-bottom:4px solid #52a82d"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td><img class="logo" src="'+logo+'" alt="Pedroza Certificadora" width="270" style="display:block;width:270px;max-width:100%;height:auto;border:0"></td><td class="mobile-hide" align="right" style="font-size:17px;line-height:1.35;font-weight:700;color:#092e5b">SEGURANÇA E CONFIANÇA<br><span style="color:#52a82d;font-weight:500">PARA VOCÊ E SUA EMPRESA</span></td></tr></table></td></tr>'+
-    '<tr><td class="pad" style="padding:38px 40px 24px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td class="hero-left" width="62%" valign="top" style="width:62%;padding-right:26px"><div style="font-size:12px;line-height:1.2;letter-spacing:1.7px;font-weight:700;color:#52a82d">'+eyebrow+'</div><h1 class="title" style="margin:10px 0 18px;font-size:42px;line-height:1.08;color:#092e5b">'+title+'</h1><p style="margin:0 0 17px;font-size:17px;line-height:1.55;color:#183c66">Olá, <strong>'+greeting+'</strong>.</p><p style="margin:0;font-size:16px;line-height:1.65;color:#405873">'+message+'</p></td>'+
-    '<td class="hero-right" width="38%" valign="middle" align="center" style="width:38%;text-align:center"><table role="presentation" cellspacing="0" cellpadding="0" style="margin:auto"><tr><td align="center" style="background:#092e5b;border-radius:14px 14px 0 0;padding:10px 28px;color:#ffffff;font-size:16px;font-weight:700">FALTAM</td></tr><tr><td align="center" style="border:1px solid #d8e2ed;border-top:0;border-radius:0 0 14px 14px;padding:22px 22px;background:#ffffff"><div style="font-size:46px;line-height:1;font-weight:800;color:#52a82d">'+highlight+'</div><div style="margin-top:6px;font-size:14px;font-weight:700;color:#092e5b">PARA O VENCIMENTO</div></td></tr></table></td></tr></table></td></tr>'+
-    '<tr><td class="pad" style="padding:0 40px 24px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #dfe7f0;border-radius:12px;overflow:hidden"><tr><td colspan="2" style="padding:17px 18px;background:#f8fafc;border-bottom:1px solid #dfe7f0;font-size:17px;font-weight:800;color:#092e5b">DADOS DO CERTIFICADO DIGITAL</td></tr><tr>'+rowsHtml+'</tr></table></td></tr>'+
-    '<tr><td class="pad" style="padding:0 40px 28px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td class="cta-cell" width="50%" align="center" style="padding-right:7px"><a href="'+primaryUrl+'" style="display:block;background:#52a82d;color:#ffffff;text-decoration:none;font-size:14px;font-weight:800;padding:17px 16px;border-radius:8px">'+primaryLabel+'</a></td><td class="cta-cell" width="50%" align="center" style="padding-left:7px"><a href="'+secondaryUrl+'" style="display:block;background:#092e5b;color:#ffffff;text-decoration:none;font-size:14px;font-weight:800;padding:17px 16px;border-radius:8px">'+secondaryLabel+'</a></td></tr></table></td></tr>'+
-    '<tr><td class="pad" style="padding:22px 40px;background:#eef5fb;border-top:1px solid #dfe7f0"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td width="70" valign="middle"><img src="'+icon+'" width="58" height="58" alt="Pedroza" style="display:block;border:0;border-radius:50%"></td><td valign="middle"><div style="font-size:16px;font-weight:800;color:#092e5b;margin-bottom:10px">Nossa Central de Atendimento está à disposição.</div><table role="presentation" width="100%"><tr><td class="support-cell" width="33%" style="font-size:13px;line-height:1.5;color:#405873"><strong style="color:#52a82d">WhatsApp</strong><br>'+phone+'</td><td class="support-cell" width="34%" style="font-size:13px;line-height:1.5;color:#405873"><strong style="color:#52a82d">E-mail</strong><br>'+email+'</td><td class="support-cell" width="33%" style="font-size:13px;line-height:1.5;color:#405873"><strong style="color:#52a82d">Atendimento</strong><br>Seg. a Sex., 8h às 18h</td></tr></table></td></tr></table></td></tr>'+
-    '<tr><td class="pad" style="padding:24px 40px"><table role="presentation" width="100%"><tr><td style="font-size:14px;line-height:1.6;color:#405873">Atenciosamente,<br><strong style="font-size:16px;color:#092e5b">Equipe Pedroza Certificadora</strong></td><td align="right" class="mobile-hide" style="font-size:12px;line-height:1.6;color:#60748a"><a href="mailto:'+email+'" style="color:#176ca4;text-decoration:none">'+email+'</a><br><a href="'+site+'" style="color:#176ca4;text-decoration:none">pedrozacertificadora.com.br</a><br>'+phone+'</td></tr></table></td></tr>'+
-    '<tr><td style="padding:18px 40px;background:#092e5b;border-top:4px solid #52a82d;color:#ffffff"><table role="presentation" width="100%"><tr><td style="font-size:13px;font-weight:700">CERTIFICAÇÃO DIGITAL É SEGURANÇA, AGILIDADE E CONFIANÇA.</td><td align="right" class="mobile-hide" style="font-size:12px;color:#cbd8e7">© 2026 Pedroza Certificadora</td></tr></table></td></tr>'+
-    '<tr><td align="center" style="padding:14px 20px;background:#ffffff;font-size:11px;line-height:1.5;color:#7b8b9d">Este e-mail foi enviado automaticamente pela Plataforma Atlas. Não compartilhe senhas ou códigos de instalação.</td></tr>'+
-    '</table></td></tr></table></body></html>';
-}
-
-
-/* TEMPLATE VISUAL CONGELADO — preservar estrutura, responsividade, identidade e rodape sem logo. */
-function buildPortalInviteEmail_(kind) {
-  const logo='https://pedrozacertificadora.com.br/images/email/pedroza-email-logo.png';
-  const icon='https://pedrozacertificadora.com.br/images/logo/icon-192.png';
-  const site='https://pedrozacertificadora.com.br';
-  const portal=site+'/cliente/';
-  const whatsapp='https://wa.me/5521991674117';
-  const welcome=kind==='WELCOME';
-  const title=welcome?'Boas-vindas à Pedroza Certificadora':'Seu certificado sempre ao seu alcance';
-  const intro=welcome?'É um prazer ter você conosco. A partir de agora, nossa equipe acompanhará cada etapa do seu certificado com atendimento humano, segurança e praticidade.':'Criamos uma área exclusiva para você acompanhar a validade do certificado, receber avisos, consultar seu histórico e solicitar atendimento em um só lugar.';
-  const button=welcome?'CONHECER NOSSOS SERVIÇOS':'CRIAR MEU ACESSO';
-  const buttonUrl=welcome?site:portal+'ativar?convite={{TOKEN_CONVITE}}';
-  const panelTitle=welcome?'VOCÊ PODE CONTAR COM A GENTE':'NO PORTAL DO CLIENTE VOCÊ PODERÁ';
-  const preheader=welcome?'Atendimento humano, avisos de vencimento e suporte para o seu certificado digital.':'Acompanhe validade, avisos e renovações no Portal do Cliente.';
-  return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>'+title+'</title><style>html,body{margin:0!important;padding:0!important;width:100%!important;background:#edf3f8!important;color:#12345a!important}table{border-collapse:collapse!important}img{border:0;outline:none;text-decoration:none}a{text-decoration:none}.mobile-brand{display:none!important;max-height:0;overflow:hidden}@media only screen and (max-width:740px){.outer-pad{padding:0!important}.shell{width:100%!important;max-width:100%!important;border-left:0!important;border-right:0!important}.pad{padding-left:18px!important;padding-right:18px!important}.desktop-cell,.benefit,.data-cell{display:block!important;width:100%!important;box-sizing:border-box!important}.desktop-cell{padding-top:22px!important}.benefit,.data-cell{border-right:0!important}.hero-title{font-size:34px!important}.hero-copy{font-size:16px!important}.desktop-brand{display:none!important}.mobile-brand{display:table!important;max-height:none!important;overflow:visible!important;width:100%!important}.mobile-full{display:block!important;width:100%!important;box-sizing:border-box!important}.footer-center{text-align:center!important}.portal-visual{max-width:320px!important;margin:0 auto!important}}</style></head><body style="margin:0;padding:0;background:#edf3f8;font-family:Arial,Helvetica,sans-serif;color:#12345a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">'+preheader+'</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#edf3f8" style="width:100%;background:#edf3f8"><tr><td class="outer-pad" align="center" style="padding:24px 10px"><table role="presentation" class="shell" width="720" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:720px;max-width:720px;background:#ffffff;border:1px solid #dce6ef"><tr><td class="pad brand-header" bgcolor="#f5f7fa" style="padding:20px 34px;border-bottom:4px solid #53ad2f;background:#f5f7fa;background-image:linear-gradient(#f5f7fa,#f5f7fa)"><table role="presentation" class="desktop-brand" width="100%" cellspacing="0" cellpadding="0"><tr><td><img src="'+logo+'" alt="Pedroza Certificadora" width="235" style="display:block;width:235px;max-width:100%;height:auto"></td><td align="right" style="font-size:15px;line-height:1.35;font-weight:900;color:#0b3563">SEGURANÇA E CONFIANÇA<br><span style="color:#53ad2f;font-weight:600">PARA VOCÊ E SUA EMPRESA</span></td></tr></table><table role="presentation" class="mobile-brand" width="100%" cellspacing="0" cellpadding="0" style="display:none;max-height:0;overflow:hidden"><tr><td width="58" valign="middle"><img src="'+icon+'" alt="Pedroza" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:50%;background:#ffffff"></td><td valign="middle" style="font-size:16px;line-height:1.15;font-weight:900;color:#0b3563">PEDROZA<br><span style="font-size:12px;font-weight:700">Certificadora</span></td><td align="right" valign="middle" style="font-size:10px;line-height:1.35;font-weight:900;color:#0b3563">SEGURANÇA E CONFIANÇA<br><span style="color:#53ad2f">PARA VOCÊ E SUA EMPRESA</span></td></tr></table></td></tr><tr><td class="pad" bgcolor="#eef6fb" style="padding:34px 38px;background:#eef6fb;background-image:linear-gradient(#eef6fb,#eef6fb)"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td class="desktop-cell" width="59%" valign="top" style="width:59%;padding-right:28px"><div style="font-size:12px;letter-spacing:1.8px;font-weight:900;color:#53ad2f">PEDROZA CERTIFICADORA</div><h1 class="hero-title" style="margin:11px 0 17px;font-size:43px;line-height:1.08;color:#0b3563">'+title+'</h1><p class="hero-copy" style="margin:0 0 13px;font-size:18px;line-height:1.5;color:#173f69">Olá, <strong>{{NOME}}</strong>.</p><p class="hero-copy" style="margin:0;font-size:17px;line-height:1.65;color:#46617c">'+intro+'</p></td><td class="desktop-cell" width="41%" valign="middle" style="width:41%"><table role="presentation" class="portal-visual" width="100%" bgcolor="#0b3563" cellspacing="0" cellpadding="0" style="width:100%;background:#0b3563;border-radius:16px"><tr><td align="center" style="padding:22px 18px 12px;color:#ffffff;font-size:12px;letter-spacing:1.4px;font-weight:800">PORTAL DO CLIENTE</td></tr><tr><td style="padding:0 18px 18px"><table role="presentation" width="100%" bgcolor="#ffffff" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:10px"><tr><td style="padding:16px"><div style="height:8px;background:#e5edf4;border-radius:8px;margin-bottom:10px"></div><div style="height:8px;width:70%;background:#d2e2ef;border-radius:8px;margin-bottom:15px"></div><table role="presentation" width="100%"><tr><td width="48%" bgcolor="#eef6fb" valign="top" style="padding:12px 6px;text-align:center;background:#eef6fb;border-radius:8px;color:#0b3563"><div style="font-size:10px;line-height:1.2;font-weight:900;letter-spacing:.4px">VALIDADE</div><div style="margin-top:6px;font-size:13px;line-height:1.25;font-weight:900;color:#0b3563">{{VALIDADE}}</div></td><td width="4%"></td><td width="48%" bgcolor="#edf8e9" valign="top" style="padding:12px 6px;text-align:center;background:#edf8e9;border-radius:8px;color:#39891e"><div style="font-size:10px;line-height:1.2;font-weight:900;letter-spacing:.4px">AVISOS</div><div style="margin-top:6px;font-size:13px;line-height:1.25;font-weight:900;color:#39891e">ATIVOS</div></td></tr></table></td></tr></table></td></tr><tr><td align="center" style="padding:0 18px 22px;color:#d9e7f3;font-size:13px;line-height:1.5">Certificado, histórico e atendimento em um só lugar.</td></tr></table></td></tr></table></td></tr><tr><td class="pad" bgcolor="#ffffff" style="padding:28px 38px 10px;background:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #d8e4ee;border-radius:14px;overflow:hidden"><tr><td colspan="2" bgcolor="#f4f8fb" style="padding:16px 20px;background:#f4f8fb;color:#0b3563;font-size:17px;font-weight:900">INFORMAÇÕES DO SEU CERTIFICADO</td></tr><tr><td class="data-cell" width="50%" style="padding:16px 20px;border-right:1px solid #e1e9f0;border-top:1px solid #e1e9f0"><div style="font-size:12px;color:#6b8197;margin-bottom:5px">Nome / Razão Social</div><div style="font-size:15px;font-weight:800;color:#0b3563">{{NOME}}</div></td><td class="data-cell" width="50%" style="padding:16px 20px;border-top:1px solid #e1e9f0"><div style="font-size:12px;color:#6b8197;margin-bottom:5px">CPF/CNPJ</div><div style="font-size:15px;font-weight:800;color:#0b3563">{{CPF_CNPJ}}</div></td></tr><tr><td class="data-cell" width="50%" style="padding:16px 20px;border-right:1px solid #e1e9f0;border-top:1px solid #e1e9f0"><div style="font-size:12px;color:#6b8197;margin-bottom:5px">Tipo do certificado</div><div style="font-size:15px;font-weight:800;color:#0b3563">{{TIPO_CERTIFICADO}}</div></td><td class="data-cell" width="50%" style="padding:16px 20px;border-top:1px solid #e1e9f0"><div style="font-size:12px;color:#6b8197;margin-bottom:5px">Validade</div><div style="font-size:15px;font-weight:800;color:#0b3563">{{VALIDADE}}</div></td></tr></table></td></tr><tr><td class="pad" bgcolor="#ffffff" style="padding:22px 38px 12px;background:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #d8e4ee;border-radius:14px"><tr><td colspan="2" bgcolor="#0b3563" style="padding:17px 20px;background:#0b3563;color:#ffffff;font-size:17px;font-weight:900">'+panelTitle+'</td></tr><tr><td class="benefit" width="50%" style="padding:18px 20px;border-right:1px solid #e1e9f0;border-bottom:1px solid #e1e9f0;color:#294b6d;font-size:15px;line-height:1.45"><strong style="color:#53ad2f">✓</strong> Avisos automáticos de vencimento</td><td class="benefit" width="50%" style="padding:18px 20px;border-bottom:1px solid #e1e9f0;color:#294b6d;font-size:15px;line-height:1.45"><strong style="color:#53ad2f">✓</strong> Consulta da validade do certificado</td></tr><tr><td class="benefit" width="50%" style="padding:18px 20px;border-right:1px solid #e1e9f0;color:#294b6d;font-size:15px;line-height:1.45"><strong style="color:#53ad2f">✓</strong> Atendimento humano e suporte remoto</td><td class="benefit" width="50%" style="padding:18px 20px;color:#294b6d;font-size:15px;line-height:1.45"><strong style="color:#53ad2f">✓</strong> Histórico e solicitação de renovação</td></tr></table></td></tr><tr><td class="pad" bgcolor="#ffffff" align="center" style="padding:24px 38px 34px;background:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td bgcolor="#53ad2f" style="background:#53ad2f;border-radius:9px"><a class="mobile-full" href="'+buttonUrl+'" style="display:inline-block;padding:17px 32px;color:#ffffff;font-size:15px;font-weight:900">'+button+'</a></td></tr></table><div style="margin-top:16px;font-size:14px;line-height:1.5"><a href="'+whatsapp+'" style="color:#0b5f96;font-weight:800">Prefere falar com nossa equipe? Acesse o WhatsApp</a></div></td></tr><tr><td class="pad" bgcolor="#f1f7fb" style="padding:22px 38px;border-top:1px solid #dce6ef;background:#f1f7fb;background-image:linear-gradient(#f1f7fb,#f1f7fb);color:#49637d;font-size:14px;line-height:1.65"><strong style="color:#0b3563">Segurança em primeiro lugar</strong><br>Seus dados são tratados de acordo com a LGPD. Nunca solicitaremos senha ou código de instalação do certificado por e-mail.</td></tr><tr><td class="pad" bgcolor="#ffffff" style="padding:22px 38px;background:#ffffff;background-image:linear-gradient(#ffffff,#ffffff);color:#49637d;font-size:14px;line-height:1.6">Atenciosamente,<br><strong style="font-size:16px;color:#0b3563">Equipe Pedroza Certificadora</strong></td></tr><tr><td class="pad footer-center" bgcolor="#0b3563" style="padding:20px 38px;background:#0b3563;border-top:4px solid #53ad2f;color:#ffffff;font-size:12px;line-height:1.55">CERTIFICAÇÃO DIGITAL É SEGURANÇA, AGILIDADE E CONFIANÇA.<br><span style="color:#d3dfeb">pedrozacertificadora.com.br • certificadodigital@pedroza.com.br • (21) 99167-4117</span></td></tr></table></td></tr></table></body></html>';
-}
-
-function seedAccModels_() {
-  const now=new Date();
-  const detailRows=[
-    ['Nome completo','{{NOME}}'],
-    ['CPF/CNPJ','{{CPF_CNPJ}}'],
-    ['Tipo','{{TIPO_CERTIFICADO}}'],
-    ['Data de vencimento','{{VALIDADE}}']
-  ];
-  const model=function(id,name,type,subject,title,highlight,message,primaryLabel){
-    return {id:id,name:name,type:type,subject:subject,html:buildAtlasEmail_({
-      title:title,eyebrow:'PEDROZA CERTIFICADORA',highlight:highlight,greeting:'{{NOME}}',message:message,rows:detailRows,
-      primaryLabel:primaryLabel||'FALAR NO WHATSAPP',primaryUrl:'https://wa.me/5521991674117',
-      secondaryLabel:'VER DETALHES NO PORTAL ATLAS',secondaryUrl:'https://pedrozacertificadora.com.br/cliente/'
-    })};
-  };
-  const models=[
-    model('MOD-000001','Aviso de vencimento','VENCIMENTO','Aviso de vencimento do seu certificado digital','Seu certificado digital vence em breve','EM BREVE','Identificamos que o seu certificado digital está próximo do vencimento. Para evitar interrupções no acesso a sistemas e serviços, recomendamos iniciar a renovação com antecedência.'),
-    model('MOD-000002','Certificado vencido','VENCIDO','Atenção: seu certificado digital está vencido','Seu certificado digital está vencido','VENCIDO','O certificado digital cadastrado consta como vencido. Nossa equipe está disponível para orientar e concluir a renovação com segurança.','RENOVAR AGORA'),
-    model('MOD-000003','Renovação concluída','RENOVACAO','Renovação concluída com sucesso','Seu certificado digital foi renovado com sucesso','CONCLUÍDO','A renovação do seu certificado digital foi concluída. Agradecemos pela confiança no atendimento da Pedroza Certificadora.','FALAR COM A EQUIPE'),
-    {id:'MOD-000004',name:'Comunicado personalizado',type:'PERSONALIZADO',subject:'Comunicado da Pedroza Certificadora',html:buildAtlasEmail_({title:'Comunicado importante',eyebrow:'PEDROZA CERTIFICADORA',highlight:'AVISO',greeting:'{{NOME}}',message:'{{MENSAGEM}}',rows:detailRows,primaryLabel:'FALAR NO WHATSAPP',primaryUrl:'https://wa.me/5521991674117',secondaryLabel:'ACESSAR O SITE',secondaryUrl:'https://pedrozacertificadora.com.br'})},
-    model('MOD-000005','Aviso de vencimento — 90 dias','VENCIMENTO_90','Aviso de vencimento: seu certificado digital vence em 90 dias','Seu certificado digital vence em 90 dias','90 DIAS','Identificamos que o seu certificado digital está próximo do vencimento. Para evitar interrupções no acesso a sistemas e serviços, recomendamos iniciar a renovação com antecedência.','RENOVAR AGORA'),
-    model('MOD-000006','Aviso de vencimento — 60 dias','VENCIMENTO_60','Seu certificado digital vence em 60 dias','Renovação recomendada','60 DIAS','Seu certificado digital está a aproximadamente 60 dias do vencimento. Recomendamos organizar a renovação para evitar imprevistos.','FALAR NO WHATSAPP'),
-    model('MOD-000007','Aviso de vencimento — 30 dias','VENCIMENTO_30','Atenção: seu certificado vence em 30 dias','Renove com antecedência','30 DIAS','Faltam aproximadamente 30 dias para o vencimento do seu certificado digital. Nossa equipe já pode conduzir a renovação.','RENOVAR AGORA'),
-    model('MOD-000008','Aviso de vencimento — 15 dias','VENCIMENTO_15','Prioridade: seu certificado vence em 15 dias','Renovação prioritária','15 DIAS','Faltam aproximadamente 15 dias para o vencimento. Recomendamos prioridade na renovação para manter seus acessos disponíveis.','RENOVAR AGORA'),
-    model('MOD-000009','Aviso de vencimento — 7 dias','VENCIMENTO_7','Último aviso: seu certificado vence em 7 dias','Último aviso de vencimento','7 DIAS','Seu certificado digital está a aproximadamente 7 dias do vencimento. Entre em contato para realizarmos a renovação o quanto antes.','RENOVAR AGORA'),
-    {id:'MOD-000010',name:'Boas-vindas à Pedroza Certificadora',type:'BOAS_VINDAS',subject:'{{NOME}}, seja bem-vindo à Pedroza Certificadora',html:buildPortalInviteEmail_('WELCOME')},
-    {id:'MOD-000011',name:'Convite para o Portal do Cliente',type:'CONVITE_PORTAL',subject:'{{NOME}}, acompanhe seu certificado no Portal Pedroza',html:buildPortalInviteEmail_('PORTAL')},
-    model('MOD-000012','Aviso de vencimento — 1 dia','VENCIMENTO_1','Atenção: seu certificado digital vence amanhã','Seu certificado digital vence amanhã','1 DIA','Falta apenas 1 dia para o vencimento do seu certificado digital. Recomendamos concluir a renovação hoje para evitar interrupções nos seus acessos.','RENOVAR AGORA'),
-    model('MOD-000013','Aviso de vencimento — hoje','VENCIMENTO_HOJE','Atenção: seu certificado digital vence hoje','Seu certificado digital vence hoje','VENCE HOJE','O seu certificado digital vence hoje. Nossa equipe está disponível para concluir a renovação com prioridade e segurança.','RENOVAR AGORA')
-  ];
-  models.forEach(function(m){
-    const current=findById_('MODELOS_EMAIL',m.id);
-    const data={NOME:m.name,TIPO:m.type,ASSUNTO:m.subject,HTML:m.html,VARIAVEIS_JSON:JSON.stringify(['NOME','EMPRESA','CPF_CNPJ','TIPO_CERTIFICADO','VALIDADE','MENSAGEM','ASSINATURA','TOKEN_CONVITE']),ATIVO:'SIM',STATUS:'ATIVO',ALTERADO_EM:now,ALTERADO_POR:'SETUP-5.0.4D.2'};
-    if(current) updateRow_('MODELOS_EMAIL',m.id,data,'SETUP-5.0.4D.2');
-    else appendObject_('MODELOS_EMAIL',Object.assign({ID:m.id,CRIADO_EM:now,CRIADO_POR:'SETUP-5.0.4D.2'},data));
-  });
-}
-
 function createCampaign_(p) {
   if(!String(p.nome||'').trim()) throw apiError_('VALIDATION','Informe o nome da campanha.');
   const now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('CAMPANHAS','CAM');
@@ -672,115 +241,6 @@ function validateInvite_(p) {
   if(String(invite.SITUACAO).toUpperCase()!=='PENDENTE') throw apiError_('INVALID_INVITE','Convite ja utilizado ou cancelado.');
   if(new Date(invite.EXPIRA_EM)<new Date()) throw apiError_('EXPIRED_INVITE','Convite expirado.');
   return {valido:true,conviteId:invite.ID,clienteId:invite.CLIENTE_ID,email:invite.EMAIL,expiraEm:invite.EXPIRA_EM};
-}
-function acceptInvite_(p,clientMeta) {
-  const validation=validateInvite_({token:p.token});
-  const invite=findById_('CONVITES',validation.conviteId);
-  const client=findById_('CLIENTES',validation.clienteId);
-  const passwordHash=String(p.passwordHash||'');
-  if(!client) throw apiError_('NOT_FOUND','Cliente do convite nao encontrado.');
-  if(!/^[a-f0-9]{64}$/i.test(passwordHash)) throw apiError_('VALIDATION','Crie uma senha valida para ativar o portal.');
-  const email=normalize_(invite.EMAIL||client.EMAIL||client.EMAIL_SECUNDARIO||'');
-  if(!email) throw apiError_('VALIDATION','O cliente nao possui e-mail cadastrado.');
-  let user=rows_('USUARIOS').find(function(row){
-    return normalize_(row.EMAIL)===email || (String(row.PERFIL||'').toUpperCase()==='CLIENTE' && digits_(row.CPF_CNPJ)===digits_(client.CPF_CNPJ));
-  });
-  const now=new Date(), actor='PORTAL_ATIVACAO';
-  if(user) {
-    updateRow_('USUARIOS',user.ID,{
-      LOGIN:email,EMAIL:email,NOME:String(client.NOME||client.EMPRESA||email),PERFIL:'CLIENTE',
-      HASH_SENHA:passwordHash,CPF_CNPJ:digits_(client.CPF_CNPJ),CHAVE_CERTIFICADO:digits_(client.CPF_CNPJ),STATUS:'ATIVO'
-    },actor);
-  } else {
-    const userId=nextId_('USUARIOS','USR');
-    appendObject_('USUARIOS',{
-      ID:userId,LOGIN:email,EMAIL:email,NOME:String(client.NOME||client.EMPRESA||email),PERFIL:'CLIENTE',
-      HASH_SENHA:passwordHash,CPF_CNPJ:digits_(client.CPF_CNPJ),TELEFONE:String(client.TELEFONE||client.WHATSAPP||''),
-      CHAVE_CERTIFICADO:digits_(client.CPF_CNPJ),PREFERENCIAS_JSON:JSON.stringify({expiration:true,email:true,whatsapp:false}),
-      STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor
-    });
-    user=findById_('USUARIOS',userId);
-  }
-  updateRow_('CONVITES',invite.ID,{USUARIO_ID:user.ID,ACEITO_EM:now,SITUACAO:'ACEITO'},actor);
-  addTimeline_({clienteId:client.ID,tipoEvento:'PORTAL_ATIVADO',titulo:'Portal do Cliente ativado',descricao:'Primeiro acesso configurado com sucesso.',origem:'PORTAL',actor:actor,dados:{conviteId:invite.ID,usuarioId:user.ID}});
-  recordAudit_({action:'PORTAL_ACTIVATED',details:{clienteId:client.ID,usuarioId:user.ID,conviteId:invite.ID}},clientMeta||{});
-  return {ativado:true,login:email};
-}
-function portalContext_(authToken) {
-  const session=requireSession_(authToken);
-  const user=findById_('USUARIOS',session.id);
-  if(!user || String(user.PERFIL||'').toUpperCase()!=='CLIENTE') throw apiError_('FORBIDDEN','Acesso exclusivo do cliente.');
-  const document=digits_(user.CHAVE_CERTIFICADO||user.CPF_CNPJ);
-  const client=rows_('CLIENTES').find(function(row){return digits_(row.CPF_CNPJ)===document;});
-  if(!client) throw apiError_('NOT_FOUND','Cadastro do cliente nao localizado.');
-  return {session:session,user:user,client:client};
-}
-function portalSummary_(authToken) {
-  const context=portalContext_(authToken), client=context.client;
-  const certificates=rows_('CERTIFICADOS').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';}).map(publicCertificate_);
-  const timeline=rows_('TIMELINE').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(b.DATA_HORA||0)-new Date(a.DATA_HORA||0);}).slice(0,20).map(function(row){
-    return {id:row.ID,tipo:row.TIPO_EVENTO,titulo:row.TITULO,descricao:row.DESCRICAO,dataHora:row.DATA_HORA};
-  });
-  const agenda=rows_('AGENDA').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).map(agendaPublica_);
-  return {
-    cliente:{id:client.ID,nome:String(client.NOME||client.EMPRESA||'Cliente'),email:mascararEmailPublico_(client.EMAIL||client.EMAIL_SECUNDARIO||''),documento:mascararDocumentoPublico_(client.CPF_CNPJ),telefone:String(client.TELEFONE||client.WHATSAPP||'')},
-    certificados:certificates,
-    agenda:agenda,
-    timeline:timeline,
-    preferencias:parseJson_(context.user.PREFERENCIAS_JSON,{expiration:true,email:true,whatsapp:false})
-  };
-}
-function portalRequestRenewal_(authToken,p,clientMeta) {
-  const context=portalContext_(authToken), certificateId=String(p.certificadoId||'');
-  const certificate=rows_('CERTIFICADOS').find(function(row){return String(row.ID)===certificateId&&String(row.CLIENTE_ID)===String(context.client.ID);});
-  if(!certificate) throw apiError_('NOT_FOUND','Certificado nao localizado para este cliente.');
-  const event=addTimeline_({clienteId:context.client.ID,tipoEvento:'RENOVACAO_SOLICITADA',titulo:'Renovacao solicitada pelo Portal',descricao:'Solicitacao referente ao certificado '+String(certificate.TIPO||certificate.MODELO||certificate.ID)+'.',origem:'PORTAL',actor:context.user.LOGIN,dados:{certificadoId:certificate.ID}});
-  recordAudit_({action:'PORTAL_RENEWAL_REQUESTED',details:{clienteId:context.client.ID,certificadoId:certificate.ID,usuarioId:context.user.ID}},clientMeta||{});
-  return {solicitado:true,eventoId:event.ID};
-}
-function agendaPublica_(row) {
-  const client=findById_('CLIENTES',row.CLIENTE_ID)||{};
-  return {id:row.ID,clienteId:row.CLIENTE_ID,clienteNome:String(client.NOME||client.EMPRESA||'Cliente'),certificadoId:String(row.CERTIFICADO_ID||''),titulo:String(row.TITULO||'Atendimento'),tipo:String(row.TIPO_ATENDIMENTO||'EMISSAO'),inicio:row.INICIO,fim:row.FIM,responsavel:String(row.RESPONSAVEL||''),situacao:String(row.SITUACAO||'SOLICITADO'),origem:String(row.ORIGEM||'AGR'),localLink:String(row.LOCAL_LINK||''),observacoes:String(row.OBSERVACOES||'')};
-}
-function listAgenda_(p) {
-  const from=dataAtlas_(p.inicio), to=dataAtlas_(p.fim), clientId=String(p.clienteId||'');
-  return rows_('AGENDA').filter(function(row){
-    if(String(row.STATUS||'ATIVO').toUpperCase()!=='ATIVO') return false;
-    if(clientId&&String(row.CLIENTE_ID)!==clientId) return false;
-    const d=dataAtlas_(row.INICIO);
-    return (!from||!d||d>=from)&&(!to||!d||d<=to);
-  }).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).map(agendaPublica_);
-}
-function validarAgenda_(p) {
-  const client=findById_('CLIENTES',p.clienteId);
-  if(!client) throw apiError_('VALIDATION','Selecione um cliente valido.');
-  const inicio=dataAtlas_(p.inicio), fim=dataAtlas_(p.fim);
-  if(!inicio||!fim||fim<=inicio) throw apiError_('VALIDATION','Informe inicio e fim validos.');
-  const situation=String(p.situacao||'SOLICITADO').toUpperCase();
-  if(['SOLICITADO','CONFIRMADO','CONCLUIDO','CANCELADO','NAO_COMPARECEU'].indexOf(situation)<0) throw apiError_('VALIDATION','Situacao do agendamento invalida.');
-  return {client:client,inicio:inicio,fim:fim,situacao:situation};
-}
-function createAppointment_(p,authToken,clientMeta) {
-  const session=requireSession_(authToken), valid=validarAgenda_(p), now=new Date(), actor=String(session.username||'ATLAS'), id=nextId_('AGENDA','AGE');
-  appendObject_('AGENDA',{ID:id,CLIENTE_ID:valid.client.ID,CERTIFICADO_ID:String(p.certificadoId||''),TITULO:String(p.titulo||'Atendimento de certificado digital'),TIPO_ATENDIMENTO:String(p.tipo||'EMISSAO').toUpperCase(),INICIO:valid.inicio,FIM:valid.fim,RESPONSAVEL:String(p.responsavel||actor),SITUACAO:valid.situacao,ORIGEM:String(p.origem||'AGR').toUpperCase(),LOCAL_LINK:String(p.localLink||''),OBSERVACOES:String(p.observacoes||''),STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
-  addTimeline_({clienteId:valid.client.ID,tipoEvento:'AGENDAMENTO_CRIADO',titulo:'Atendimento agendado',descricao:String(p.titulo||'Atendimento')+' em '+Utilities.formatDate(valid.inicio,Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy HH:mm')+'.',origem:String(p.origem||'AGR'),actor:actor,dados:{agendamentoId:id,situacao:valid.situacao}});
-  recordAudit_({action:'APPOINTMENT_CREATED',details:{agendamentoId:id,clienteId:valid.client.ID}},clientMeta||{});
-  return agendaPublica_(findById_('AGENDA',id));
-}
-function updateAppointment_(p,authToken,clientMeta) {
-  const session=requireSession_(authToken), current=findById_('AGENDA',p.id);
-  if(!current) throw apiError_('NOT_FOUND','Agendamento nao localizado.');
-  const merged=Object.assign({},current,p,{clienteId:p.clienteId||current.CLIENTE_ID,inicio:p.inicio||current.INICIO,fim:p.fim||current.FIM,situacao:p.situacao||current.SITUACAO}), valid=validarAgenda_(merged), actor=String(session.username||'ATLAS');
-  const updated=updateRow_('AGENDA',current.ID,{CLIENTE_ID:valid.client.ID,CERTIFICADO_ID:String(p.certificadoId!==undefined?p.certificadoId:current.CERTIFICADO_ID||''),TITULO:String(p.titulo!==undefined?p.titulo:current.TITULO),TIPO_ATENDIMENTO:String(p.tipo!==undefined?p.tipo:current.TIPO_ATENDIMENTO||'EMISSAO').toUpperCase(),INICIO:valid.inicio,FIM:valid.fim,RESPONSAVEL:String(p.responsavel!==undefined?p.responsavel:current.RESPONSAVEL||actor),SITUACAO:valid.situacao,LOCAL_LINK:String(p.localLink!==undefined?p.localLink:current.LOCAL_LINK||''),OBSERVACOES:String(p.observacoes!==undefined?p.observacoes:current.OBSERVACOES||'')},actor);
-  addTimeline_({clienteId:valid.client.ID,tipoEvento:'AGENDAMENTO_ATUALIZADO',titulo:'Agendamento atualizado',descricao:'Situacao: '+valid.situacao.replace(/_/g,' ')+'.',origem:'AGR',actor:actor,dados:{agendamentoId:current.ID,situacao:valid.situacao}});
-  recordAudit_({action:'APPOINTMENT_UPDATED',details:{agendamentoId:current.ID,clienteId:valid.client.ID,situacao:valid.situacao}},clientMeta||{});
-  return agendaPublica_(updated);
-}
-function portalRequestAppointment_(authToken,p,clientMeta) {
-  const context=portalContext_(authToken), requested=dataAtlas_(p.inicio);
-  if(!requested||requested.getTime()<Date.now()) throw apiError_('VALIDATION','Escolha uma data e horario futuros.');
-  const end=new Date(requested.getTime()+Number(p.duracaoMinutos||30)*60000);
-  return createAppointment_({clienteId:context.client.ID,certificadoId:String(p.certificadoId||''),titulo:String(p.titulo||'Atendimento solicitado pelo Portal'),tipo:String(p.tipo||'RENOVACAO'),inicio:requested,fim:end,responsavel:'A DEFINIR',situacao:'SOLICITADO',origem:'PORTAL',observacoes:String(p.observacoes||'')},authToken,clientMeta);
 }
 function sha256Hex_(value){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(value),Utilities.Charset.UTF_8).map(b=>(b+256)%256).map(b=>('0'+b.toString(16)).slice(-2)).join('');}
 function seedCrmCatalogs_() {
@@ -861,32 +321,20 @@ function normalize_(v){return String(v||'').trim().toLowerCase();} function digi
 
 
 /**
- * Sprint 4.8.3.1 - Hotfix Code.gs Limpo
- *
- * Fluxo seguro:
- * 1) validarImportacaoCRM(sourceSpreadsheetId)
- * 2) simularImportacaoCRM(sourceSpreadsheetId)
- * 3) importarBaseCRM(sourceSpreadsheetId)
- *
- * A importacao CRM preserva as estruturas operacionais da producao:
- * USUARIOS, PERMISSOES, AUDITORIA, CONFIGURACOES e LOGS.
+ * Sprint 4.8.2 - Importador Inteligente CRM
+ * Uso seguro:
+ * 1) Envie o XLSX oficial ao Google Drive e abra como Planilhas Google.
+ * 2) Copie o ID da planilha de origem.
+ * 3) Na planilha oficial do Atlas, execute validarImportacaoCRM("ID").
+ * 4) Se o relatorio estiver aprovado, execute importarBaseCRM("ID").
  */
-const CRM_IMPORT_SHEETS = Object.freeze([
-  'CLIENTES','CERTIFICADOS','AGENDA','TIMELINE','COMUNICACOES','MODELOS_EMAIL',
-  'CAMPANHAS','CAMPANHA_DESTINATARIOS','PREFERENCIAS_COMUNICACAO','CONVITES',
-  'FILA_ENVIO','SETORES','SUBSETORES','TAGS','CLIENTE_TAGS','IA_PROFILE'
-]);
-
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Atlas CRM')
-    .addItem('Configurar estrutura 4.8.3.1', 'configurarAtlasDataFoundation')
+    .addItem('Configurar estrutura 4.8.2', 'configurarAtlasDataFoundation')
     .addSeparator()
     .addItem('Validar base para importacao', 'solicitarValidacaoImportacaoCRM')
-    .addItem('Simular importacao (sem gravar)', 'solicitarSimulacaoImportacaoCRM')
-    .addItem('Importar base homologada', 'solicitarImportacaoCRM')
-    .addSeparator()
-    .addItem('Restaurar backup da importacao', 'solicitarRestauracaoBackupCRM')
+    .addItem('Importar base validada', 'solicitarImportacaoCRM')
     .addToUi();
 }
 
@@ -898,40 +346,20 @@ function solicitarValidacaoImportacaoCRM() {
   ui.alert('Validacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
 }
 
-function solicitarSimulacaoImportacaoCRM() {
-  const ui=SpreadsheetApp.getUi();
-  const r=ui.prompt('Simular importacao CRM','Cole o ID da Planilha Google ja validada:',ui.ButtonSet.OK_CANCEL);
-  if(r.getSelectedButton()!==ui.Button.OK) return;
-  const result=simularImportacaoCRM(String(r.getResponseText()||'').trim());
-  ui.alert('Simulacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
-}
-
 function solicitarImportacaoCRM() {
   const ui=SpreadsheetApp.getUi();
-  const r=ui.prompt('Importar base CRM','Cole o ID da Planilha Google validada e simulada:',ui.ButtonSet.OK_CANCEL);
+  const r=ui.prompt('Importar base CRM','Cole o ID da Planilha Google ja validada:',ui.ButtonSet.OK_CANCEL);
   if(r.getSelectedButton()!==ui.Button.OK) return;
-  const confirm=ui.alert('Confirmar importacao','Apenas as abas CRM serao importadas. Usuarios, senhas, permissoes, auditoria, configuracoes e logs da producao serao preservados. Um backup automatico sera criado. Deseja continuar?',ui.ButtonSet.YES_NO);
+  const confirm=ui.alert('Confirmar importacao','Um backup automatico sera criado antes da importacao. Deseja continuar?',ui.ButtonSet.YES_NO);
   if(confirm!==ui.Button.YES) return;
   const result=importarBaseCRM(String(r.getResponseText()||'').trim());
   ui.alert('Importacao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
 }
 
-function solicitarRestauracaoBackupCRM() {
-  const ui=SpreadsheetApp.getUi();
-  const r=ui.prompt('Restaurar backup CRM','Cole o ID do backup criado pela importacao:',ui.ButtonSet.OK_CANCEL);
-  if(r.getSelectedButton()!==ui.Button.OK) return;
-  const confirm=ui.alert('Confirmar restauracao','As abas CRM atuais serao substituidas pelas copias do backup informado. Deseja continuar?',ui.ButtonSet.YES_NO);
-  if(confirm!==ui.Button.YES) return;
-  const result=restaurarBackupImportacaoCRM(String(r.getResponseText()||'').trim());
-  ui.alert('Restauracao concluida',JSON.stringify(result,null,2),ui.ButtonSet.OK);
-}
-
 function validarImportacaoCRM(sourceSpreadsheetId) {
   if(!sourceSpreadsheetId) throw apiError_('VALIDATION','Informe o ID da planilha de origem.');
-  const target=SpreadsheetApp.getActiveSpreadsheet();
-  if(String(sourceSpreadsheetId)===String(target.getId())) throw apiError_('VALIDATION','A planilha de origem nao pode ser a propria base oficial do Atlas.');
   const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const report={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),sheets:{},errors:[],warnings:[],protectedSheets:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],approved:false};
+  const report={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),sheets:{},errors:[],warnings:[],approved:false};
   const sourceClientIds={};
   const clientSheet=source.getSheetByName('CLIENTES');
   if(!clientSheet){ report.errors.push('Aba CLIENTES nao encontrada.'); return writeImportReport_(report); }
@@ -941,20 +369,20 @@ function validarImportacaoCRM(sourceSpreadsheetId) {
   const duplicateClientIds=findDuplicateValues_(clients,'ID');
   if(duplicateClientIds.length) report.errors.push('IDs duplicados em CLIENTES: '+duplicateClientIds.join(', '));
 
-  CRM_IMPORT_SHEETS.forEach(name=>{
+  Object.keys(SHEETS).forEach(name=>{
     const sh=source.getSheetByName(name);
     if(!sh){
-      report.warnings.push('Aba CRM ausente: '+name);
+      report.warnings.push('Aba opcional ausente: '+name);
       return;
     }
     const objects=readSheetObjects_(sh);
     const headers=sh.getLastColumn()?sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(String):[];
-    const missing=(SHEETS[name]||[]).filter(h=>headers.indexOf(h)<0);
+    const missing=SHEETS[name].filter(h=>headers.indexOf(h)<0);
     report.sheets[name]={rows:objects.length,missingHeaders:missing};
-    if(missing.length) report.errors.push(name+' sem colunas obrigatorias: '+missing.join(', '));
+    if(missing.length) report.warnings.push(name+' sem colunas: '+missing.join(', '));
     if(headers.indexOf('ID')>=0){
       const dup=findDuplicateValues_(objects,'ID');
-      if(dup.length) report.errors.push('IDs duplicados em '+name+': '+dup.slice(0,50).join(', '));
+      if(dup.length) report.errors.push('IDs duplicados em '+name+': '+dup.slice(0,20).join(', '));
     }
     if(headers.indexOf('CLIENTE_ID')>=0){
       const orphans=objects.filter(r=>String(r.CLIENTE_ID||'').trim()&&!sourceClientIds[String(r.CLIENTE_ID).trim()]);
@@ -962,156 +390,71 @@ function validarImportacaoCRM(sourceSpreadsheetId) {
     }
   });
   report.approved=report.errors.length===0;
-  report.fingerprint=report.approved?buildImportFingerprint_(source,report):'';
-  if(report.approved) PropertiesService.getScriptProperties().setProperty('CRM_VALIDATED_'+sourceSpreadsheetId,report.fingerprint);
   return writeImportReport_(report);
-}
-
-function simularImportacaoCRM(sourceSpreadsheetId) {
-  const validation=validarImportacaoCRM(sourceSpreadsheetId);
-  if(!validation.approved) throw apiError_('IMPORT_VALIDATION_FAILED','A base nao foi aprovada. Consulte a aba IMPORTACAO_CRM.');
-  const target=SpreadsheetApp.getActiveSpreadsheet();
-  const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const simulation={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),fingerprint:validation.fingerprint,sheets:{},protectedSheetsPreserved:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],totals:{inserted:0,updated:0,skipped:0},approved:true,generatedAt:new Date().toISOString()};
-  CRM_IMPORT_SHEETS.forEach(name=>{
-    const src=source.getSheetByName(name);
-    if(!src) return;
-    const dst=target.getSheetByName(name);
-    const result=previewSheetUpsert_(src,dst);
-    simulation.sheets[name]=result;
-    simulation.totals.inserted+=result.inserted;
-    simulation.totals.updated+=result.updated;
-    simulation.totals.skipped+=result.skipped;
-  });
-  PropertiesService.getScriptProperties().setProperty('CRM_SIMULATED_'+sourceSpreadsheetId,validation.fingerprint);
-  writeImportReport_({approved:true,simulation:simulation,errors:[],warnings:[]});
-  return simulation;
 }
 
 function importarBaseCRM(sourceSpreadsheetId) {
   const validation=validarImportacaoCRM(sourceSpreadsheetId);
   if(!validation.approved) throw apiError_('IMPORT_VALIDATION_FAILED','A base nao foi aprovada. Consulte a aba IMPORTACAO_CRM.');
-  const props=PropertiesService.getScriptProperties();
-  const simulated=props.getProperty('CRM_SIMULATED_'+sourceSpreadsheetId);
-  if(simulated!==validation.fingerprint) throw apiError_('IMPORT_NOT_SIMULATED','Execute primeiro Simular importacao (sem gravar) para esta mesma versao da base.');
-
   const target=SpreadsheetApp.getActiveSpreadsheet();
   const source=SpreadsheetApp.openById(sourceSpreadsheetId);
-  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.3.1 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
+  const backup=DriveApp.getFileById(target.getId()).makeCopy('Atlas Backup Antes Importacao 4.8.2 - '+Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH-mm-ss'));
   const lock=LockService.getScriptLock();
   lock.waitLock(30000);
-  const summary={version:ATLAS_VERSION,sourceId:sourceSpreadsheetId,sourceName:source.getName(),fingerprint:validation.fingerprint,backupId:backup.getId(),backupName:backup.getName(),protectedSheetsPreserved:['USUARIOS','PERMISSOES','AUDITORIA','CONFIGURACOES','LOGS'],sheets:{},totals:{inserted:0,updated:0,skipped:0},startedAt:new Date().toISOString()};
+  const summary={version:ATLAS_VERSION,backupId:backup.getId(),backupName:backup.getName(),sheets:{},startedAt:new Date().toISOString()};
   try {
-    CRM_IMPORT_SHEETS.forEach(name=>{
+    Object.keys(SHEETS).forEach(name=>{
       const src=source.getSheetByName(name);
       if(!src) return;
-      ensureSheet_(target,name,SHEETS[name]||[]);
-      const dst=target.getSheetByName(name);
-      const result=upsertSheetFromSourceBatch_(src,dst);
+      const dst=ensureSheet_(target,name,SHEETS[name])||target.getSheetByName(name);
+      const result=upsertSheetFromSource_(src,dst);
       summary.sheets[name]=result;
-      summary.totals.inserted+=result.inserted;
-      summary.totals.updated+=result.updated;
-      summary.totals.skipped+=result.skipped;
     });
     seedConfig_();
+    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.2 concluida',summary);
+    recordAudit_({action:'CRM_IMPORT_SUCCESS',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),summary:summary}},{});
     summary.finishedAt=new Date().toISOString();
     summary.ok=true;
-    appendLog_('INFO','IMPORTADOR_CRM','Importacao CRM 4.8.3.1 concluida',summary);
-    recordAudit_({action:'CRM_IMPORT_SUCCESS',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),summary:summary}},{});
     writeImportReport_({approved:true,importSummary:summary,errors:[],warnings:[]});
-    props.setProperty('CRM_LAST_BACKUP_ID',backup.getId());
-    props.setProperty('CRM_LAST_IMPORT_SOURCE',sourceSpreadsheetId);
-    props.deleteProperty('CRM_SIMULATED_'+sourceSpreadsheetId);
     SpreadsheetApp.flush();
     return summary;
   } catch(error) {
-    summary.ok=false; summary.error=error.message; summary.failedAt=new Date().toISOString();
-    try{appendLog_('ERROR','IMPORTADOR_CRM','Falha na importacao CRM. Backup disponivel para restauracao.',summary);}catch(_){ }
-    try{recordAudit_({action:'CRM_IMPORT_FAILED',details:{sourceId:sourceSpreadsheetId,backupId:backup.getId(),error:error.message}},{});}catch(_){ }
-    writeImportReport_({approved:false,importSummary:summary,errors:['Falha na importacao: '+error.message,'Use o backup '+backup.getId()+' para restauracao, se necessario.'],warnings:[]});
+    summary.ok=false; summary.error=error.message;
+    try{appendLog_('ERROR','IMPORTADOR_CRM','Falha na importacao CRM',summary);}catch(_){ }
     throw error;
   } finally {
     lock.releaseLock();
   }
 }
 
-function restaurarBackupImportacaoCRM(backupSpreadsheetId) {
-  if(!backupSpreadsheetId) throw apiError_('VALIDATION','Informe o ID do backup.');
-  const target=SpreadsheetApp.getActiveSpreadsheet();
-  const backup=SpreadsheetApp.openById(backupSpreadsheetId);
-  const lock=LockService.getScriptLock();
-  lock.waitLock(30000);
-  const result={version:ATLAS_VERSION,backupId:backupSpreadsheetId,backupName:backup.getName(),restoredSheets:{},startedAt:new Date().toISOString()};
-  try{
-    CRM_IMPORT_SHEETS.forEach(name=>{
-      const src=backup.getSheetByName(name);
-      if(!src) return;
-      ensureSheet_(target,name,SHEETS[name]||[]);
-      const dst=target.getSheetByName(name);
-      const values=src.getDataRange().getValues();
-      dst.clearContents();
-      if(values.length&&values[0].length) dst.getRange(1,1,values.length,values[0].length).setValues(values);
-      dst.setFrozenRows(1);
-      result.restoredSheets[name]={rows:Math.max(values.length-1,0)};
-    });
-    result.finishedAt=new Date().toISOString(); result.ok=true;
-    appendLog_('WARN','IMPORTADOR_CRM','Backup CRM restaurado',result);
-    recordAudit_({action:'CRM_IMPORT_ROLLBACK',details:result},{});
-    writeImportReport_({approved:true,restoreSummary:result,errors:[],warnings:['Backup restaurado manualmente.']});
-    SpreadsheetApp.flush();
-    return result;
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function previewSheetUpsert_(sourceSheet,targetSheet) {
-  const sourceRows=readSheetObjects_(sourceSheet);
-  if(!targetSheet) return {sourceRows:sourceRows.length,inserted:sourceRows.length,updated:0,skipped:0};
-  const targetHeaders=targetSheet.getLastColumn()?targetSheet.getRange(1,1,1,targetSheet.getLastColumn()).getValues()[0].map(String):[];
-  const targetRows=readSheetObjects_(targetSheet);
-  const hasId=targetHeaders.indexOf('ID')>=0;
-  const targetIds={}; targetRows.forEach(r=>{const id=String(r.ID||'').trim();if(id)targetIds[id]=true;});
-  let inserted=0,updated=0,skipped=0;
-  sourceRows.forEach(obj=>{const id=String(obj.ID||'').trim();if(hasId&&!id){skipped++;}else if(id&&targetIds[id]){updated++;}else{inserted++;}});
-  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped};
-}
-
-function upsertSheetFromSourceBatch_(sourceSheet,targetSheet) {
+function upsertSheetFromSource_(sourceSheet,targetSheet) {
   const sourceRows=readSheetObjects_(sourceSheet);
   const targetHeaders=targetSheet.getRange(1,1,1,targetSheet.getLastColumn()).getValues()[0].map(String);
   const targetData=targetSheet.getDataRange().getValues();
   const idIndex=targetHeaders.indexOf('ID');
   const rowById={};
-  for(let r=1;r<targetData.length;r++){
-    const id=idIndex>=0?String(targetData[r][idIndex]||'').trim():'';
-    if(id) rowById[id]=r;
+  if(idIndex>=0){
+    for(let r=1;r<targetData.length;r++){
+      const id=String(targetData[r][idIndex]||'').trim();
+      if(id) rowById[id]=r+1;
+    }
   }
   let inserted=0,updated=0,skipped=0;
   sourceRows.forEach(obj=>{
     const id=String(obj.ID||'').trim();
     const values=targetHeaders.map(h=>obj[h]!==undefined?obj[h]:'');
-    if(idIndex>=0&&!id){skipped++;return;}
-    if(id&&rowById[id]!==undefined){
-      targetData[rowById[id]]=values;
+    if(id&&rowById[id]){
+      targetSheet.getRange(rowById[id],1,1,values.length).setValues([values]);
       updated++;
-    }else{
-      targetData.push(values);
-      if(id) rowById[id]=targetData.length-1;
+    }else if(idIndex<0||id){
+      targetSheet.appendRow(values);
       inserted++;
+    }else{
+      skipped++;
     }
   });
-  targetSheet.clearContents();
-  if(targetData.length&&targetHeaders.length) targetSheet.getRange(1,1,targetData.length,targetHeaders.length).setValues(targetData);
   targetSheet.setFrozenRows(1);
-  targetSheet.getRange(1,1,1,targetHeaders.length).setFontWeight('bold');
-  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped,finalRows:Math.max(targetData.length-1,0)};
-}
-
-function buildImportFingerprint_(source,report) {
-  const payload=[ATLAS_VERSION,source.getId(),source.getName()];
-  Object.keys(report.sheets||{}).sort().forEach(name=>payload.push(name+':'+report.sheets[name].rows+':'+(report.sheets[name].missingHeaders||[]).join(',')));
-  return sha256Hex_(payload.join('|'));
+  return {sourceRows:sourceRows.length,inserted:inserted,updated:updated,skipped:skipped};
 }
 
 function readSheetObjects_(sheet) {
@@ -1137,194 +480,10 @@ function writeImportReport_(report) {
   const rows=[['ATLAS CRM - RELATORIO DE IMPORTACAO',''],['Versao',ATLAS_VERSION],['Gerado em',new Date()],['Aprovado',report.approved?'SIM':'NAO']];
   (report.errors||[]).forEach(v=>rows.push(['ERRO',v]));
   (report.warnings||[]).forEach(v=>rows.push(['AVISO',v]));
-  if(report.protectedSheets) rows.push(['ABAS PROTEGIDAS',report.protectedSheets.join(', ')]);
-  if(report.sheets){Object.keys(report.sheets).forEach(k=>rows.push(['VALIDACAO '+k,JSON.stringify(report.sheets[k])]));}
-  if(report.simulation){
-    rows.push(['SIMULACAO TOTAL',JSON.stringify(report.simulation.totals)]);
-    Object.keys(report.simulation.sheets||{}).forEach(k=>rows.push(['SIMULACAO '+k,JSON.stringify(report.simulation.sheets[k])]));
-  }
+  if(report.sheets){Object.keys(report.sheets).forEach(k=>rows.push(['ABA '+k,JSON.stringify(report.sheets[k])]));}
   if(report.importSummary) rows.push(['RESUMO IMPORTACAO',JSON.stringify(report.importSummary)]);
-  if(report.restoreSummary) rows.push(['RESUMO RESTAURACAO',JSON.stringify(report.restoreSummary)]);
   sh.getRange(1,1,rows.length,2).setValues(rows);
   sh.getRange(1,1,1,2).setFontWeight('bold').setBackground('#17365D').setFontColor('#FFFFFF');
   sh.autoResizeColumns(1,2); sh.setFrozenRows(1);
   return report;
 }
-
-
-/* Sprint 5.0.4 - ACC Automation Engine */
-const ACC_AUTOMATION_DEFAULTS = Object.freeze({
-  enabled:false,
-  testMode:true,
-  testRecipient:'',
-  dailyLimit:40,
-  batchSize:20,
-  replyTo:'certificadodigital@pedroza.com.br',
-  senderName:'Pedroza Certificadora',
-  milestones:[90,60,30,15,7,1,0,-1]
-});
-
-function getAccAutomationConfig_() {
-  const props=PropertiesService.getScriptProperties();
-  let saved={};
-  try { saved=JSON.parse(props.getProperty('ACC_AUTOMATION_CONFIG')||'{}'); } catch(_){ saved={}; }
-  const cfg=Object.assign({},ACC_AUTOMATION_DEFAULTS,saved||{});
-  cfg.milestones=ACC_AUTOMATION_DEFAULTS.milestones.slice();
-  return cfg;
-}
-function saveAccAutomationConfig_(cfg) {
-  PropertiesService.getScriptProperties().setProperty('ACC_AUTOMATION_CONFIG',JSON.stringify(cfg));
-  return cfg;
-}
-function automationStatus_() {
-  ensureAccAutomationFoundation_();
-  const cfg=getAccAutomationConfig_();
-  const queue=rows_('FILA_ENVIO').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});
-  const comm=rows_('COMUNICACOES');
-  const today=Utilities.formatDate(new Date(),Session.getScriptTimeZone()||'America/Sao_Paulo','yyyy-MM-dd');
-  const sentToday=comm.filter(function(r){
-    if(!r.ENVIADO_EM) return false;
-    try{return Utilities.formatDate(new Date(r.ENVIADO_EM),Session.getScriptTimeZone()||'America/Sao_Paulo','yyyy-MM-dd')===today;}catch(_){return false;}
-  }).length;
-  return {config:cfg,queue:{pending:queue.filter(r=>String(r.SITUACAO)==='PENDENTE').length,error:queue.filter(r=>String(r.SITUACAO)==='ERRO').length,total:queue.length},sentToday:sentToday,remainingQuota:MailApp.getRemainingDailyQuota(),triggers:ScriptApp.getProjectTriggers().map(function(t){return {handler:t.getHandlerFunction(),eventType:String(t.getEventType())};})};
-}
-function configureAutomation_(p) {
-  const cfg=getAccAutomationConfig_();
-  if(Object.prototype.hasOwnProperty.call(p,'enabled')) cfg.enabled=Boolean(p.enabled);
-  if(Object.prototype.hasOwnProperty.call(p,'testMode')) cfg.testMode=Boolean(p.testMode);
-  if(Object.prototype.hasOwnProperty.call(p,'testRecipient')) cfg.testRecipient=normalize_(p.testRecipient||'');
-  if(Object.prototype.hasOwnProperty.call(p,'dailyLimit')) cfg.dailyLimit=Math.max(1,Math.min(500,Number(p.dailyLimit)||40));
-  if(Object.prototype.hasOwnProperty.call(p,'batchSize')) cfg.batchSize=Math.max(1,Math.min(100,Number(p.batchSize)||20));
-  if(Object.prototype.hasOwnProperty.call(p,'replyTo')) cfg.replyTo=normalize_(p.replyTo||ACC_AUTOMATION_DEFAULTS.replyTo);
-  saveAccAutomationConfig_(cfg);
-  recordAudit_({action:'ACC_AUTOMATION_CONFIG_UPDATED',details:{enabled:cfg.enabled,testMode:cfg.testMode,dailyLimit:cfg.dailyLimit,batchSize:cfg.batchSize}},{});
-  return automationStatus_();
-}
-function installAccAutomationTriggers_() {
-  ensureAccAutomationFoundation_();
-  removeAccAutomationTriggers_();
-  ScriptApp.newTrigger('accDailyAutomationTrigger').timeBased().everyDays(1).atHour(8).create();
-  ScriptApp.newTrigger('accQueueProcessorTrigger').timeBased().everyHours(1).create();
-  recordAudit_({action:'ACC_TRIGGERS_INSTALLED',details:{handlers:['accDailyAutomationTrigger','accQueueProcessorTrigger']}},{});
-  return automationStatus_();
-}
-function removeAccAutomationTriggers_() {
-  let removed=0;
-  ScriptApp.getProjectTriggers().forEach(function(t){if(['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0){ScriptApp.deleteTrigger(t);removed++;}});
-  try{recordAudit_({action:'ACC_TRIGGERS_REMOVED',details:{removed:removed}},{});}catch(_){}
-  return automationStatus_();
-}
-function listAccAutomationTriggers_(){
-  return ScriptApp.getProjectTriggers().filter(function(t){return ['accDailyAutomationTrigger','accQueueProcessorTrigger'].indexOf(t.getHandlerFunction())>=0;}).map(function(t){return {handler:t.getHandlerFunction(),eventType:String(t.getEventType()),uniqueId:t.getUniqueId?t.getUniqueId():''};});
-}
-
-function accDailyAutomationTrigger(){ return runAccAutomation_({source:'TRIGGER'}); }
-function accQueueProcessorTrigger(){ return processAccQueue_(); }
-function runAccAutomation_(p) {
-  const lock=LockService.getScriptLock();
-  if(!lock.tryLock(1000)) return {ok:false,skipped:true,reason:'LOCKED'};
-  try {
-    const cfg=getAccAutomationConfig_();
-    if(!cfg.enabled && String((p||{}).source||'')==='TRIGGER') return {ok:true,skipped:true,reason:'DISABLED'};
-    const certs=rows_('CERTIFICADOS').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO' && r.VENCIMENTO;});
-    let queued=0, skipped=0;
-    certs.forEach(function(cert){
-      const expiry=parseAtlasDate_(cert.VENCIMENTO);
-      if(!expiry){skipped++;return;}
-      const days=Math.ceil((new Date(expiry.getFullYear(),expiry.getMonth(),expiry.getDate())-new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()))/86400000);
-      if(cfg.milestones.indexOf(days)<0){skipped++;return;}
-      const client=findById_('CLIENTES',cert.CLIENTE_ID); if(!client){skipped++;return;}
-      const email=normalize_(client.EMAIL||client.EMAIL_SECUNDARIO||''); if(!email||email.indexOf('@')<1){skipped++;return;}
-      if(!clientAllowsAutomaticEmail_(client.ID)){skipped++;return;}
-      const key=String(cert.ID)+'|'+String(days);
-      if(hasAutomationMilestone_(key)){skipped++;return;}
-      const modelId=modelIdForMilestone_(days);
-      const model=findById_('MODELOS_EMAIL',modelId);
-      const subject=renderAccSubject_((model&&model.ASSUNTO)||defaultAutomationSubject_(days),client,cert);
-      const html=renderAccTemplate_((model&&model.HTML)||defaultAutomationHtml_(days),client,{mensagem:'',modeloId:modelId});
-      const communicationId=nextId_('COMUNICACOES','COM'), now=new Date();
-      appendObject_('COMUNICACOES',{ID:communicationId,CLIENTE_ID:String(client.ID),CAMPANHA_ID:'AUTO:'+key,MODELO_ID:modelId,CANAL:'EMAIL',DESTINO:email,ASSUNTO:subject,CONTEUDO_HTML:html,STATUS_ENVIO:'PENDENTE',TENTATIVAS:0,ERRO:'',AGENDADO_PARA:now,ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'ACC_AUTOMATION',ALTERADO_EM:now,ALTERADO_POR:'ACC_AUTOMATION'});
-      appendObject_('FILA_ENVIO',{ID:nextId_('FILA_ENVIO','FIL'),COMUNICACAO_ID:communicationId,TIPO:'EMAIL_AUTOMATICO',DESTINO:email,PRIORIDADE:days<=7?1:2,SITUACAO:'PENDENTE',TENTATIVAS:0,PROXIMA_EXECUCAO:now,ULTIMO_ERRO:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:'ACC_AUTOMATION',ALTERADO_EM:now,ALTERADO_POR:'ACC_AUTOMATION'});
-      recordAudit_({action:'ACC_AUTO_EMAIL_QUEUED',details:{clienteId:client.ID,certificadoId:cert.ID,comunicacaoId:communicationId,marcoDias:days}},{}); queued++;
-    });
-    const processed=processAccQueue_();
-    recordAudit_({action:'ACC_TRIGGER_EXECUTED',details:{queued:queued,skipped:skipped,processed:processed}},{});
-    return {ok:true,queued:queued,skipped:skipped,processed:processed};
-  } finally { lock.releaseLock(); }
-}
-function processAccQueue_() {
-  const cfg=getAccAutomationConfig_(), quota=Math.min(MailApp.getRemainingDailyQuota(),cfg.dailyLimit), max=Math.min(cfg.batchSize,quota);
-  if(max<=0) return {sent:0,failed:0,reason:'NO_QUOTA'};
-  const queue=rows_('FILA_ENVIO').filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO' && ['PENDENTE','ERRO'].indexOf(String(r.SITUACAO||''))>=0 && Number(r.TENTATIVAS||0)<3;}).slice(0,max);
-  let sent=0,failed=0;
-  queue.forEach(function(item){
-    const comm=findById_('COMUNICACOES',item.COMUNICACAO_ID); if(!comm){updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'IGNORADO',ULTIMO_ERRO:'Comunicacao nao encontrada'},'ACC_AUTOMATION');return;}
-    const to=cfg.testMode&&cfg.testRecipient?cfg.testRecipient:comm.DESTINO;
-    try{
-      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'PROCESSANDO'},'ACC_AUTOMATION');
-      MailApp.sendEmail({to:to,subject:(cfg.testMode?'[TESTE ATLAS] ':'')+comm.ASSUNTO,htmlBody:comm.CONTEUDO_HTML,name:cfg.senderName,replyTo:cfg.replyTo});
-      updateRow_('COMUNICACOES',comm.ID,{STATUS_ENVIO:'ENVIADO',ENVIADO_EM:new Date(),ERRO:'',TENTATIVAS:Number(comm.TENTATIVAS||0)+1},'ACC_AUTOMATION');
-      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'ENVIADO',TENTATIVAS:Number(item.TENTATIVAS||0)+1,ULTIMO_ERRO:''},'ACC_AUTOMATION');
-      addTimeline_({clienteId:comm.CLIENTE_ID,tipoEvento:'EMAIL_AUTOMATICO_ENVIADO',titulo:'Aviso automatico enviado',descricao:comm.ASSUNTO,origem:'ACC_AUTOMATION',actor:'ACC_AUTOMATION',dados:{comunicacaoId:comm.ID,destinoMascarado:mascararEmailPublico_(to)}});
-      recordAudit_({action:'ACC_AUTO_EMAIL_SENT',details:{clienteId:comm.CLIENTE_ID,comunicacaoId:comm.ID,destinoMascarado:mascararEmailPublico_(to),testMode:cfg.testMode}},{}); sent++;
-    }catch(error){
-      const attempts=Number(item.TENTATIVAS||0)+1;
-      updateRow_('COMUNICACOES',comm.ID,{STATUS_ENVIO:'ERRO',ERRO:String(error.message||error),TENTATIVAS:attempts},'ACC_AUTOMATION');
-      updateRow_('FILA_ENVIO',item.ID,{SITUACAO:'ERRO',TENTATIVAS:attempts,ULTIMO_ERRO:String(error.message||error)},'ACC_AUTOMATION');
-      recordAudit_({action:'ACC_AUTO_EMAIL_FAILED',details:{clienteId:comm.CLIENTE_ID,comunicacaoId:comm.ID,erro:String(error.message||error)}},{}); failed++;
-    }
-  });
-  return {sent:sent,failed:failed,total:queue.length};
-}
-function sendAutomationTest_(p,clientMeta) {
-  const cfg=getAccAutomationConfig_(), to=normalize_((p||{}).email||cfg.testRecipient||'');
-  if(!to||to.indexOf('@')<1) throw apiError_('VALIDATION','Informe o e-mail de teste.');
-  MailApp.sendEmail({to:to,subject:'Teste de conexao - Atlas ACC',htmlBody:'<div style="font-family:Arial;padding:24px"><h2>Atlas Communication Center</h2><p>A conexao de envio pelo Google Apps Script esta funcionando.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>',name:cfg.senderName,replyTo:cfg.replyTo});
-  recordAudit_({action:'ACC_TEST_EMAIL_SENT',details:{destinoMascarado:mascararEmailPublico_(to)}},clientMeta||{});
-  return {sent:true,destinationMasked:mascararEmailPublico_(to),remainingQuota:MailApp.getRemainingDailyQuota()};
-}
-
-function ensureAccAutomationFoundation_(){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
-  ['COMUNICACOES','MODELOS_EMAIL','CAMPANHAS','CAMPANHA_DESTINATARIOS','PREFERENCIAS_COMUNICACAO','FILA_ENVIO','TIMELINE','AUDITORIA','LOGS'].forEach(function(name){ensureSheet_(ss,name,SHEETS[name]);});
-  seedAccModels_();
-  return true;
-}
-function parseAtlasDate_(value){
-  if(value instanceof Date && !isNaN(value.getTime())) return new Date(value.getTime());
-  if(value===null || typeof value==='undefined' || value==='') return null;
-  const text=String(value).trim();
-  let m=text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if(m){const d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));return isNaN(d.getTime())?null:d;}
-  m=text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/);
-  if(m){const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));return isNaN(d.getTime())?null:d;}
-  const d=new Date(text); return isNaN(d.getTime())?null:d;
-}
-function accBackendHealth_(){
-  ensureAccAutomationFoundation_();
-  const required=['automation.status','automation.configure','automation.test','automation.run','automation.processQueue','automation.installTriggers','automation.removeTriggers'];
-  const sheets=['CLIENTES','CERTIFICADOS','COMUNICACOES','MODELOS_EMAIL','PREFERENCIAS_COMUNICACAO','FILA_ENVIO','TIMELINE','AUDITORIA'];
-  return {
-    service:'ACC Backend Engine',
-    version:ATLAS_VERSION,
-    status:'online',
-    actions:required,
-    sheets:sheets.map(function(name){const sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);return {name:name,ok:!!sh,rows:sh?Math.max(0,sh.getLastRow()-1):0};}),
-    triggers:listAccAutomationTriggers_(),
-    remainingQuota:MailApp.getRemainingDailyQuota(),
-    config:getAccAutomationConfig_(),
-    timestamp:new Date()
-  };
-}
-function testarAccBackend(){
-  const result=accBackendHealth_();
-  Logger.log(JSON.stringify(result,null,2));
-  return result;
-}
-
-function clientAllowsAutomaticEmail_(clientId){const pref=rows_('PREFERENCIAS_COMUNICACAO').find(function(r){return String(r.CLIENTE_ID)===String(clientId)&&String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});return !pref || String(pref.AVISO_VENCIMENTO||'SIM').toUpperCase()!=='NAO';}
-function hasAutomationMilestone_(key){return rows_('COMUNICACOES').some(function(r){return String(r.CAMPANHA_ID||'')==='AUTO:'+key && String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});}
-function modelIdForMilestone_(days){if(days===90)return 'MOD-000005';if(days===60)return 'MOD-000006';if(days===30)return 'MOD-000007';if(days===15)return 'MOD-000008';if(days===7)return 'MOD-000009';if(days===1)return 'MOD-000012';if(days===0)return 'MOD-000013';return 'MOD-000002';}
-function defaultAutomationSubject_(days){if(days===1)return 'Seu certificado digital vence amanha';if(days>1)return 'Seu certificado digital vence em '+days+' dias';if(days===0)return 'Seu certificado digital vence hoje';return 'Seu certificado digital esta vencido';}
-function defaultAutomationHtml_(days){return '<div style="font-family:Arial,sans-serif;color:#17365d;line-height:1.6"><h2>Ola, {{NOME}}.</h2><p>'+defaultAutomationSubject_(days)+'.</p><p>Validade: <strong>{{VALIDADE}}</strong></p><p>Entre em contato para organizar sua renovacao.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>';}
-function renderAccSubject_(subject,client,cert){const d=parseAtlasDate_(cert&&cert.VENCIMENTO);const vars={NOME:String(client.NOME||client.EMPRESA||'Cliente'),EMPRESA:String(client.EMPRESA||client.NOME||''),CPF_CNPJ:String(client.CPF_CNPJ||''),TIPO_CERTIFICADO:String((cert&&(cert.TIPO||cert.MODELO))||'Certificado digital'),VALIDADE:d?Utilities.formatDate(d,Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):''};return Object.keys(vars).reduce(function(out,key){return out.split('{{'+key+'}}').join(vars[key]);},String(subject||''));}
