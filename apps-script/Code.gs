@@ -620,7 +620,9 @@ function seedAccModels_() {
     model('MOD-000008','Aviso de vencimento — 15 dias','VENCIMENTO_15','Prioridade: seu certificado vence em 15 dias','Renovação prioritária','15 DIAS','Faltam aproximadamente 15 dias para o vencimento. Recomendamos prioridade na renovação para manter seus acessos disponíveis.','RENOVAR AGORA'),
     model('MOD-000009','Aviso de vencimento — 7 dias','VENCIMENTO_7','Último aviso: seu certificado vence em 7 dias','Último aviso de vencimento','7 DIAS','Seu certificado digital está a aproximadamente 7 dias do vencimento. Entre em contato para realizarmos a renovação o quanto antes.','RENOVAR AGORA'),
     {id:'MOD-000010',name:'Boas-vindas à Pedroza Certificadora',type:'BOAS_VINDAS',subject:'{{NOME}}, seja bem-vindo à Pedroza Certificadora',html:buildPortalInviteEmail_('WELCOME')},
-    {id:'MOD-000011',name:'Convite para o Portal do Cliente',type:'CONVITE_PORTAL',subject:'{{NOME}}, acompanhe seu certificado no Portal Pedroza',html:buildPortalInviteEmail_('PORTAL')}
+    {id:'MOD-000011',name:'Convite para o Portal do Cliente',type:'CONVITE_PORTAL',subject:'{{NOME}}, acompanhe seu certificado no Portal Pedroza',html:buildPortalInviteEmail_('PORTAL')},
+    model('MOD-000012','Aviso de vencimento — 1 dia','VENCIMENTO_1','Atenção: seu certificado digital vence amanhã','Seu certificado digital vence amanhã','1 DIA','Falta apenas 1 dia para o vencimento do seu certificado digital. Recomendamos concluir a renovação hoje para evitar interrupções nos seus acessos.','RENOVAR AGORA'),
+    model('MOD-000013','Aviso de vencimento — hoje','VENCIMENTO_HOJE','Atenção: seu certificado digital vence hoje','Seu certificado digital vence hoje','VENCE HOJE','O seu certificado digital vence hoje. Nossa equipe está disponível para concluir a renovação com prioridade e segurança.','RENOVAR AGORA')
   ];
   models.forEach(function(m){
     const current=findById_('MODELOS_EMAIL',m.id);
@@ -1150,14 +1152,16 @@ const ACC_AUTOMATION_DEFAULTS = Object.freeze({
   batchSize:20,
   replyTo:'certificadodigital@pedroza.com.br',
   senderName:'Pedroza Certificadora',
-  milestones:[90,60,30,15,7,0,-1]
+  milestones:[90,60,30,15,7,1,0,-1]
 });
 
 function getAccAutomationConfig_() {
   const props=PropertiesService.getScriptProperties();
   let saved={};
   try { saved=JSON.parse(props.getProperty('ACC_AUTOMATION_CONFIG')||'{}'); } catch(_){ saved={}; }
-  return Object.assign({},ACC_AUTOMATION_DEFAULTS,saved||{});
+  const cfg=Object.assign({},ACC_AUTOMATION_DEFAULTS,saved||{});
+  cfg.milestones=ACC_AUTOMATION_DEFAULTS.milestones.slice();
+  return cfg;
 }
 function saveAccAutomationConfig_(cfg) {
   PropertiesService.getScriptProperties().setProperty('ACC_AUTOMATION_CONFIG',JSON.stringify(cfg));
@@ -1311,7 +1315,7 @@ function testarAccBackend(){
 
 function clientAllowsAutomaticEmail_(clientId){const pref=rows_('PREFERENCIAS_COMUNICACAO').find(function(r){return String(r.CLIENTE_ID)===String(clientId)&&String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});return !pref || String(pref.AVISO_VENCIMENTO||'SIM').toUpperCase()!=='NAO';}
 function hasAutomationMilestone_(key){return rows_('COMUNICACOES').some(function(r){return String(r.CAMPANHA_ID||'')==='AUTO:'+key && String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';});}
-function modelIdForMilestone_(days){if(days===90)return 'ACC-VENC-90';if(days===60)return 'ACC-VENC-60';if(days===30)return 'ACC-VENC-30';if(days===15)return 'ACC-VENC-15';if(days===7)return 'ACC-VENC-7';if(days===0)return 'ACC-VENCE-HOJE';return 'ACC-VENCIDO';}
-function defaultAutomationSubject_(days){if(days>0)return 'Seu certificado digital vence em '+days+' dias';if(days===0)return 'Seu certificado digital vence hoje';return 'Seu certificado digital esta vencido';}
+function modelIdForMilestone_(days){if(days===90)return 'MOD-000005';if(days===60)return 'MOD-000006';if(days===30)return 'MOD-000007';if(days===15)return 'MOD-000008';if(days===7)return 'MOD-000009';if(days===1)return 'MOD-000012';if(days===0)return 'MOD-000013';return 'MOD-000002';}
+function defaultAutomationSubject_(days){if(days===1)return 'Seu certificado digital vence amanha';if(days>1)return 'Seu certificado digital vence em '+days+' dias';if(days===0)return 'Seu certificado digital vence hoje';return 'Seu certificado digital esta vencido';}
 function defaultAutomationHtml_(days){return '<div style="font-family:Arial,sans-serif;color:#17365d;line-height:1.6"><h2>Ola, {{NOME}}.</h2><p>'+defaultAutomationSubject_(days)+'.</p><p>Validade: <strong>{{VALIDADE}}</strong></p><p>Entre em contato para organizar sua renovacao.</p><p><strong>Equipe Pedroza Certificadora</strong></p></div>';}
 function renderAccSubject_(subject,client,cert){const d=parseAtlasDate_(cert&&cert.VENCIMENTO);const vars={NOME:String(client.NOME||client.EMPRESA||'Cliente'),EMPRESA:String(client.EMPRESA||client.NOME||''),CPF_CNPJ:String(client.CPF_CNPJ||''),TIPO_CERTIFICADO:String((cert&&(cert.TIPO||cert.MODELO))||'Certificado digital'),VALIDADE:d?Utilities.formatDate(d,Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy'):''};return Object.keys(vars).reduce(function(out,key){return out.split('{{'+key+'}}').join(vars[key]);},String(subject||''));}
