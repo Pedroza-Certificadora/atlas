@@ -478,9 +478,10 @@ function communicationTiming_(certificate) {
     const late=Math.abs(days);
     return {days:days,modelId:'MOD-000002',subject:'Aten\u00e7\u00e3o: seu certificado digital venceu h\u00e1 '+late+(late===1?' dia':' dias'),message:'Seu certificado digital venceu h\u00e1 '+late+(late===1?' dia':' dias')+'. Nossa equipe est\u00e1 dispon\u00edvel para orientar e concluir a renova\u00e7\u00e3o com seguran\u00e7a.'};
   }
-  if(days===0) return {days:0,modelId:'MOD-000007',subject:'Aten\u00e7\u00e3o: seu certificado digital vence hoje',message:'Seu certificado digital vence hoje. Entre em contato com nossa equipe para realizar a renova\u00e7\u00e3o e evitar interrup\u00e7\u00f5es.'};
-  if(days===1) return {days:1,modelId:'MOD-000007',subject:'Aten\u00e7\u00e3o: seu certificado digital vence amanh\u00e3',message:'Falta 1 dia para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
-  return {days:days,modelId:days<=30?'MOD-000007':'MOD-000006',subject:'Aten\u00e7\u00e3o: seu certificado digital vence em '+days+' dias',message:'Faltam exatamente '+days+' dias para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
+  if(days===0) return {days:0,modelId:'MOD-000013',subject:'Aten\u00e7\u00e3o: seu certificado digital vence hoje',message:'Seu certificado digital vence hoje. Entre em contato com nossa equipe para realizar a renova\u00e7\u00e3o e evitar interrup\u00e7\u00f5es.'};
+  if(days===1) return {days:1,modelId:'MOD-000012',subject:'Aten\u00e7\u00e3o: seu certificado digital vence amanh\u00e3',message:'Falta 1 dia para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
+  const modelId=days<=7?'MOD-000009':days<=15?'MOD-000008':days<=30?'MOD-000007':'MOD-000006';
+  return {days:days,modelId:modelId,subject:'Aten\u00e7\u00e3o: seu certificado digital vence em '+days+' dias',message:'Faltam exatamente '+days+' dias para o vencimento do seu certificado digital. Nossa equipe j\u00e1 pode conduzir a renova\u00e7\u00e3o com seguran\u00e7a.'};
 }
 
 function sendCommunication_(p,clientMeta) {
@@ -488,14 +489,22 @@ function sendCommunication_(p,clientMeta) {
   if(!cliente) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
   const destino=normalize_(p.destino||cliente.EMAIL||cliente.EMAIL_SECUNDARIO||'');
   if(!destino||destino.indexOf('@')<1) throw apiError_('VALIDATION','Informe um e-mail valido para o envio.');
-  const certificate=findById_('CERTIFICADOS',p.certificadoId);
-  if(!certificate||String(certificate.CLIENTE_ID)!==String(cliente.ID)) throw apiError_('VALIDATION','O certificado selecionado nao pertence ao cliente informado.');
-  const timing=communicationTiming_(certificate);
-  if(String(p.modeloId||'')!==timing.modelId) throw apiError_('VALIDATION','O tipo de aviso nao corresponde aos dias reais para o vencimento.');
-  if(Number(p.diasCalculados)!==timing.days) throw apiError_('VALIDATION','A validade mudou desde a abertura da ficha. Atualize e tente novamente.');
-  p.modeloId=timing.modelId;
-  p.mensagem=timing.message;
-  const assunto=renderAccSubject_(timing.subject,cliente,certificate);
+  const modeloInicial=p.modeloId?findById_('MODELOS_EMAIL',p.modeloId):null;
+  const tipoModelo=String((modeloInicial&&modeloInicial.TIPO)||'').toUpperCase();
+  const avisoVencimento=tipoModelo.indexOf('VENCIMENTO')===0||tipoModelo==='VENCIDO';
+  let certificate=p.certificadoId?findById_('CERTIFICADOS',p.certificadoId):null;
+  if(certificate&&String(certificate.CLIENTE_ID)!==String(cliente.ID)) throw apiError_('VALIDATION','O certificado selecionado nao pertence ao cliente informado.');
+  let assuntoBase=String(p.assunto||'Comunicado da Pedroza Certificadora');
+  if(avisoVencimento) {
+    if(!certificate) throw apiError_('VALIDATION','Selecione um certificado deste cliente para o aviso de vencimento.');
+    const timing=communicationTiming_(certificate);
+    if(String(p.modeloId||'')!==timing.modelId) throw apiError_('VALIDATION','O tipo de aviso nao corresponde aos dias reais para o vencimento.');
+    if(Number(p.diasCalculados)!==timing.days) throw apiError_('VALIDATION','A validade mudou desde a abertura da ficha. Atualize e tente novamente.');
+    p.modeloId=timing.modelId;
+    p.mensagem=timing.message;
+    assuntoBase=timing.subject;
+  }
+  const assunto=renderAccSubject_(assuntoBase,cliente,certificate||{});
   const actor=String(p.actor||'ATLAS');
   const modelo=p.modeloId?findById_('MODELOS_EMAIL',p.modeloId):null;
   let html=String(p.conteudoHtml||(modelo&&modelo.HTML)||'').trim();
