@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../css/agr.css?v=5.0.4">
   <link rel="stylesheet" href="../css/auth.css?v=5.0.4">
   <link rel="stylesheet" href="../css/crm-clientes.css?v=5.0.4">
+  <link rel="stylesheet" href="../css/client-communication.css?v=5.0.7.3">
   <link rel="stylesheet" href="../css/atlas-core.css?v=5.0.4">
   <link rel="stylesheet" href="../css/crm-enterprise.css?v=5.0.4">
   <script src="../js/auth/config.js?v=5.0.4"></script>
@@ -148,6 +149,7 @@
         <div class="crm-drawer-actions" aria-label="Ações rápidas">
           <a id="crm-action-whatsapp" class="crm-action-primary" href="#" target="_blank" rel="noopener">WhatsApp</a>
           <a id="crm-action-email" href="#">E-mail</a>
+          <button id="crm-action-communication" class="crm-action-communication" type="button">Comunica&#231;&#227;o</button>
           <button id="crm-action-copy" type="button">Copiar documento</button>
           <button id="crm-action-admin" class="crm-action-admin" type="button" data-auth-permission="CLIENTS_UPDATE">⚙ Configurar cliente</button>
         </div>
@@ -172,6 +174,29 @@
       </div>
     </div>
   </aside>
+
+  <div class="client-comm-backdrop" id="client-comm-backdrop" hidden></div>
+  <section class="client-comm-modal" id="client-comm-modal" role="dialog" aria-modal="true" aria-labelledby="client-comm-title" hidden>
+    <header>
+      <div><span>Ficha 360&#186; &bull; comunica&#231;&#227;o individual</span><h2 id="client-comm-title">Enviar aviso ao cliente</h2><p>Confira os dados e confirme antes do envio.</p></div>
+      <button id="client-comm-close" type="button" aria-label="Fechar">&times;</button>
+    </header>
+    <form id="client-comm-form">
+      <div class="client-comm-summary">
+        <div><small>Cliente</small><strong id="client-comm-client">&mdash;</strong></div>
+        <div><small>Certificado</small><strong id="client-comm-certificate">&mdash;</strong></div>
+        <div><small>Vencimento</small><strong id="client-comm-expiry">&mdash;</strong></div>
+        <div><small>Destino</small><strong id="client-comm-destination-view">&mdash;</strong></div>
+      </div>
+      <label>Tipo de aviso<select id="client-comm-type" required><option value="MOD-000006">Vencimento em 60 dias</option><option value="MOD-000007">Vencimento em 30 dias</option><option value="MOD-000002">Certificado vencido</option></select></label>
+      <label>E-mail de destino<input id="client-comm-destination" type="email" required autocomplete="email"></label>
+      <label>Assunto<input id="client-comm-subject" required></label>
+      <div class="client-comm-preview" id="client-comm-preview" aria-live="polite"></div>
+      <label class="client-comm-confirm"><input id="client-comm-confirm" type="checkbox" required><span>Confirmo que revisei cliente, certificado, vencimento, destinat&#225;rio e tipo de aviso.</span></label>
+      <div class="client-comm-status" id="client-comm-status" role="status"></div>
+      <footer><button id="client-comm-cancel" type="button">Cancelar</button><button class="primary" id="client-comm-send" type="submit">Confirmar e enviar</button></footer>
+    </form>
+  </section>
 
   <div class="atlas-modal-backdrop" id="acdm-backdrop" hidden></div>
   <section class="atlas-modal acdm-modal" id="acdm-modal" role="dialog" aria-modal="true" aria-labelledby="acdm-title" hidden>
@@ -212,11 +237,12 @@
   <script src="../js/auth/auth.js?v=5.0.4"></script>
   <script src="../js/auth/protected-ui.js?v=5.0.4"></script>
   <script src="../js/app.js?v=5.0.4" defer></script>
-  <script src="../js/core/shared-cache.js?v=5.0.5.2" defer></script><script src="../js/agr/clientes.js?v=5.0.7.2.2" charset="utf-8" defer></script>
+  <script src="../js/core/shared-cache.js?v=5.0.5.2" defer></script><script src="../js/agr/clientes.js?v=5.0.7.3" charset="utf-8" defer></script>
+  <script src="../js/agr/client-communication.js?v=5.0.7.3" charset="utf-8" defer></script>
   <script src="../js/core/atlas-core.js?v=5.0.4" defer></script>
   <script src="../js/agr/acdm.js?v=5.0.4" defer></script>
   <script src="../js/agr/crm-enterprise.js?v=5.0.4" defer></script>
   <script src="../js/agr/intelligence.js?v=5.0.4" defer></script>
-  <script src="../js/build-info.js?v=5.0.7.2.2" charset="utf-8" defer></script>
+  <script src="../js/build-info.js?v=5.0.7.3" charset="utf-8" defer></script>
 </body>
 </html>

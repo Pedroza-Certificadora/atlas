@@ -4,7 +4,7 @@
  */
 (function (window, document) {
   "use strict";
-  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Agenda e Agendamentos", version: "5.0.7.2.2", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
+  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Comunica\u00E7\u00E3o na Ficha 360\u00BA", version: "5.0.7.3", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
   window.ATLAS_BUILD = build;
   function label(){ return "Atlas \u2022 Sprint " + build.sprint + " \u2022 " + build.module + " \u2022 v" + build.version; }
   function ensureGlobalStamp(){ var stamp=document.getElementById("atlas-build-stamp"); if(!stamp){ stamp=document.createElement("div"); stamp.id="atlas-build-stamp"; stamp.className="atlas-build-stamp"; stamp.setAttribute("role","status"); stamp.setAttribute("aria-label","Vers\u00E3o atual do Portal Atlas"); document.body.appendChild(stamp); } stamp.textContent=label(); }
