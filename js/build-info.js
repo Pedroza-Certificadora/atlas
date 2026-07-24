@@ -4,17 +4,17 @@
  */
 (function (window, document) {
   "use strict";
-  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Agenda e Agendamentos", version: "5.0.7.2.1", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
+  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Agenda e Agendamentos", version: "5.0.7.2.2", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
   window.ATLAS_BUILD = build;
-  function label(){ return "Atlas • Sprint " + build.sprint + " • " + build.module + " • v" + build.version; }
-  function ensureGlobalStamp(){ var stamp=document.getElementById("atlas-build-stamp"); if(!stamp){ stamp=document.createElement("div"); stamp.id="atlas-build-stamp"; stamp.className="atlas-build-stamp"; stamp.setAttribute("role","status"); stamp.setAttribute("aria-label","Versão atual do Portal Atlas"); document.body.appendChild(stamp); } stamp.textContent=label(); }
+  function label(){ return "Atlas \u2022 Sprint " + build.sprint + " \u2022 " + build.module + " \u2022 v" + build.version; }
+  function ensureGlobalStamp(){ var stamp=document.getElementById("atlas-build-stamp"); if(!stamp){ stamp=document.createElement("div"); stamp.id="atlas-build-stamp"; stamp.className="atlas-build-stamp"; stamp.setAttribute("role","status"); stamp.setAttribute("aria-label","Vers\u00E3o atual do Portal Atlas"); document.body.appendChild(stamp); } stamp.textContent=label(); }
   function ensureInstitutionalId(){
     if(document.querySelector("[data-atlas-institutional-id]")) return;
     var target=document.querySelector(".footer-bottom, .agr-footer-bottom, .client-footer-bottom, footer, .auth-brand-footer") || document.body;
     var line=document.createElement("div");
     line.setAttribute("data-atlas-institutional-id","");
     line.className="atlas-institutional-id";
-    line.textContent="Pedroza Certificadora • CNPJ: 57.938.005/0001-87";
+    line.textContent="Pedroza Certificadora \u2022 CNPJ: 57.938.005/0001-87";
     line.style.cssText="margin-top:8px;font-size:12px;line-height:1.5;opacity:.78;text-align:center;";
     target.appendChild(line);
   }
