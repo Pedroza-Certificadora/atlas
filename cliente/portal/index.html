@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#092e5b">
   <title>Meu Portal | Pedroza Certificadora</title>
   <link rel="icon" href="../../images/logo/favicon-32.png">
-  <link rel="stylesheet" href="../../css/portal-cliente.css?v=5.0.6">
+  <link rel="stylesheet" href="../../css/portal-cliente.css?v=5.0.7">
 </head>
 <body class="portal-page">
   <header class="portal-header">
@@ -39,14 +39,15 @@
         <article><span>Próximo vencimento</span><strong id="portal-kpi-expiry">—</strong><small id="portal-kpi-expiry-copy">Sem data cadastrada</small></article>
       </div>
       <section class="portal-panel"><div class="portal-panel-head"><div><span>Certificados digitais</span><h2>Meus certificados</h2></div></div><div id="portal-certificates" class="portal-cards"></div></section>
+      <section class="portal-panel"><div class="portal-panel-head"><div><span>Agenda</span><h2>Meus atendimentos</h2></div></div><div id="portal-appointments" class="portal-timeline"></div><form id="portal-appointment-form" class="portal-appointment-form"><label>Data e horário preferidos<input id="portal-appointment-start" type="datetime-local" required></label><label>Tipo<select id="portal-appointment-type"><option value="RENOVACAO">Renovação</option><option value="EMISSAO">Emissão</option><option value="SUPORTE">Suporte/instalação</option><option value="OUTRO">Outro atendimento</option></select></label><label>Observações<textarea id="portal-appointment-notes" rows="3" placeholder="Conte brevemente como podemos ajudar"></textarea></label><button type="submit">Solicitar agendamento</button><p id="portal-appointment-feedback" hidden></p></form></section>
       <section class="portal-panel"><div class="portal-panel-head"><div><span>Acompanhamento</span><h2>Histórico recente</h2></div></div><div id="portal-timeline" class="portal-timeline"></div></section>
     </section>
   </main>
-  <script src="../../js/auth/config.js?v=5.0.6"></script>
-  <script src="../../js/api/atlas-api.js?v=5.0.6"></script>
+  <script src="../../js/auth/config.js?v=5.0.7"></script>
+  <script src="../../js/api/atlas-api.js?v=5.0.7"></script>
   <script src="../../js/auth/storage.js?v=5.0.6"></script>
   <script src="../../js/auth/crypto.js?v=5.0.6"></script>
   <script src="../../js/auth/session.js?v=5.0.6"></script>
-  <script src="../../js/cliente/portal.js?v=5.0.6"></script>
+  <script src="../../js/cliente/portal.js?v=5.0.7"></script>
 </body>
 </html>

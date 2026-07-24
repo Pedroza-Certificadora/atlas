@@ -202,7 +202,7 @@
             <a href="clientes.html" data-auth-permission="CLIENTS_READ"><span aria-hidden="true">◉</span> Clientes</a>
             <a href="comunicacao.html"><span aria-hidden="true">✉</span> Comunicação</a>
             <a href="#certificados" data-auth-permission="CERTIFICATES_READ"><span aria-hidden="true">▤</span> Certificados</a>
-            <a href="#agenda" data-auth-permission="AGENDA_READ"><span aria-hidden="true">□</span> Agenda</a>
+            <a href="agenda.html" data-auth-permission="AGENDA_READ"><span aria-hidden="true">□</span> Agenda</a>
             <a href="#emissao"><span aria-hidden="true">◇</span> Central AGR</a>
             <a href="#auditoria" data-auth-permission="AUDIT_READ"><span aria-hidden="true">◎</span> Auditoria</a>
             <a href="usuarios.html" data-auth-permission="USERS_MANAGE"><span aria-hidden="true">♙</span> Usuários</a>
@@ -236,7 +236,7 @@
     <a href="clientes.html?action=new"><b>＋</b><span>Novo cliente<small>Cadastrar na base</small></span></a>
     <a href="clientes.html?action=certificate"><b>▤</b><span>Novo certificado<small>Vincular validade</small></span></a>
     <a href="comunicacao.html"><b>✉</b><span>Enviar e-mail<small>Abrir comunicação</small></span></a>
-    <a href="#agenda"><b>□</b><span>Agenda<small>Próximos atendimentos</small></span></a>
+    <a href="agenda.html"><b>□</b><span>Agenda<small>Próximos atendimentos</small></span></a>
     <a href="usuarios.html#configuracoes"><b>⚙</b><span>Configurações<small>Administração</small></span></a>
   </nav>
 
@@ -269,7 +269,7 @@
 
   <div class="cockpit-secondary-grid">
     <section class="cockpit-panel" id="agenda" aria-labelledby="agenda-title">
-      <div class="cockpit-panel-head"><div><span>Agenda</span><h2 id="agenda-title">Próximos atendimentos</h2></div><button type="button" class="cockpit-link-button">Novo</button></div>
+      <div class="cockpit-panel-head"><div><span>Agenda</span><h2 id="agenda-title">Próximos atendimentos</h2></div><a href="agenda.html">Abrir agenda</a></div>
       <div id="atlas-agenda-list" class="cockpit-empty"><b>□</b><p>Nenhum atendimento agendado para hoje.</p><small>A agenda será conectada ao módulo de agendamentos da versão 5.0.</small></div>
     </section>
 
@@ -1618,7 +1618,7 @@
 
   <script src="../js/auth/auth.js?v=4.8.1"></script>
   <script src="../js/auth/protected-ui.js?v=4.8.1"></script>
-  <script src="../js/core/shared-cache.js?v=5.0.5.2" defer></script><script src="../js/agr/dashboard.js?v=5.0.5.2" defer></script>
+  <script src="../js/core/shared-cache.js?v=5.0.7" defer></script><script src="../js/agr/dashboard.js?v=5.0.7" defer></script>
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
   <script src="../js/agr/agr.js?v=4.4.0" defer></script>

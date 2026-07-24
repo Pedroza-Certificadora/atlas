@@ -4,7 +4,7 @@
  */
 (function (window, document) {
   "use strict";
-  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Portal do Cliente Premium + Busca Inteligente", version: "5.0.6.1", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
+  var build = Object.freeze({ product: "Portal Atlas", sprint: "5.0", module: "Agenda e Agendamentos", version: "5.0.7", environment: "Pre-Homologacao", publishedAt: "24/07/2026" });
   window.ATLAS_BUILD = build;
   function label(){ return "Atlas • Sprint " + build.sprint + " • " + build.module + " • v" + build.version; }
   function ensureGlobalStamp(){ var stamp=document.getElementById("atlas-build-stamp"); if(!stamp){ stamp=document.createElement("div"); stamp.id="atlas-build-stamp"; stamp.className="atlas-build-stamp"; stamp.setAttribute("role","status"); stamp.setAttribute("aria-label","Versão atual do Portal Atlas"); document.body.appendChild(stamp); } stamp.textContent=label(); }

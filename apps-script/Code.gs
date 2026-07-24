@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.6';
+const ATLAS_VERSION = '5.0.7';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -12,7 +12,7 @@ const SHEETS = Object.freeze({
   PERMISSOES: ['ID','PERFIL','PERMISSAO','ATIVO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   AUDITORIA: ['ID','USUARIO_ID','USUARIO_LOGIN','ACAO','DETALHES_JSON','CAMINHO','USER_AGENT','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   CONFIGURACOES: ['ID','CHAVE','VALOR_JSON','DESCRICAO','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
-  AGENDA: ['ID','CLIENTE_ID','TITULO','INICIO','FIM','RESPONSAVEL','SITUACAO','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
+  AGENDA: ['ID','CLIENTE_ID','CERTIFICADO_ID','TITULO','TIPO_ATENDIMENTO','INICIO','FIM','RESPONSAVEL','SITUACAO','ORIGEM','LOCAL_LINK','OBSERVACOES','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   LOGS: ['ID','NIVEL','ORIGEM','MENSAGEM','CONTEXTO_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   TIMELINE: ['ID','CLIENTE_ID','TIPO_EVENTO','TITULO','DESCRICAO','ORIGEM','USUARIO_ID','USUARIO_LOGIN','DADOS_JSON','DATA_HORA','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
   COMUNICACOES: ['ID','CLIENTE_ID','CAMPANHA_ID','MODELO_ID','CANAL','DESTINO','ASSUNTO','CONTEUDO_HTML','STATUS_ENVIO','TENTATIVAS','ERRO','AGENDADO_PARA','ENVIADO_EM','ENTREGUE_EM','LIDO_EM','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -65,7 +65,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','portal.summary','portal.requestRenewal','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','agenda.list','agenda.create','agenda.update','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','portal.summary','portal.requestRenewal','portal.requestAppointment','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -91,6 +91,9 @@ function route_(action,payload,client,authToken) {
     case 'clients.get': return getClient_(payload);
     case 'timeline.list': return listTimeline_(payload);
     case 'timeline.add': return addTimeline_(payload);
+    case 'agenda.list': return listAgenda_(payload);
+    case 'agenda.create': return createAppointment_(payload,authToken,client);
+    case 'agenda.update': return updateAppointment_(payload,authToken,client);
     case 'communications.list': return listCommunications_(payload);
     case 'communications.create': return createCommunication_(payload);
     case 'communications.send': return sendCommunication_(payload,client);
@@ -115,6 +118,7 @@ function route_(action,payload,client,authToken) {
     case 'invites.accept': return acceptInvite_(payload,client);
     case 'portal.summary': return portalSummary_(authToken);
     case 'portal.requestRenewal': return portalRequestRenewal_(authToken,payload,client);
+    case 'portal.requestAppointment': return portalRequestAppointment_(authToken,payload,client);
     case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
     case 'tags.list': return rows_('TAGS');
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
@@ -409,15 +413,17 @@ function cockpitSummary_(p) {
   const clients=rows_('CLIENTES');
   const certRows=rows_('CERTIFICADOS');
   const timelineRows=rows_('TIMELINE');
+  const agendaRows=rows_('AGENDA');
   const activeClients=clients.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';});
   const certificates=certRows.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';}).map(publicCertificate_);
   const payload={
     summary:{activeClients:activeClients.length,certificates:certificates.length},
     certificates:certificates,
     timeline:timelineRows.slice(-120).reverse(),
+    agenda:agendaRows.filter(function(r){return String(r.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).slice(0,20).map(agendaPublica_),
     communications:[],
     health:{api:true,dataFoundation:true},
-    meta:{generatedAt:new Date().toISOString(),cache:'MISS',ttlSeconds:300,version:'5.0.5.2',mode:'core'}
+    meta:{generatedAt:new Date().toISOString(),cache:'MISS',ttlSeconds:300,version:'5.0.7',mode:'core'}
   };
   try{cache.put(key,JSON.stringify(payload),300);}catch(_){}
   return payload;
@@ -681,9 +687,11 @@ function portalSummary_(authToken) {
   const timeline=rows_('TIMELINE').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(b.DATA_HORA||0)-new Date(a.DATA_HORA||0);}).slice(0,20).map(function(row){
     return {id:row.ID,tipo:row.TIPO_EVENTO,titulo:row.TITULO,descricao:row.DESCRICAO,dataHora:row.DATA_HORA};
   });
+  const agenda=rows_('AGENDA').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).map(agendaPublica_);
   return {
     cliente:{id:client.ID,nome:String(client.NOME||client.EMPRESA||'Cliente'),email:mascararEmailPublico_(client.EMAIL||client.EMAIL_SECUNDARIO||''),documento:mascararDocumentoPublico_(client.CPF_CNPJ),telefone:String(client.TELEFONE||client.WHATSAPP||'')},
     certificados:certificates,
+    agenda:agenda,
     timeline:timeline,
     preferencias:parseJson_(context.user.PREFERENCIAS_JSON,{expiration:true,email:true,whatsapp:false})
   };
@@ -695,6 +703,50 @@ function portalRequestRenewal_(authToken,p,clientMeta) {
   const event=addTimeline_({clienteId:context.client.ID,tipoEvento:'RENOVACAO_SOLICITADA',titulo:'Renovacao solicitada pelo Portal',descricao:'Solicitacao referente ao certificado '+String(certificate.TIPO||certificate.MODELO||certificate.ID)+'.',origem:'PORTAL',actor:context.user.LOGIN,dados:{certificadoId:certificate.ID}});
   recordAudit_({action:'PORTAL_RENEWAL_REQUESTED',details:{clienteId:context.client.ID,certificadoId:certificate.ID,usuarioId:context.user.ID}},clientMeta||{});
   return {solicitado:true,eventoId:event.ID};
+}
+function agendaPublica_(row) {
+  const client=findById_('CLIENTES',row.CLIENTE_ID)||{};
+  return {id:row.ID,clienteId:row.CLIENTE_ID,clienteNome:String(client.NOME||client.EMPRESA||'Cliente'),certificadoId:String(row.CERTIFICADO_ID||''),titulo:String(row.TITULO||'Atendimento'),tipo:String(row.TIPO_ATENDIMENTO||'EMISSAO'),inicio:row.INICIO,fim:row.FIM,responsavel:String(row.RESPONSAVEL||''),situacao:String(row.SITUACAO||'SOLICITADO'),origem:String(row.ORIGEM||'AGR'),localLink:String(row.LOCAL_LINK||''),observacoes:String(row.OBSERVACOES||'')};
+}
+function listAgenda_(p) {
+  const from=dataAtlas_(p.inicio), to=dataAtlas_(p.fim), clientId=String(p.clienteId||'');
+  return rows_('AGENDA').filter(function(row){
+    if(String(row.STATUS||'ATIVO').toUpperCase()!=='ATIVO') return false;
+    if(clientId&&String(row.CLIENTE_ID)!==clientId) return false;
+    const d=dataAtlas_(row.INICIO);
+    return (!from||!d||d>=from)&&(!to||!d||d<=to);
+  }).sort(function(a,b){return new Date(a.INICIO||0)-new Date(b.INICIO||0);}).map(agendaPublica_);
+}
+function validarAgenda_(p) {
+  const client=findById_('CLIENTES',p.clienteId);
+  if(!client) throw apiError_('VALIDATION','Selecione um cliente valido.');
+  const inicio=dataAtlas_(p.inicio), fim=dataAtlas_(p.fim);
+  if(!inicio||!fim||fim<=inicio) throw apiError_('VALIDATION','Informe inicio e fim validos.');
+  const situation=String(p.situacao||'SOLICITADO').toUpperCase();
+  if(['SOLICITADO','CONFIRMADO','CONCLUIDO','CANCELADO','NAO_COMPARECEU'].indexOf(situation)<0) throw apiError_('VALIDATION','Situacao do agendamento invalida.');
+  return {client:client,inicio:inicio,fim:fim,situacao:situation};
+}
+function createAppointment_(p,authToken,clientMeta) {
+  const session=requireSession_(authToken), valid=validarAgenda_(p), now=new Date(), actor=String(session.username||'ATLAS'), id=nextId_('AGENDA','AGE');
+  appendObject_('AGENDA',{ID:id,CLIENTE_ID:valid.client.ID,CERTIFICADO_ID:String(p.certificadoId||''),TITULO:String(p.titulo||'Atendimento de certificado digital'),TIPO_ATENDIMENTO:String(p.tipo||'EMISSAO').toUpperCase(),INICIO:valid.inicio,FIM:valid.fim,RESPONSAVEL:String(p.responsavel||actor),SITUACAO:valid.situacao,ORIGEM:String(p.origem||'AGR').toUpperCase(),LOCAL_LINK:String(p.localLink||''),OBSERVACOES:String(p.observacoes||''),STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
+  addTimeline_({clienteId:valid.client.ID,tipoEvento:'AGENDAMENTO_CRIADO',titulo:'Atendimento agendado',descricao:String(p.titulo||'Atendimento')+' em '+Utilities.formatDate(valid.inicio,Session.getScriptTimeZone()||'America/Sao_Paulo','dd/MM/yyyy HH:mm')+'.',origem:String(p.origem||'AGR'),actor:actor,dados:{agendamentoId:id,situacao:valid.situacao}});
+  recordAudit_({action:'APPOINTMENT_CREATED',details:{agendamentoId:id,clienteId:valid.client.ID}},clientMeta||{});
+  return agendaPublica_(findById_('AGENDA',id));
+}
+function updateAppointment_(p,authToken,clientMeta) {
+  const session=requireSession_(authToken), current=findById_('AGENDA',p.id);
+  if(!current) throw apiError_('NOT_FOUND','Agendamento nao localizado.');
+  const merged=Object.assign({},current,p,{clienteId:p.clienteId||current.CLIENTE_ID,inicio:p.inicio||current.INICIO,fim:p.fim||current.FIM,situacao:p.situacao||current.SITUACAO}), valid=validarAgenda_(merged), actor=String(session.username||'ATLAS');
+  const updated=updateRow_('AGENDA',current.ID,{CLIENTE_ID:valid.client.ID,CERTIFICADO_ID:String(p.certificadoId!==undefined?p.certificadoId:current.CERTIFICADO_ID||''),TITULO:String(p.titulo!==undefined?p.titulo:current.TITULO),TIPO_ATENDIMENTO:String(p.tipo!==undefined?p.tipo:current.TIPO_ATENDIMENTO||'EMISSAO').toUpperCase(),INICIO:valid.inicio,FIM:valid.fim,RESPONSAVEL:String(p.responsavel!==undefined?p.responsavel:current.RESPONSAVEL||actor),SITUACAO:valid.situacao,LOCAL_LINK:String(p.localLink!==undefined?p.localLink:current.LOCAL_LINK||''),OBSERVACOES:String(p.observacoes!==undefined?p.observacoes:current.OBSERVACOES||'')},actor);
+  addTimeline_({clienteId:valid.client.ID,tipoEvento:'AGENDAMENTO_ATUALIZADO',titulo:'Agendamento atualizado',descricao:'Situacao: '+valid.situacao.replace(/_/g,' ')+'.',origem:'AGR',actor:actor,dados:{agendamentoId:current.ID,situacao:valid.situacao}});
+  recordAudit_({action:'APPOINTMENT_UPDATED',details:{agendamentoId:current.ID,clienteId:valid.client.ID,situacao:valid.situacao}},clientMeta||{});
+  return agendaPublica_(updated);
+}
+function portalRequestAppointment_(authToken,p,clientMeta) {
+  const context=portalContext_(authToken), requested=dataAtlas_(p.inicio);
+  if(!requested||requested.getTime()<Date.now()) throw apiError_('VALIDATION','Escolha uma data e horario futuros.');
+  const end=new Date(requested.getTime()+Number(p.duracaoMinutos||30)*60000);
+  return createAppointment_({clienteId:context.client.ID,certificadoId:String(p.certificadoId||''),titulo:String(p.titulo||'Atendimento solicitado pelo Portal'),tipo:String(p.tipo||'RENOVACAO'),inicio:requested,fim:end,responsavel:'A DEFINIR',situacao:'SOLICITADO',origem:'PORTAL',observacoes:String(p.observacoes||'')},authToken,clientMeta);
 }
 function sha256Hex_(value){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(value),Utilities.Charset.UTF_8).map(b=>(b+256)%256).map(b=>('0'+b.toString(16)).slice(-2)).join('');}
 function seedCrmCatalogs_() {
