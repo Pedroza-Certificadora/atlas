@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#092e5b">
+  <title>Meu Portal | Pedroza Certificadora</title>
+  <link rel="icon" href="../../images/logo/favicon-32.png">
+  <link rel="stylesheet" href="../../css/portal-cliente.css?v=5.0.6">
+</head>
+<body class="portal-page">
+  <header class="portal-header">
+    <a href="../../"><img src="../../images/logo/pedroza-certificadora-header.svg" alt="Pedroza Certificadora"></a>
+    <div><span id="portal-user-name">Portal do Cliente</span><button id="portal-logout" type="button" hidden>Sair</button></div>
+  </header>
+  <main>
+    <section id="portal-login" class="portal-access-shell">
+      <div class="portal-access-card">
+        <span class="portal-kicker">Acesso seguro</span>
+        <h1>Entre no seu portal</h1>
+        <p>Acompanhe certificados, vencimentos, histórico e solicitações.</p>
+        <form id="portal-login-form">
+          <label>E-mail<input id="portal-login-email" type="email" autocomplete="username" required></label>
+          <label>Senha<input id="portal-login-password" type="password" autocomplete="current-password" required></label>
+          <button type="submit">Entrar no portal</button>
+        </form>
+        <div id="portal-login-feedback" class="portal-feedback" hidden></div>
+      </div>
+    </section>
+    <section id="portal-dashboard" class="portal-dashboard" hidden>
+      <div class="portal-welcome">
+        <div><span class="portal-kicker">Portal do Cliente Premium</span><h1>Olá, <strong id="portal-client-name">Cliente</strong>.</h1><p>Seus certificados e atendimentos em um só lugar.</p></div>
+        <a href="https://wa.me/5521991674117" target="_blank" rel="noopener">Falar com a equipe</a>
+      </div>
+      <div class="portal-kpis">
+        <article><span>Certificados</span><strong id="portal-kpi-total">0</strong><small>Cadastrados no Atlas</small></article>
+        <article><span>Certificados ativos</span><strong id="portal-kpi-active">0</strong><small>Dentro da validade</small></article>
+        <article><span>Próximo vencimento</span><strong id="portal-kpi-expiry">—</strong><small id="portal-kpi-expiry-copy">Sem data cadastrada</small></article>
+      </div>
+      <section class="portal-panel"><div class="portal-panel-head"><div><span>Certificados digitais</span><h2>Meus certificados</h2></div></div><div id="portal-certificates" class="portal-cards"></div></section>
+      <section class="portal-panel"><div class="portal-panel-head"><div><span>Acompanhamento</span><h2>Histórico recente</h2></div></div><div id="portal-timeline" class="portal-timeline"></div></section>
+    </section>
+  </main>
+  <script src="../../js/auth/config.js?v=5.0.6"></script>
+  <script src="../../js/api/atlas-api.js?v=5.0.6"></script>
+  <script src="../../js/auth/storage.js?v=5.0.6"></script>
+  <script src="../../js/auth/crypto.js?v=5.0.6"></script>
+  <script src="../../js/auth/session.js?v=5.0.6"></script>
+  <script src="../../js/cliente/portal.js?v=5.0.6"></script>
+</body>
+</html>

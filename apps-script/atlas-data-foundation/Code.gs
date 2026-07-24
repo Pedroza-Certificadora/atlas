@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.5.2';
+const ATLAS_VERSION = '5.0.6';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -65,7 +65,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','sectors.list','tags.list'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','cockpit.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','models.list','campaigns.list','campaigns.create','campaigns.preview','automation.status','automation.configure','automation.loadConfig','automation.saveConfig','automation.test','automation.run','automation.processQueue','automation.gmailQuota','automation.listTriggers','automation.backendHealth','automation.installTriggers','automation.removeTriggers','invites.generate','portal.summary','portal.requestRenewal','sectors.list','tags.list'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -112,6 +112,9 @@ function route_(action,payload,client,authToken) {
     case 'automation.removeTriggers': return removeAccAutomationTriggers_();
     case 'invites.generate': return generateInvite_(payload);
     case 'invites.validate': return validateInvite_(payload);
+    case 'invites.accept': return acceptInvite_(payload,client);
+    case 'portal.summary': return portalSummary_(authToken);
+    case 'portal.requestRenewal': return portalRequestRenewal_(authToken,payload,client);
     case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
     case 'tags.list': return rows_('TAGS');
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
@@ -471,6 +474,10 @@ function sendCommunication_(p,clientMeta) {
   const modelo=p.modeloId?findById_('MODELOS_EMAIL',p.modeloId):null;
   let html=String(p.conteudoHtml||(modelo&&modelo.HTML)||'').trim();
   if(!html) throw apiError_('VALIDATION','Informe o conteudo do e-mail.');
+  if(String((modelo&&modelo.TIPO)||'').toUpperCase()==='CONVITE_PORTAL' || html.indexOf('{{TOKEN_CONVITE}}')>=0) {
+    const convite=generateInvite_({clienteId:cliente.ID,email:destino,ttlHours:72,actor:actor});
+    html=html.split('{{TOKEN_CONVITE}}').join(encodeURIComponent(convite.token));
+  }
   html=renderAccTemplate_(html,cliente,p);
   const now=new Date(), id=nextId_('COMUNICACOES','COM');
   appendObject_('COMUNICACOES',{ID:id,CLIENTE_ID:String(cliente.ID),CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:String(p.modeloId||''),CANAL:'EMAIL',DESTINO:destino,ASSUNTO:assunto,CONTEUDO_HTML:html,STATUS_ENVIO:'PROCESSANDO',TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor});
@@ -625,6 +632,69 @@ function validateInvite_(p) {
   if(String(invite.SITUACAO).toUpperCase()!=='PENDENTE') throw apiError_('INVALID_INVITE','Convite ja utilizado ou cancelado.');
   if(new Date(invite.EXPIRA_EM)<new Date()) throw apiError_('EXPIRED_INVITE','Convite expirado.');
   return {valido:true,conviteId:invite.ID,clienteId:invite.CLIENTE_ID,email:invite.EMAIL,expiraEm:invite.EXPIRA_EM};
+}
+function acceptInvite_(p,clientMeta) {
+  const validation=validateInvite_({token:p.token});
+  const invite=findById_('CONVITES',validation.conviteId);
+  const client=findById_('CLIENTES',validation.clienteId);
+  const passwordHash=String(p.passwordHash||'');
+  if(!client) throw apiError_('NOT_FOUND','Cliente do convite nao encontrado.');
+  if(!/^[a-f0-9]{64}$/i.test(passwordHash)) throw apiError_('VALIDATION','Crie uma senha valida para ativar o portal.');
+  const email=normalize_(invite.EMAIL||client.EMAIL||client.EMAIL_SECUNDARIO||'');
+  if(!email) throw apiError_('VALIDATION','O cliente nao possui e-mail cadastrado.');
+  let user=rows_('USUARIOS').find(function(row){
+    return normalize_(row.EMAIL)===email || (String(row.PERFIL||'').toUpperCase()==='CLIENTE' && digits_(row.CPF_CNPJ)===digits_(client.CPF_CNPJ));
+  });
+  const now=new Date(), actor='PORTAL_ATIVACAO';
+  if(user) {
+    updateRow_('USUARIOS',user.ID,{
+      LOGIN:email,EMAIL:email,NOME:String(client.NOME||client.EMPRESA||email),PERFIL:'CLIENTE',
+      HASH_SENHA:passwordHash,CPF_CNPJ:digits_(client.CPF_CNPJ),CHAVE_CERTIFICADO:digits_(client.CPF_CNPJ),STATUS:'ATIVO'
+    },actor);
+  } else {
+    const userId=nextId_('USUARIOS','USR');
+    appendObject_('USUARIOS',{
+      ID:userId,LOGIN:email,EMAIL:email,NOME:String(client.NOME||client.EMPRESA||email),PERFIL:'CLIENTE',
+      HASH_SENHA:passwordHash,CPF_CNPJ:digits_(client.CPF_CNPJ),TELEFONE:String(client.TELEFONE||client.WHATSAPP||''),
+      CHAVE_CERTIFICADO:digits_(client.CPF_CNPJ),PREFERENCIAS_JSON:JSON.stringify({expiration:true,email:true,whatsapp:false}),
+      STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor
+    });
+    user=findById_('USUARIOS',userId);
+  }
+  updateRow_('CONVITES',invite.ID,{USUARIO_ID:user.ID,ACEITO_EM:now,SITUACAO:'ACEITO'},actor);
+  addTimeline_({clienteId:client.ID,tipoEvento:'PORTAL_ATIVADO',titulo:'Portal do Cliente ativado',descricao:'Primeiro acesso configurado com sucesso.',origem:'PORTAL',actor:actor,dados:{conviteId:invite.ID,usuarioId:user.ID}});
+  recordAudit_({action:'PORTAL_ACTIVATED',details:{clienteId:client.ID,usuarioId:user.ID,conviteId:invite.ID}},clientMeta||{});
+  return {ativado:true,login:email};
+}
+function portalContext_(authToken) {
+  const session=requireSession_(authToken);
+  const user=findById_('USUARIOS',session.id);
+  if(!user || String(user.PERFIL||'').toUpperCase()!=='CLIENTE') throw apiError_('FORBIDDEN','Acesso exclusivo do cliente.');
+  const document=digits_(user.CHAVE_CERTIFICADO||user.CPF_CNPJ);
+  const client=rows_('CLIENTES').find(function(row){return digits_(row.CPF_CNPJ)===document;});
+  if(!client) throw apiError_('NOT_FOUND','Cadastro do cliente nao localizado.');
+  return {session:session,user:user,client:client};
+}
+function portalSummary_(authToken) {
+  const context=portalContext_(authToken), client=context.client;
+  const certificates=rows_('CERTIFICADOS').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO';}).map(publicCertificate_);
+  const timeline=rows_('TIMELINE').filter(function(row){return String(row.CLIENTE_ID)===String(client.ID)&&String(row.STATUS||'ATIVO').toUpperCase()==='ATIVO';}).sort(function(a,b){return new Date(b.DATA_HORA||0)-new Date(a.DATA_HORA||0);}).slice(0,20).map(function(row){
+    return {id:row.ID,tipo:row.TIPO_EVENTO,titulo:row.TITULO,descricao:row.DESCRICAO,dataHora:row.DATA_HORA};
+  });
+  return {
+    cliente:{id:client.ID,nome:String(client.NOME||client.EMPRESA||'Cliente'),email:mascararEmailPublico_(client.EMAIL||client.EMAIL_SECUNDARIO||''),documento:mascararDocumentoPublico_(client.CPF_CNPJ),telefone:String(client.TELEFONE||client.WHATSAPP||'')},
+    certificados:certificates,
+    timeline:timeline,
+    preferencias:parseJson_(context.user.PREFERENCIAS_JSON,{expiration:true,email:true,whatsapp:false})
+  };
+}
+function portalRequestRenewal_(authToken,p,clientMeta) {
+  const context=portalContext_(authToken), certificateId=String(p.certificadoId||'');
+  const certificate=rows_('CERTIFICADOS').find(function(row){return String(row.ID)===certificateId&&String(row.CLIENTE_ID)===String(context.client.ID);});
+  if(!certificate) throw apiError_('NOT_FOUND','Certificado nao localizado para este cliente.');
+  const event=addTimeline_({clienteId:context.client.ID,tipoEvento:'RENOVACAO_SOLICITADA',titulo:'Renovacao solicitada pelo Portal',descricao:'Solicitacao referente ao certificado '+String(certificate.TIPO||certificate.MODELO||certificate.ID)+'.',origem:'PORTAL',actor:context.user.LOGIN,dados:{certificadoId:certificate.ID}});
+  recordAudit_({action:'PORTAL_RENEWAL_REQUESTED',details:{clienteId:context.client.ID,certificadoId:certificate.ID,usuarioId:context.user.ID}},clientMeta||{});
+  return {solicitado:true,eventoId:event.ID};
 }
 function sha256Hex_(value){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(value),Utilities.Charset.UTF_8).map(b=>(b+256)%256).map(b=>('0'+b.toString(16)).slice(-2)).join('');}
 function seedCrmCatalogs_() {

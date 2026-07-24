@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#092e5b">
+  <title>Ativar Portal do Cliente | Pedroza Certificadora</title>
+  <link rel="icon" href="../../images/logo/favicon-32.png">
+  <link rel="stylesheet" href="../../css/portal-cliente.css?v=5.0.6">
+</head>
+<body class="portal-access">
+  <main class="portal-access-shell">
+    <a class="portal-logo" href="../../"><img src="../../images/logo/pedroza-certificadora-header.svg" alt="Pedroza Certificadora"></a>
+    <section class="portal-access-card">
+      <span class="portal-kicker">Portal do Cliente Premium</span>
+      <h1>Ative seu acesso</h1>
+      <p id="activation-copy">Validando seu convite individual...</p>
+      <div id="activation-loading" class="portal-loading">Aguarde um instante.</div>
+      <form id="activation-form" hidden>
+        <label>E-mail cadastrado<input id="activation-email" type="text" readonly></label>
+        <label>Crie uma senha<input id="activation-password" type="password" minlength="8" autocomplete="new-password" required></label>
+        <label>Confirme a senha<input id="activation-confirm" type="password" minlength="8" autocomplete="new-password" required></label>
+        <small>A senha deve ter pelo menos 8 caracteres, incluindo letra e número.</small>
+        <button type="submit">Ativar meu portal</button>
+      </form>
+      <div id="activation-result" class="portal-feedback" hidden></div>
+      <a class="portal-support" href="https://wa.me/5521991674117" target="_blank" rel="noopener">Precisa de ajuda? Fale com nossa equipe.</a>
+    </section>
+    <p class="portal-security">Seus dados são tratados conforme a LGPD. A Pedroza Certificadora nunca solicita a senha do certificado digital.</p>
+  </main>
+  <script src="../../js/auth/config.js?v=5.0.6"></script>
+  <script src="../../js/cliente/portal-ativar.js?v=5.0.6"></script>
+</body>
+</html>
