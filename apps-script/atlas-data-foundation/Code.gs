@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.5.1';
+const ATLAS_VERSION = '5.0.5.2';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -391,40 +391,32 @@ function dashboardSummary_() {
 
 
 /**
- * Sprint 5.0.5.1 - endpoint consolidado do Atlas Cockpit.
- * Uma unica viagem ao Apps Script, cache curto e payload reduzido.
+ * Sprint 5.0.5.2 - núcleo rápido do Cockpit.
+ * Não consulta Gmail, gatilhos, fila ou histórico de comunicações.
+ * Esses blocos são atualizados separadamente pelo navegador.
  */
 function cockpitSummary_(p) {
   const force=Boolean(p&&p.forceRefresh);
   const cache=CacheService.getScriptCache();
-  const key='ATLAS_COCKPIT_5_0_5_1';
+  const key='ATLAS_COCKPIT_CORE_5_0_5_2';
   if(!force){
     const cached=cache.get(key);
-    if(cached){
-      try { const parsed=JSON.parse(cached); parsed.meta=Object.assign({},parsed.meta||{},{cache:'HIT'}); return parsed; } catch(_){}
-    }
+    if(cached){try{const parsed=JSON.parse(cached);parsed.meta=Object.assign({},parsed.meta||{},{cache:'HIT'});return parsed;}catch(_){}}
   }
-  const now=new Date();
   const clients=rows_('CLIENTES');
   const certRows=rows_('CERTIFICADOS');
   const timelineRows=rows_('TIMELINE');
-  const commRows=rows_('COMUNICACOES');
   const activeClients=clients.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';});
   const certificates=certRows.filter(function(r){return String(r.STATUS||'').toUpperCase()==='ATIVO';}).map(publicCertificate_);
-  const timeline=timelineRows.slice(-120).reverse();
-  const communications=commRows.slice(-200).reverse();
-  let automation={config:getAccAutomationConfig_(),queue:{pending:0,error:0,total:0},sentToday:0,remainingQuota:null,triggers:[]};
-  try { automation=automationStatus_(); } catch(error) { automation.error=String(error&&error.message||error); }
   const payload={
     summary:{activeClients:activeClients.length,certificates:certificates.length},
     certificates:certificates,
-    timeline:timeline,
-    communications:communications,
-    automation:automation,
-    health:{api:true,dataFoundation:true,gmail:automation.remainingQuota!==null,triggers:Array.isArray(automation.triggers)&&automation.triggers.length>0},
-    meta:{generatedAt:now.toISOString(),cache:'MISS',ttlSeconds:90,version:ATLAS_VERSION}
+    timeline:timelineRows.slice(-120).reverse(),
+    communications:[],
+    health:{api:true,dataFoundation:true},
+    meta:{generatedAt:new Date().toISOString(),cache:'MISS',ttlSeconds:300,version:'5.0.5.2',mode:'core'}
   };
-  try { cache.put(key,JSON.stringify(payload),90); } catch(_){}
+  try{cache.put(key,JSON.stringify(payload),300);}catch(_){}
   return payload;
 }
 
