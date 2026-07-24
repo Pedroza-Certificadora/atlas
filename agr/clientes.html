@@ -16,9 +16,9 @@
   <link rel="stylesheet" href="../css/agr.css?v=5.0.4">
   <link rel="stylesheet" href="../css/auth.css?v=5.0.4">
   <link rel="stylesheet" href="../css/crm-clientes.css?v=5.0.4">
-  <link rel="stylesheet" href="../css/client-communication.css?v=5.0.7.3">
+  <link rel="stylesheet" href="../css/client-communication.css?v=5.0.7.3.2">
   <link rel="stylesheet" href="../css/atlas-core.css?v=5.0.4">
-  <link rel="stylesheet" href="../css/crm-enterprise.css?v=5.0.4">
+  <link rel="stylesheet" href="../css/crm-enterprise.css?v=5.0.7.3.2">
   <script src="../js/auth/config.js?v=5.0.4"></script>
   <script src="../js/api/atlas-api.js?v=5.0.4"></script>
   <script src="../js/auth/storage.js?v=5.0.4"></script>
@@ -187,12 +187,14 @@
         <div><small>Certificado</small><strong id="client-comm-certificate">&mdash;</strong></div>
         <div><small>Vencimento</small><strong id="client-comm-expiry">&mdash;</strong></div>
         <div><small>Destino</small><strong id="client-comm-destination-view">&mdash;</strong></div>
+        <div><small>Dias calculados hoje</small><strong id="client-comm-days">&mdash;</strong></div>
+        <div><small>Regra selecionada pelo Atlas</small><strong id="client-comm-type-view">&mdash;</strong></div>
       </div>
-      <label>Tipo de aviso<select id="client-comm-type" required><option value="MOD-000006">Vencimento em 60 dias</option><option value="MOD-000007">Vencimento em 30 dias</option><option value="MOD-000002">Certificado vencido</option></select></label>
+      <input id="client-comm-type" type="hidden">
       <label>E-mail de destino<input id="client-comm-destination" type="email" required autocomplete="email"></label>
       <label>Assunto<input id="client-comm-subject" required></label>
       <div class="client-comm-preview" id="client-comm-preview" aria-live="polite"></div>
-      <label class="client-comm-confirm"><input id="client-comm-confirm" type="checkbox" required><span>Confirmo que revisei cliente, certificado, vencimento, destinat&#225;rio e tipo de aviso.</span></label>
+      <label class="client-comm-confirm"><input id="client-comm-confirm" type="checkbox" required><span>Confirmo que revisei cliente, certificado, vencimento, destinat&#225;rio e a quantidade de dias calculada automaticamente pelo Atlas.</span></label>
       <div class="client-comm-status" id="client-comm-status" role="status"></div>
       <footer><button id="client-comm-cancel" type="button">Cancelar</button><button class="primary" id="client-comm-send" type="submit">Confirmar e enviar</button></footer>
     </form>
@@ -238,11 +240,11 @@
   <script src="../js/auth/protected-ui.js?v=5.0.4"></script>
   <script src="../js/app.js?v=5.0.4" defer></script>
   <script src="../js/core/shared-cache.js?v=5.0.5.2" defer></script><script src="../js/agr/clientes.js?v=5.0.7.3" charset="utf-8" defer></script>
-  <script src="../js/agr/client-communication.js?v=5.0.7.3" charset="utf-8" defer></script>
+  <script src="../js/agr/client-communication.js?v=5.0.7.3.2" charset="utf-8" defer></script>
   <script src="../js/core/atlas-core.js?v=5.0.4" defer></script>
   <script src="../js/agr/acdm.js?v=5.0.4" defer></script>
   <script src="../js/agr/crm-enterprise.js?v=5.0.4" defer></script>
   <script src="../js/agr/intelligence.js?v=5.0.4" defer></script>
-  <script src="../js/build-info.js?v=5.0.7.3" charset="utf-8" defer></script>
+  <script src="../js/build-info.js?v=5.0.7.3.2" charset="utf-8" defer></script>
 </body>
 </html>
