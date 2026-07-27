@@ -1,0 +1,13 @@
+(function(){
+  "use strict";
+  var endpoint=String((window.AtlasAuth&&window.AtlasAuth.config&&window.AtlasAuth.config.apiEndpoint)||"");
+  var token=new URLSearchParams(location.search).get("convite")||"";
+  var form=document.getElementById("activation-form"), loading=document.getElementById("activation-loading");
+  var copy=document.getElementById("activation-copy"), result=document.getElementById("activation-result"), email=document.getElementById("activation-email");
+  function request(action,payload){return fetch(endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:action,payload:payload||{},client:{path:location.pathname}}),cache:"no-store"}).then(function(r){return r.json();}).then(function(r){if(!r.ok){var e=new Error(r.message||"Não foi possível concluir.");e.code=r.code;throw e;}return r.data;});}
+  function feedback(message,success){result.hidden=false;result.className="portal-feedback "+(success?"success":"error");result.innerHTML=message;}
+  function sha256(value){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(value)).then(function(buffer){return Array.from(new Uint8Array(buffer)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");});}
+  if(!token){loading.hidden=true;copy.textContent="Este link de ativação está incompleto.";feedback("Solicite um novo convite à Pedroza Certificadora.",false);return;}
+  request("invites.validate",{token:token}).then(function(data){loading.hidden=true;form.hidden=false;email.value=data.email||"E-mail protegido";copy.textContent="Convite validado. Crie sua senha para concluir o primeiro acesso.";}).catch(function(error){loading.hidden=true;copy.textContent="Não foi possível validar o convite.";feedback(error.code==="EXPIRED_INVITE"?"Este convite expirou. Solicite um novo link.":error.message,false);});
+  form.addEventListener("submit",function(event){event.preventDefault();var password=document.getElementById("activation-password").value,confirm=document.getElementById("activation-confirm").value;if(password.length<8||!/[A-Za-z]/.test(password)||!/\d/.test(password)){feedback("Use pelo menos 8 caracteres, com letra e número.",false);return;}if(password!==confirm){feedback("A confirmação da senha não corresponde.",false);return;}form.querySelector("button").disabled=true;sha256(password).then(function(hash){return request("invites.accept",{token:token,passwordHash:hash});}).then(function(data){form.hidden=true;copy.textContent="Seu Portal do Cliente foi ativado.";feedback('Acesso criado com sucesso. <a href="../portal/">Entrar usando '+String(data.login||"seu e-mail")+"</a>.",true);}).catch(function(error){form.querySelector("button").disabled=false;feedback(error.message,false);});});
+})();

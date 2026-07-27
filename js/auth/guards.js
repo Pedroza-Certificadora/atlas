@@ -100,7 +100,13 @@
     applyIdentity(activeSession);
   }
 
-  var protectedPage = document.documentElement.hasAttribute("data-auth-protected");
+  /* A Área do Cliente é uma consulta pública com dados mascarados.
+     Esta exceção explícita também neutraliza HTML antigo em cache que ainda
+     possa conter data-auth-protected. As rotas AGR e administrativas continuam
+     integralmente protegidas. */
+  var normalizedPath = currentPath.replace(/\/+$/, "") || "/";
+  var publicClientArea = /\/cliente(?:\/index\.html)?$/i.test(normalizedPath);
+  var protectedPage = !publicClientArea && document.documentElement.hasAttribute("data-auth-protected");
   var requiredPermission = document.documentElement.getAttribute("data-auth-permission");
 
   if (protectedPage) {
