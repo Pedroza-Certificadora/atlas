@@ -430,3 +430,95 @@ html, body { max-width: 100%; overflow-x: clip; }
     font-size: 8px;
   }
 }
+
+/* ================================================================
+   Sprint 5.0.8.5 — cabeçalho público responsivo e isolado
+   A regra nunca alcança a Área AGR.
+   ================================================================ */
+@media (min-width:1181px) and (max-width:1750px) {
+  body:not(.agr-page) .site-header,
+  body:not(.agr-page) .header-inner {
+    height:88px;
+  }
+
+  body:not(.agr-page) .header-inner {
+    grid-template-columns:minmax(230px,1fr) auto auto;
+    gap:18px;
+  }
+
+  body:not(.agr-page) .brand,
+  body:not(.agr-page) .brand img {
+    width:268px;
+    height:84px;
+  }
+
+  body:not(.agr-page) .menu-toggle {
+    width:44px;
+    height:42px;
+    display:grid;
+    align-content:center;
+    gap:5px;
+    padding:10px;
+    border:1px solid #204475;
+    border-radius:7px;
+    background:#06142e;
+  }
+
+  body:not(.agr-page) .menu-toggle span {
+    display:block;
+    height:2px;
+    background:#fff;
+  }
+
+  body:not(.agr-page) .main-nav {
+    position:fixed;
+    top:88px;
+    left:16px;
+    right:16px;
+    height:auto;
+    max-height:calc(100vh - 104px);
+    display:none;
+    align-items:stretch;
+    flex-direction:column;
+    gap:0;
+    padding:8px;
+    overflow-y:auto;
+    color:#fff;
+    background:#03132f;
+    border:1px solid #1a477d;
+    border-radius:10px;
+    box-shadow:var(--shadow);
+  }
+
+  body:not(.agr-page) .main-nav.open {
+    display:flex;
+  }
+
+  body:not(.agr-page) .main-nav a {
+    height:auto;
+    padding:10px;
+    color:#f7fbff;
+    font-size:13px;
+    text-shadow:0 1px 2px rgba(0,0,0,.35);
+    font-weight:700;
+  }
+
+  body:not(.agr-page) .main-nav a:after {
+    bottom:4px;
+  }
+
+  body:not(.agr-page) .header-actions {
+    display:flex;
+    gap:14px;
+  }
+
+  body:not(.agr-page) .header-phone {
+    display:inline-flex;
+    align-items:center;
+  }
+
+  body:not(.agr-page) .header-cta {
+    display:inline-flex;
+    height:44px;
+  }
+}
