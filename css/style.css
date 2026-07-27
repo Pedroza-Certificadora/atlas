@@ -473,21 +473,22 @@ html, body { max-width: 100%; overflow-x: clip; }
   body:not(.agr-page) .main-nav {
     position:fixed;
     top:88px;
-    left:16px;
+    left:auto;
     right:16px;
+    width:min(420px, calc(100vw - 32px));
     height:auto;
-    max-height:calc(100vh - 104px);
+    max-height:min(620px, calc(100vh - 104px));
     display:none;
     align-items:stretch;
     flex-direction:column;
     gap:0;
-    padding:8px;
+    padding:10px;
     overflow-y:auto;
     color:#fff;
     background:#03132f;
     border:1px solid #1a477d;
-    border-radius:10px;
-    box-shadow:var(--shadow);
+    border-radius:12px;
+    box-shadow:0 22px 55px rgba(0,0,0,.32);
   }
 
   body:not(.agr-page) .main-nav.open {
@@ -496,11 +497,18 @@ html, body { max-width: 100%; overflow-x: clip; }
 
   body:not(.agr-page) .main-nav a {
     height:auto;
-    padding:10px;
+    min-height:42px;
+    padding:11px 14px;
     color:#f7fbff;
     font-size:13px;
     text-shadow:0 1px 2px rgba(0,0,0,.35);
     font-weight:700;
+    border-radius:7px;
+  }
+
+  body:not(.agr-page) .main-nav a:hover,
+  body:not(.agr-page) .main-nav a:focus-visible {
+    background:#0b2a55;
   }
 
   body:not(.agr-page) .main-nav a:after {
