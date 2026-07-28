@@ -1,0 +1,18 @@
+/* Atlas Dashboard Executivo 5.0.9.0 - escopo isolado */
+.executive-filters{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr)) auto;gap:10px;align-items:end;padding:16px 18px;background:#fff;border:1px solid #dfe8f2;border-radius:16px;box-shadow:0 8px 24px rgba(17,50,83,.045)}
+.executive-filters label{display:grid;gap:6px;color:#60758a;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.executive-filters select{min-width:0;height:38px;padding:0 10px;color:#153451;background:#f7fafd;border:1px solid #dbe5ef;border-radius:9px;font:700 11px inherit}
+.executive-filters button{height:38px;padding:0 14px;color:#0878ff;background:#eef6ff;border:1px solid #cfe4fb;border-radius:9px;font-size:10px;font-weight:850;cursor:pointer}
+.atlas-cockpit .cockpit-kpis{grid-template-columns:repeat(6,1fr)}
+.cockpit-kpi.warning-soft:before{background:#f6c24a}
+.executive-charts{display:grid;grid-template-columns:1.45fr .8fr;gap:14px}
+.executive-chart-panel{min-height:270px}
+.executive-chart{min-height:190px;overflow:hidden}.executive-chart svg{display:block;width:100%;height:190px}.executive-chart svg text{fill:#71859a;font:700 9px system-ui,sans-serif}
+.executive-donut-wrap{display:flex;align-items:center;justify-content:center;gap:28px;min-height:185px}
+.executive-donut{--active:0%;display:grid;place-content:center;width:142px;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at center,#fff 0 53%,transparent 54%),conic-gradient(#22b573 0 var(--active),#e84c61 var(--active) 100%);text-align:center}
+.executive-donut strong{color:#143655;font-size:27px}.executive-donut small{color:#71859a;font-size:9px}
+.executive-legend{display:grid;gap:10px}.executive-legend span{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;color:#63788d;font-size:10px}.executive-legend i{width:9px;height:9px;border-radius:50%}.executive-legend i.ok{background:#22b573}.executive-legend i.danger{background:#e84c61}.executive-legend b{color:#143655}
+.executive-bars{display:grid;gap:13px;padding-top:8px}.executive-bars>div{display:grid;grid-template-columns:minmax(90px,1fr) 2fr 28px;gap:10px;align-items:center;color:#597087;font-size:10px}.executive-bars i{height:9px;overflow:hidden;background:#eaf0f6;border-radius:99px}.executive-bars i b{display:block;height:100%;background:linear-gradient(90deg,#0878ff,#32a3ff);border-radius:inherit}.executive-bars strong{color:#143655;text-align:right}
+@media(max-width:1180px){.executive-filters{grid-template-columns:repeat(3,1fr)}.executive-charts{grid-template-columns:1fr 1fr}.atlas-cockpit .cockpit-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.executive-filters{grid-template-columns:1fr 1fr}.executive-filters button{grid-column:1/-1}.executive-charts{grid-template-columns:1fr}.executive-chart-panel{min-height:auto}.executive-donut-wrap{min-height:165px}.atlas-cockpit .cockpit-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:430px){.executive-filters{grid-template-columns:1fr}.executive-filters button{grid-column:auto}.executive-donut-wrap{gap:18px}.executive-donut{width:122px}}

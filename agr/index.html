@@ -62,7 +62,8 @@
   <link rel="stylesheet" href="../css/style.css?v=4.8.1">
   <link rel="stylesheet" href="../css/motion.css?v=4.3.0">
   <link rel="stylesheet" href="../css/agr.css?v=5.0.5.2">
-  <link rel="stylesheet" href="../css/cockpit.css?v=5.0.5.2">
+  <link rel="stylesheet" href="../css/cockpit.css?v=5.0.9.0">
+  <link rel="stylesheet" href="../css/dashboard-executivo.css?v=5.0.9.0">
   <link rel="stylesheet" href="../css/auth.css?v=4.8.1">
 
   <script src="../js/auth/config.js?v=4.8.1"></script>
@@ -198,7 +199,7 @@
           </div>
 
           <nav class="atlas-admin-nav">
-            <a class="active" href="#dashboard"><span aria-hidden="true">▦</span> Cockpit</a>
+            <a class="active" href="#dashboard"><span aria-hidden="true">▦</span> Dashboard Executivo</a>
             <a href="clientes.html" data-auth-permission="CLIENTS_READ"><span aria-hidden="true">◉</span> Clientes</a>
             <a href="comunicacao.html"><span aria-hidden="true">✉</span> Comunicação</a>
             <a href="#certificados" data-auth-permission="CERTIFICATES_READ"><span aria-hidden="true">▤</span> Certificados</a>
@@ -221,9 +222,9 @@
 <div class="atlas-admin-content atlas-cockpit" id="dashboard">
   <section class="cockpit-hero" aria-labelledby="dashboard-title">
     <div>
-      <span class="cockpit-kicker">Atlas Cockpit Enterprise</span>
+      <span class="cockpit-kicker">Atlas Dashboard Executivo</span>
       <h1 id="dashboard-title"><span id="atlas-greeting">Olá</span>, <span data-auth-user-first-name>Marcos</span>.</h1>
-      <p>Prioridades, comunicação e saúde operacional em uma única visão.</p>
+      <p>Indicadores reais, vencimentos, agenda e saúde operacional em uma única visão.</p>
     </div>
     <div class="cockpit-session">
       <span class="cockpit-live"><i></i> Operação online</span>
@@ -240,13 +241,29 @@
     <a href="usuarios.html#configuracoes"><b>⚙</b><span>Configurações<small>Administração</small></span></a>
   </nav>
 
+  <section class="executive-filters" aria-label="Filtros executivos">
+    <label>Período<select id="atlas-filter-period"><option value="12">Últimos 12 meses</option><option value="6">Últimos 6 meses</option><option value="3">Últimos 3 meses</option><option value="all">Todo o histórico</option></select></label>
+    <label>Situação<select id="atlas-filter-status"><option value="all">Todas</option><option value="active">Ativos</option><option value="expired">Vencidos</option></select></label>
+    <label>Pessoa<select id="atlas-filter-person"><option value="all">PF e PJ</option><option value="pf">Pessoa física</option><option value="pj">Pessoa jurídica</option></select></label>
+    <label>Certificado<select id="atlas-filter-type"><option value="all">Todos os tipos</option></select></label>
+    <label>Responsável<select id="atlas-filter-owner"><option value="all">Todos</option></select></label>
+    <button id="atlas-filter-clear" type="button">Limpar filtros</button>
+  </section>
+
   <section class="cockpit-kpis" aria-label="Prioridades operacionais">
     <article class="cockpit-kpi danger" data-dashboard-target="clientes.html?filter=expired" tabindex="0" role="link"><span>Vencidos</span><strong id="atlas-kpi-expired">—</strong><small>Exigem contato imediato</small></article>
     <article class="cockpit-kpi warning" data-dashboard-target="clientes.html?filter=7" tabindex="0" role="link"><span>Próximos 7 dias</span><strong id="atlas-kpi-due-7">—</strong><small>Prioridade alta</small></article>
-    <article class="cockpit-kpi info" data-dashboard-target="clientes.html?filter=30" tabindex="0" role="link"><span>Próximos 30 dias</span><strong id="atlas-kpi-due-30">—</strong><small>Acompanhamento preventivo</small></article>
+    <article class="cockpit-kpi warning-soft" data-dashboard-target="clientes.html?filter=15" tabindex="0" role="link"><span>Próximos 15 dias</span><strong id="atlas-kpi-due-15">—</strong><small>Ação preventiva</small></article>
+    <article class="cockpit-kpi info" data-dashboard-target="clientes.html?filter=30" tabindex="0" role="link"><span>Próximos 30 dias</span><strong id="atlas-kpi-due-30">—</strong><small>Acompanhamento</small></article>
     <article class="cockpit-kpi success" data-dashboard-target="clientes.html?filter=certificate-active" tabindex="0" role="link"><span>Certificados ativos</span><strong id="atlas-kpi-certificates">—</strong><small>Base acompanhada</small></article>
-    <article class="cockpit-kpi purple" data-dashboard-target="comunicacao.html" tabindex="0" role="link"><span>Comunicações</span><strong id="atlas-kpi-communications">—</strong><small>Enviadas hoje</small></article>
     <article class="cockpit-kpi neutral" data-dashboard-target="clientes.html?filter=all" tabindex="0" role="link"><span>Clientes ativos</span><strong id="atlas-kpi-clients">—</strong><small>Cadastros no CRM</small></article>
+  </section>
+
+  <section class="executive-charts" aria-label="Análises executivas">
+    <article class="cockpit-panel executive-chart-panel"><div class="cockpit-panel-head"><div><span>Carteira</span><h2>Emissões mensais</h2></div><small id="atlas-chart-period">Dados reais</small></div><div class="executive-chart" id="atlas-chart-issues" role="img" aria-label="Gráfico de emissões mensais"></div></article>
+    <article class="cockpit-panel executive-chart-panel"><div class="cockpit-panel-head"><div><span>Situação</span><h2>Ativos versus vencidos</h2></div></div><div class="executive-donut-wrap"><div class="executive-donut" id="atlas-chart-status"></div><div id="atlas-chart-status-legend" class="executive-legend"></div></div></article>
+    <article class="cockpit-panel executive-chart-panel"><div class="cockpit-panel-head"><div><span>Produtos</span><h2>Tipos de certificado</h2></div></div><div class="executive-bars" id="atlas-chart-types"></div></article>
+    <article class="cockpit-panel executive-chart-panel"><div class="cockpit-panel-head"><div><span>Planejamento</span><h2>Vencimentos futuros</h2></div></div><div class="executive-chart" id="atlas-chart-expiry" role="img" aria-label="Gráfico de vencimentos futuros"></div></article>
   </section>
 
   <div class="cockpit-main-grid">
@@ -1618,13 +1635,13 @@
 
   <script src="../js/auth/auth.js?v=4.8.1"></script>
   <script src="../js/auth/protected-ui.js?v=4.8.1"></script>
-  <script src="../js/core/shared-cache.js?v=5.0.7" defer></script><script src="../js/agr/dashboard.js?v=5.0.7" defer></script>
+  <script src="../js/core/shared-cache.js?v=5.0.7" defer></script><script src="../js/agr/dashboard.js?v=5.0.9.0" defer></script>
   <script src="../js/app.js?v=4.2.1" defer></script>
   <script src="../js/motion.js?v=4.2.1" defer></script>
   <script src="../js/agr/agr.js?v=4.4.0" defer></script>
   <script src="../js/agr/aims-data.js?v=4.4.0" defer></script>
   <script src="../js/agr/aims.js?v=4.4.0" defer></script>
 
-  <script src="../js/build-info.js?v=5.0.1" defer></script>
+  <script src="../js/build-info.js?v=5.0.9.0" defer></script>
 </body>
 </html>
