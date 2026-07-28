@@ -26,7 +26,7 @@
 .crm-company{max-width:150px}.crm-client strong{max-width:235px}
 @media(max-width:1380px){.crm-clientes-page .crm-shell>.container{width:min(1348px,calc(100% - 24px))}.crm-clientes-page .atlas-admin-layout{grid-template-columns:220px minmax(0,1fr);gap:18px}.crm-table{min-width:1020px}.crm-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.crm-kpi-card{padding:14px 28px 14px 14px;min-height:98px}}
 @media(max-width:1100px){.crm-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:900px){.crm-clientes-page .crm-shell>.container{width:min(100% - 20px,860px)}.crm-clientes-page .atlas-admin-layout{display:block}.crm-table{min-width:980px}}
+@media(max-width:900px){.crm-clientes-page .crm-shell>.container{width:min(calc(100% - 20px),860px)}.crm-clientes-page .atlas-admin-layout{display:block}.crm-table{min-width:980px}}
 @media(max-width:600px){.crm-clientes-page .crm-shell>.container{width:calc(100% - 16px)}.crm-kpi-grid{grid-template-columns:1fr}.crm-kpi-card{min-height:88px}}
 
 /* Sprint 5.0.1 - Exclusao protegida e busca de duplicidades */
