@@ -32,15 +32,13 @@
     var passwordHash = await window.AtlasAuth.crypto.sha256(password || "");
     var user = null;
 
-    if (window.AtlasAPI && window.AtlasAPI.isConfigured()) {
-      try {
-        user = await window.AtlasAPI.login(loginName, passwordHash);
-      } catch (apiError) {
-        if (apiError.code !== "INVALID_CREDENTIALS") throw apiError;
-      }
-    } else {
-      user = window.AtlasAuth.userProvider.findByLogin(loginName);
-      if (user && user.passwordHash !== passwordHash) user = null;
+    if (!(window.AtlasAPI && window.AtlasAPI.isConfigured())) {
+      throw new Error("Atlas API indisponível. O acesso local foi desativado por segurança.");
+    }
+    try {
+      user = await window.AtlasAPI.login(loginName, passwordHash);
+    } catch (apiError) {
+      if (apiError.code !== "INVALID_CREDENTIALS" && apiError.code !== "LOGIN_LOCKED") throw apiError;
     }
 
     if (!user || !user.active) {

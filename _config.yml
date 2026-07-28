@@ -1,5 +1,7 @@
 exclude:
   - README.md
+  - apps-script
+  - "ATLAS-*"
   - backup-sprint-20260717-160656
   - backup-sprint-3.6.3-20260718-165721
   - _backups

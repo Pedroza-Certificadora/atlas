@@ -4,7 +4,7 @@ Portal público de certificação digital da Pedroza Certificadora.
 
 ## Versão atual
 
-Sprint 3.9.1 — Correção, confiança e mensuração.
+Sprint 5.0.10.1 — Hotfix de segurança e consistência operacional.
 
 Principais entregas:
 
@@ -17,6 +17,10 @@ Principais entregas:
 - rascunho do pré-atendimento somente após autorização, com expiração em 24 horas;
 - camada de eventos preparada para integração com analytics;
 - cartão social próprio para compartilhamento do portal.
+- Central de Comunicação protegida pela mesma guarda das demais rotas AGR;
+- limpeza de caches operacionais no logout;
+- autorização por perfil e limitação de login documentadas para o Apps Script;
+- canonical e dados sociais alinhados ao domínio oficial.
 
 ## Estrutura
 
@@ -31,3 +35,5 @@ Principais entregas:
 ## Publicação
 
 O portal é estático e compatível com GitHub Pages. Recursos autenticados, consultas pessoais e documentos não devem ser implementados nesta camada pública; eles pertencem à futura aplicação operacional segura.
+
+Antes de uma nova publicação, leia `ATLAS-HOTFIX-5.0.10.1.md` e `apps-script/README.md`. O `Code.gs` incluído é uma referência arquivada; ele não substitui integralmente o Web App 5.0.7 atualmente implantado.

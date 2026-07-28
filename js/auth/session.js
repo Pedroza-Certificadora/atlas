@@ -7,7 +7,8 @@
 
   function read() {
     try {
-      var session = JSON.parse(localStorage.getItem(config.sessionKey) || "null");
+      var raw = sessionStorage.getItem(config.sessionKey) || localStorage.getItem(config.sessionKey) || "null";
+      var session = JSON.parse(raw);
       return session && typeof session === "object" ? session : null;
     } catch (error) {
       return null;
@@ -15,11 +16,15 @@
   }
 
   function write(session) {
-    localStorage.setItem(config.sessionKey, JSON.stringify(session));
+    var target = session && session.remember ? localStorage : sessionStorage;
+    var other = target === localStorage ? sessionStorage : localStorage;
+    target.setItem(config.sessionKey, JSON.stringify(session));
+    other.removeItem(config.sessionKey);
   }
 
   function create(user, remember) {
     var now = Date.now();
+    try { localStorage.removeItem("atlas_security_logout_marker"); } catch (error) {}
     var session = {
       token: window.AtlasAuth.crypto.randomId(),
       apiToken: user.apiToken || "",
@@ -98,6 +103,7 @@
     var session = read();
     try {
       localStorage.removeItem(config.sessionKey);
+      sessionStorage.removeItem(config.sessionKey);
     } catch (error) {}
 
     if (window.AtlasAuth.audit) {
