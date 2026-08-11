@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.10.5';
+const ATLAS_VERSION = '5.0.10.6';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -348,6 +348,29 @@ function expirationBadge_(days) {
 function replaceTemplateVariable_(html,key,value) {
   return String(html||'').replace(new RegExp('\\{\\{\\s*'+key+'\\s*\\}\\}','gi'),String(value==null?'':value));
 }
+function forceExpiryDaysInTemplate_(html,days) {
+  var value=String(Math.abs(days));
+  var out=String(html||'');
+
+  // Modelos historicos podem ter o prazo fixo isolado em uma tag HTML
+  // (ex.: <strong>30</strong><span>DIAS</span>). Nesse caso a regex de
+  // frase nao enxerga "30 DIAS" como texto continuo.
+  out=out.replace(/>\s*(7|15|30|60|90)\s*</g,function(match){
+    return match.replace(/(7|15|30|60|90)/,value);
+  });
+
+  // Tambem cobre prazo fixo quando numero e palavra estao no mesmo no de texto.
+  out=out.replace(/\b(7|15|30|60|90)\s+DIAS?\b/gi,function(match){
+    return match.replace(/(7|15|30|60|90)/,value);
+  });
+
+  // Cobre atributos de acessibilidade/titulo usados nos cards antigos.
+  out=out.replace(/((?:aria-label|title)=["'][^"']*?)\b(7|15|30|60|90)\s+DIAS?\b/gi,function(_,prefix){
+    return prefix+value+' DIAS';
+  });
+
+  return out;
+}
 function renderExpiryEmailHtml_(p,customer,certificate,days,expiryText) {
   var modelId=expiryModelId_(days);
   var html=String(p.conteudoHtml||'').trim();
@@ -393,12 +416,17 @@ function renderExpiryEmailHtml_(p,customer,certificate,days,expiryText) {
   };
   Object.keys(vars).forEach(function(key){html=replaceTemplateVariable_(html,key,vars[key]);});
 
+  // Forca o numero calculado inclusive quando o modelo antigo separa
+  // o numero e a palavra DIAS em tags diferentes.
+  html=forceExpiryDaysInTemplate_(html,days);
+
   html=html
     .replace(/FALTAM?\s+(?:APROXIMADAMENTE\s+|EXATAMENTE\s+)?\d+\s+DIAS?(?:\s+PARA\s+O\s+VENCIMENTO)?/g,expirationBadge_(days))
     .replace(/Faltam?\s+(?:aproximadamente\s+|exatamente\s+)?\d+\s+dias?(?:\s+para\s+o\s+vencimento(?:\s+do\s+seu\s+certificado\s+digital)?)?\.?/g,expirationSentence_(days))
     .replace(/(<img\b[^>]*\bsrc=["'])(?:\.\.\/|\.\/)*images\/logo\/[^"']+(["'][^>]*>)/gi,'$1'+logo+'$2')
     .replace(/(<img\b[^>]*\bsrc=["'])https?:\/\/(?:www\.)?pedrozacertificadora\.com\.br\/images\/logo\/[^"']+(["'][^>]*>)/gi,'$1'+logo+'$2');
 
+  html=forceExpiryDaysInTemplate_(html,days);
   return html;
 }
 function sendCommunication_(p,client) {
