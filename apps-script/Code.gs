@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.10.6';
+const ATLAS_VERSION = '5.0.10.7';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -476,33 +476,119 @@ function sendCommunication_(p,client) {
     throw apiError_('EMAIL_SEND_FAILED','Nao foi possivel enviar o e-mail: '+String(error.message||error));
   }
 }
+function expiryMilestoneAlreadySent_(certificateId,days) {
+  const certId=String(certificateId||'');
+  return rows_('TIMELINE').some(function(r){
+    if(String(r.TIPO_EVENTO||'')!=='EMAIL_VENCIMENTO_ENVIADO') return false;
+    const data=parseJson_(r.DADOS_JSON,{});
+    return String(data.certificadoId||'')===certId && Number(data.diasCalculados)===Number(days);
+  });
+}
 function runExpirationAutomation_(p,client) {
-  const requested=Array.isArray(p.dias)?p.dias:(Array.isArray(p.days)?p.days:[30,15]);
+  const requested=Array.isArray(p.dias)?p.dias:(Array.isArray(p.days)?p.days:[60,30,15,5]);
   const rules=requested.map(Number).filter(n=>isFinite(n)&&n>=0);
   const activeClients={};
   rows_('CLIENTES').filter(r=>String(r.STATUS||'').toUpperCase()==='ATIVO').forEach(r=>activeClients[String(r.ID)]=r);
-  const certs=rows_('CERTIFICADOS').filter(r=>String(r.STATUS||'').toUpperCase()==='ATIVO');
+  const certs=rows_('CERTIFICADOS').filter(r=>
+    String(r.STATUS||'').toUpperCase()==='ATIVO' &&
+    String(r.STATUS_CERTIFICADO||'ATIVO').toUpperCase()!=='RENOVADO'
+  );
   const result={regras:rules,analisados:certs.length,enviados:0,ignorados:0,erros:[]};
 
   certs.forEach(cert=>{
     try {
       const days=expirationDays_(cert.VENCIMENTO);
       if(rules.indexOf(days)<0){result.ignorados++;return;}
+
       const customer=activeClients[String(cert.CLIENTE_ID)];
       if(!customer||!normalize_(customer.EMAIL)){result.ignorados++;return;}
-      const alreadySent=rows_('COMUNICACOES').some(r=>{
-        if(String(r.CLIENTE_ID)!==String(cert.CLIENTE_ID)||String(r.STATUS_ENVIO).toUpperCase()!=='ENVIADO') return false;
-        const subject=String(r.ASSUNTO||'');
-        return subject===expirationSubject_(days);
-      });
-      if(alreadySent){result.ignorados++;return;}
-      sendCommunication_({clienteId:cert.CLIENTE_ID,certificadoId:cert.ID,destino:customer.EMAIL,actor:String(p.actor||'ATLAS-AUTOMACAO')},client||{});
+
+      if(expiryMilestoneAlreadySent_(cert.ID,days)){
+        result.ignorados++;
+        return;
+      }
+
+      sendCommunication_({
+        clienteId:cert.CLIENTE_ID,
+        certificadoId:cert.ID,
+        destino:customer.EMAIL,
+        actor:String(p.actor||'ATLAS-AUTOMACAO')
+      },client||{});
       result.enviados++;
     } catch(error) {
       result.erros.push({certificadoId:String(cert.ID||''),erro:String(error.message||error)});
     }
   });
   return result;
+}
+function executarAutomacaoVencimentosDiaria() {
+  const lock=LockService.getScriptLock();
+  if(!lock.tryLock(1000)) return {ok:false,motivo:'EXECUCAO_EM_ANDAMENTO'};
+
+  try {
+    const result=runExpirationAutomation_({
+      dias:[60,30,15,5],
+      actor:'ATLAS-AUTOMACAO-DIARIA'
+    },{path:'TRIGGER_DIARIO',userAgent:'Google Apps Script Time Trigger'});
+
+    appendLog_('INFO','AUTOMACAO_VENCIMENTOS','Automacao diaria de vencimentos executada',result);
+    return result;
+  } catch(error) {
+    try {
+      appendLog_('ERROR','AUTOMACAO_VENCIMENTOS','Falha na automacao diaria de vencimentos',{
+        erro:String(error.message||error),
+        stack:String(error.stack||'')
+      });
+    } catch(_) {}
+    throw error;
+  } finally {
+    lock.releaseLock();
+  }
+}
+function configurarGatilhoAutomacaoVencimentos() {
+  const functionName='executarAutomacaoVencimentosDiaria';
+
+  ScriptApp.getProjectTriggers().forEach(function(trigger){
+    if(trigger.getHandlerFunction()===functionName){
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  const trigger=ScriptApp.newTrigger(functionName)
+    .timeBased()
+    .everyDays(1)
+    .atHour(9)
+    .create();
+
+  appendLog_('INFO','AUTOMACAO_VENCIMENTOS','Gatilho diario configurado',{
+    funcao:functionName,
+    horaAproximada:9,
+    regras:[60,30,15,5],
+    triggerId:trigger.getUniqueId()
+  });
+
+  return {
+    ok:true,
+    funcao:functionName,
+    frequencia:'DIARIA',
+    horaAproximada:'09:00',
+    regras:[60,30,15,5],
+    triggerId:trigger.getUniqueId()
+  };
+}
+function removerGatilhoAutomacaoVencimentos() {
+  const functionName='executarAutomacaoVencimentosDiaria';
+  let removidos=0;
+
+  ScriptApp.getProjectTriggers().forEach(function(trigger){
+    if(trigger.getHandlerFunction()===functionName){
+      ScriptApp.deleteTrigger(trigger);
+      removidos++;
+    }
+  });
+
+  appendLog_('INFO','AUTOMACAO_VENCIMENTOS','Gatilho diario removido',{removidos:removidos});
+  return {ok:true,removidos:removidos};
 }
 function escapeHtml_(value) {
   return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -633,6 +719,10 @@ function onOpen() {
     .addSeparator()
     .addItem('Validar base para importacao', 'solicitarValidacaoImportacaoCRM')
     .addItem('Importar base validada', 'solicitarImportacaoCRM')
+    .addSeparator()
+    .addItem('Ativar avisos automaticos 60/30/15/5', 'configurarGatilhoAutomacaoVencimentos')
+    .addItem('Executar avisos agora (teste)', 'executarAutomacaoVencimentosDiaria')
+    .addItem('Desativar avisos automaticos', 'removerGatilhoAutomacaoVencimentos')
     .addToUi();
 }
 
