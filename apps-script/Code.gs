@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.10.3';
+const ATLAS_VERSION = '5.0.10.4';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -52,7 +52,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list','agenda.list','agenda.create','agenda.update'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','automation.run','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list','agenda.list','agenda.create','agenda.update'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -78,6 +78,8 @@ function route_(action,payload,client,authToken) {
     case 'timeline.add': return addTimeline_(payload);
     case 'communications.list': return listCommunications_(payload);
     case 'communications.create': return createCommunication_(payload);
+    case 'communications.send': return sendCommunication_(payload,client);
+    case 'automation.run': return runExpirationAutomation_(payload,client);
     case 'models.list': return rows_('MODELOS_EMAIL');
     case 'campaigns.list': return rows_('CAMPANHAS');
     case 'campaigns.create': return createCampaign_(payload);
@@ -292,6 +294,129 @@ function createCommunication_(p) {
   addTimeline_({clienteId:p.clienteId,tipoEvento:'COMUNICACAO_CRIADA',titulo:'Comunicacao preparada',descricao:String(p.assunto||p.canal||''),origem:'CENTRO_COMUNICACAO',actor:actor,dados:{comunicacaoId:id}});
   return findById_('COMUNICACOES',id);
 }
+
+function parseCertificateDate_(value) {
+  if (value instanceof Date && !isNaN(value.getTime())) return new Date(value.getFullYear(),value.getMonth(),value.getDate());
+  const text=String(value||'').trim();
+  let match=text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(match) return new Date(Number(match[3]),Number(match[2])-1,Number(match[1]));
+  match=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(match) return new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));
+  const date=new Date(text);
+  if(isNaN(date.getTime())) throw apiError_('VALIDATION','Data de vencimento invalida.');
+  return new Date(date.getFullYear(),date.getMonth(),date.getDate());
+}
+function expirationDays_(value) {
+  const expiry=parseCertificateDate_(value);
+  const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round((expiry.getTime()-today.getTime())/86400000);
+}
+function expirationLabel_(days) {
+  if(days>1) return 'Aviso de '+days+' dias';
+  if(days===1) return 'Aviso de 1 dia';
+  if(days===0) return 'Aviso de vencimento hoje';
+  return 'Certificado vencido ha '+Math.abs(days)+' dia'+(Math.abs(days)===1?'':'s');
+}
+function expirationSubject_(days) {
+  if(days>1) return 'Atencao: seu certificado digital vence em '+days+' dias';
+  if(days===1) return 'Atencao: seu certificado digital vence amanha';
+  if(days===0) return 'Atencao: seu certificado digital vence hoje';
+  return 'Atencao: seu certificado digital esta vencido';
+}
+function sendCommunication_(p,client) {
+  const clientId=String(p.clienteId||'').trim();
+  const customer=findById_('CLIENTES',clientId);
+  if(!customer) throw apiError_('NOT_FOUND','Cliente nao encontrado.');
+
+  const certificateId=String(p.certificadoId||p.certificateId||'').trim();
+  let certificate=certificateId?findById_('CERTIFICADOS',certificateId):null;
+  if(!certificate && p.vencimento) {
+    certificate={ID:certificateId||'',CLIENTE_ID:clientId,TIPO:String(p.certificado||p.tipoCertificado||''),VENCIMENTO:p.vencimento};
+  }
+  if(!certificate) {
+    certificate=rows_('CERTIFICADOS')
+      .filter(r=>String(r.CLIENTE_ID)===clientId && String(r.STATUS||'ATIVO').toUpperCase()==='ATIVO')
+      .sort((a,b)=>parseCertificateDate_(a.VENCIMENTO)-parseCertificateDate_(b.VENCIMENTO))[0] || null;
+  }
+  if(!certificate || !certificate.VENCIMENTO) throw apiError_('VALIDATION','Certificado ou vencimento nao informado.');
+
+  const days=expirationDays_(certificate.VENCIMENTO);
+  const destination=normalize_(p.destino||p.email||customer.EMAIL);
+  if(!destination || destination.indexOf('@')<1) throw apiError_('VALIDATION','Informe um e-mail de destino valido.');
+
+  const subject=expirationSubject_(days);
+  const label=expirationLabel_(days);
+  const name=String(customer.NOME||customer.EMPRESA||'Cliente');
+  const certType=String(certificate.TIPO||p.certificado||p.tipoCertificado||'Certificado digital');
+  const tz=Session.getScriptTimeZone()||'America/Sao_Paulo';
+  const expiry=parseCertificateDate_(certificate.VENCIMENTO);
+  const expiryText=Utilities.formatDate(expiry,tz,'dd/MM/yyyy');
+
+  const html='<div style="font-family:Arial,sans-serif;color:#17365D;line-height:1.55">'
+    +'<h2 style="margin:0 0 16px">'+label+'</h2>'
+    +'<p>Ola, '+escapeHtml_(name)+'.</p>'
+    +'<p>'+ (days>1
+      ? 'Faltam exatamente <strong>'+days+' dias</strong> para o vencimento do seu certificado digital.'
+      : days===1 ? 'Falta exatamente <strong>1 dia</strong> para o vencimento do seu certificado digital.'
+      : days===0 ? 'Seu certificado digital <strong>vence hoje</strong>.'
+      : 'Seu certificado digital esta <strong>vencido ha '+Math.abs(days)+' dia'+(Math.abs(days)===1?'':'s')+'</strong>.')
+    +' Nossa equipe ja pode conduzir a renovacao com seguranca.</p>'
+    +'<p><strong>Cliente:</strong> '+escapeHtml_(name)
+    +' &bull; <strong>Certificado:</strong> '+escapeHtml_(certType)
+    +' &bull; <strong>Validade:</strong> '+expiryText+'</p>'
+    +'<p>Equipe Pedroza Certificadora</p></div>';
+
+  const now=new Date(),actor=String(p.actor||'ATLAS'),id=nextId_('COMUNICACOES','COM');
+  appendObject_('COMUNICACOES',{
+    ID:id,CLIENTE_ID:clientId,CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:String(p.modeloId||'AVISO_VENCIMENTO'),
+    CANAL:'EMAIL',DESTINO:destination,ASSUNTO:subject,CONTEUDO_HTML:html,STATUS_ENVIO:'PROCESSANDO',
+    TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',
+    CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor
+  });
+  try {
+    MailApp.sendEmail({to:destination,subject:subject,htmlBody:html,name:'Pedroza Certificadora'});
+    updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ENVIADO',ENVIADO_EM:new Date(),ERRO:''},actor);
+    addTimeline_({clienteId:clientId,tipoEvento:'EMAIL_VENCIMENTO_ENVIADO',titulo:label,descricao:subject,origem:'FICHA_360',actor:actor,dados:{comunicacaoId:id,certificadoId:String(certificate.ID||''),vencimento:expiryText,diasCalculados:days,destino:destination}});
+    recordAudit_({action:'COMMUNICATION_SENT',details:{user:actor,clienteId:clientId,certificadoId:String(certificate.ID||''),comunicacaoId:id,diasCalculados:days,destino:destination}},client||{});
+    return {id:id,status:'ENVIADO',destino:destination,assunto:subject,diasCalculados:days,regra:label,vencimento:expiryText};
+  } catch(error) {
+    updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ERRO',ERRO:String(error.message||error)},actor);
+    throw apiError_('EMAIL_SEND_FAILED','Nao foi possivel enviar o e-mail: '+String(error.message||error));
+  }
+}
+function runExpirationAutomation_(p,client) {
+  const requested=Array.isArray(p.dias)?p.dias:(Array.isArray(p.days)?p.days:[30,15]);
+  const rules=requested.map(Number).filter(n=>isFinite(n)&&n>=0);
+  const activeClients={};
+  rows_('CLIENTES').filter(r=>String(r.STATUS||'').toUpperCase()==='ATIVO').forEach(r=>activeClients[String(r.ID)]=r);
+  const certs=rows_('CERTIFICADOS').filter(r=>String(r.STATUS||'').toUpperCase()==='ATIVO');
+  const result={regras:rules,analisados:certs.length,enviados:0,ignorados:0,erros:[]};
+
+  certs.forEach(cert=>{
+    try {
+      const days=expirationDays_(cert.VENCIMENTO);
+      if(rules.indexOf(days)<0){result.ignorados++;return;}
+      const customer=activeClients[String(cert.CLIENTE_ID)];
+      if(!customer||!normalize_(customer.EMAIL)){result.ignorados++;return;}
+      const alreadySent=rows_('COMUNICACOES').some(r=>{
+        if(String(r.CLIENTE_ID)!==String(cert.CLIENTE_ID)||String(r.STATUS_ENVIO).toUpperCase()!=='ENVIADO') return false;
+        const subject=String(r.ASSUNTO||'');
+        return subject===expirationSubject_(days);
+      });
+      if(alreadySent){result.ignorados++;return;}
+      sendCommunication_({clienteId:cert.CLIENTE_ID,certificadoId:cert.ID,destino:customer.EMAIL,actor:String(p.actor||'ATLAS-AUTOMACAO')},client||{});
+      result.enviados++;
+    } catch(error) {
+      result.erros.push({certificadoId:String(cert.ID||''),erro:String(error.message||error)});
+    }
+  });
+  return result;
+}
+function escapeHtml_(value) {
+  return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function createCampaign_(p) {
   if(!String(p.nome||'').trim()) throw apiError_('VALIDATION','Informe o nome da campanha.');
   const now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('CAMPANHAS','CAM');
