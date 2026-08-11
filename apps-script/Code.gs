@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.10.4';
+const ATLAS_VERSION = '5.0.10.5';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -324,6 +324,83 @@ function expirationSubject_(days) {
   if(days===0) return 'Atencao: seu certificado digital vence hoje';
   return 'Atencao: seu certificado digital esta vencido';
 }
+function expiryModelId_(days) {
+  if(days<0) return 'MOD-000002';
+  if(days===0) return 'MOD-000013';
+  if(days===1) return 'MOD-000012';
+  if(days<=7) return 'MOD-000009';
+  if(days<=15) return 'MOD-000008';
+  if(days<=30) return 'MOD-000007';
+  return 'MOD-000006';
+}
+function expirationSentence_(days) {
+  if(days<0) return 'Seu certificado digital venceu ha '+Math.abs(days)+(Math.abs(days)===1?' dia.':' dias.');
+  if(days===0) return 'Seu certificado digital vence hoje.';
+  if(days===1) return 'Falta 1 dia para o vencimento do seu certificado digital.';
+  return 'Faltam exatamente '+days+' dias para o vencimento do seu certificado digital.';
+}
+function expirationBadge_(days) {
+  if(days<0) return 'VENCIDO HA '+Math.abs(days)+(Math.abs(days)===1?' DIA':' DIAS');
+  if(days===0) return 'VENCE HOJE';
+  if(days===1) return 'FALTA 1 DIA PARA O VENCIMENTO';
+  return 'FALTAM '+days+' DIAS PARA O VENCIMENTO';
+}
+function replaceTemplateVariable_(html,key,value) {
+  return String(html||'').replace(new RegExp('\\{\\{\\s*'+key+'\\s*\\}\\}','gi'),String(value==null?'':value));
+}
+function renderExpiryEmailHtml_(p,customer,certificate,days,expiryText) {
+  var modelId=expiryModelId_(days);
+  var html=String(p.conteudoHtml||'').trim();
+  if(!html) {
+    var model=rows_('MODELOS_EMAIL').find(function(r){return String(r.ID)===String(modelId);});
+    html=model?String(model.HTML||''):'';
+  }
+
+  var name=String(customer.NOME||customer.EMPRESA||'Cliente');
+  var company=String(customer.EMPRESA||name);
+  var document=String(customer.CPF_CNPJ||'');
+  var certType=String(certificate.TIPO||p.tipoCertificado||'Certificado digital');
+  var message=expirationSentence_(days)+' Nossa equipe ja pode conduzir a renovacao com seguranca.';
+  var logo='https://pedrozacertificadora.com.br/images/logo/pedroza-certificadora-email.png';
+
+  if(!html) {
+    return '<div style="font-family:Arial,sans-serif;color:#17365D;line-height:1.55">'
+      +'<h2>'+escapeHtml_(expirationLabel_(days))+'</h2>'
+      +'<p>Ola, '+escapeHtml_(name)+'.</p>'
+      +'<p>'+escapeHtml_(message)+'</p>'
+      +'<p><strong>Cliente:</strong> '+escapeHtml_(name)
+      +' &bull; <strong>Certificado:</strong> '+escapeHtml_(certType)
+      +' &bull; <strong>Validade:</strong> '+escapeHtml_(expiryText)+'</p>'
+      +'<p>Equipe Pedroza Certificadora</p></div>';
+  }
+
+  var vars={
+    NOME:name,
+    EMPRESA:company,
+    CPF_CNPJ:document,
+    TIPO_CERTIFICADO:certType,
+    VALIDADE:expiryText,
+    MENSAGEM:message,
+    ASSINATURA:'Equipe Pedroza Certificadora',
+    LOGO:logo,
+    LOGO_URL:logo,
+    URL_LOGO:logo,
+    DIAS:String(Math.abs(days)),
+    DIAS_RESTANTES:String(Math.abs(days)),
+    PRAZO_DIAS:String(Math.abs(days)),
+    TEXTO_PRAZO:expirationSentence_(days),
+    MENSAGEM_VENCIMENTO:expirationSentence_(days)
+  };
+  Object.keys(vars).forEach(function(key){html=replaceTemplateVariable_(html,key,vars[key]);});
+
+  html=html
+    .replace(/FALTAM?\s+(?:APROXIMADAMENTE\s+|EXATAMENTE\s+)?\d+\s+DIAS?(?:\s+PARA\s+O\s+VENCIMENTO)?/g,expirationBadge_(days))
+    .replace(/Faltam?\s+(?:aproximadamente\s+|exatamente\s+)?\d+\s+dias?(?:\s+para\s+o\s+vencimento(?:\s+do\s+seu\s+certificado\s+digital)?)?\.?/g,expirationSentence_(days))
+    .replace(/(<img\b[^>]*\bsrc=["'])(?:\.\.\/|\.\/)*images\/logo\/[^"']+(["'][^>]*>)/gi,'$1'+logo+'$2')
+    .replace(/(<img\b[^>]*\bsrc=["'])https?:\/\/(?:www\.)?pedrozacertificadora\.com\.br\/images\/logo\/[^"']+(["'][^>]*>)/gi,'$1'+logo+'$2');
+
+  return html;
+}
 function sendCommunication_(p,client) {
   const clientId=String(p.clienteId||'').trim();
   const customer=findById_('CLIENTES',clientId);
@@ -332,7 +409,7 @@ function sendCommunication_(p,client) {
   const certificateId=String(p.certificadoId||p.certificateId||'').trim();
   let certificate=certificateId?findById_('CERTIFICADOS',certificateId):null;
   if(!certificate && p.vencimento) {
-    certificate={ID:certificateId||'',CLIENTE_ID:clientId,TIPO:String(p.certificado||p.tipoCertificado||''),VENCIMENTO:p.vencimento};
+    certificate={ID:certificateId||'',CLIENTE_ID:clientId,TIPO:String(p.tipoCertificado||''),VENCIMENTO:p.vencimento};
   }
   if(!certificate) {
     certificate=rows_('CERTIFICADOS')
@@ -347,29 +424,15 @@ function sendCommunication_(p,client) {
 
   const subject=expirationSubject_(days);
   const label=expirationLabel_(days);
-  const name=String(customer.NOME||customer.EMPRESA||'Cliente');
-  const certType=String(certificate.TIPO||p.certificado||p.tipoCertificado||'Certificado digital');
   const tz=Session.getScriptTimeZone()||'America/Sao_Paulo';
   const expiry=parseCertificateDate_(certificate.VENCIMENTO);
   const expiryText=Utilities.formatDate(expiry,tz,'dd/MM/yyyy');
-
-  const html='<div style="font-family:Arial,sans-serif;color:#17365D;line-height:1.55">'
-    +'<h2 style="margin:0 0 16px">'+label+'</h2>'
-    +'<p>Ola, '+escapeHtml_(name)+'.</p>'
-    +'<p>'+ (days>1
-      ? 'Faltam exatamente <strong>'+days+' dias</strong> para o vencimento do seu certificado digital.'
-      : days===1 ? 'Falta exatamente <strong>1 dia</strong> para o vencimento do seu certificado digital.'
-      : days===0 ? 'Seu certificado digital <strong>vence hoje</strong>.'
-      : 'Seu certificado digital esta <strong>vencido ha '+Math.abs(days)+' dia'+(Math.abs(days)===1?'':'s')+'</strong>.')
-    +' Nossa equipe ja pode conduzir a renovacao com seguranca.</p>'
-    +'<p><strong>Cliente:</strong> '+escapeHtml_(name)
-    +' &bull; <strong>Certificado:</strong> '+escapeHtml_(certType)
-    +' &bull; <strong>Validade:</strong> '+expiryText+'</p>'
-    +'<p>Equipe Pedroza Certificadora</p></div>';
+  const html=renderExpiryEmailHtml_(p,customer,certificate,days,expiryText);
+  const modelId=expiryModelId_(days);
 
   const now=new Date(),actor=String(p.actor||'ATLAS'),id=nextId_('COMUNICACOES','COM');
   appendObject_('COMUNICACOES',{
-    ID:id,CLIENTE_ID:clientId,CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:String(p.modeloId||'AVISO_VENCIMENTO'),
+    ID:id,CLIENTE_ID:clientId,CAMPANHA_ID:String(p.campanhaId||''),MODELO_ID:modelId,
     CANAL:'EMAIL',DESTINO:destination,ASSUNTO:subject,CONTEUDO_HTML:html,STATUS_ENVIO:'PROCESSANDO',
     TENTATIVAS:1,ERRO:'',AGENDADO_PARA:'',ENVIADO_EM:'',ENTREGUE_EM:'',LIDO_EM:'',STATUS:'ATIVO',
     CRIADO_EM:now,CRIADO_POR:actor,ALTERADO_EM:now,ALTERADO_POR:actor
@@ -377,9 +440,9 @@ function sendCommunication_(p,client) {
   try {
     MailApp.sendEmail({to:destination,subject:subject,htmlBody:html,name:'Pedroza Certificadora'});
     updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ENVIADO',ENVIADO_EM:new Date(),ERRO:''},actor);
-    addTimeline_({clienteId:clientId,tipoEvento:'EMAIL_VENCIMENTO_ENVIADO',titulo:label,descricao:subject,origem:'FICHA_360',actor:actor,dados:{comunicacaoId:id,certificadoId:String(certificate.ID||''),vencimento:expiryText,diasCalculados:days,destino:destination}});
-    recordAudit_({action:'COMMUNICATION_SENT',details:{user:actor,clienteId:clientId,certificadoId:String(certificate.ID||''),comunicacaoId:id,diasCalculados:days,destino:destination}},client||{});
-    return {id:id,status:'ENVIADO',destino:destination,assunto:subject,diasCalculados:days,regra:label,vencimento:expiryText};
+    addTimeline_({clienteId:clientId,tipoEvento:'EMAIL_VENCIMENTO_ENVIADO',titulo:label,descricao:subject,origem:'FICHA_360',actor:actor,dados:{comunicacaoId:id,certificadoId:String(certificate.ID||''),modeloId:modelId,vencimento:expiryText,diasCalculados:days,destino:destination}});
+    recordAudit_({action:'COMMUNICATION_SENT',details:{user:actor,clienteId:clientId,certificadoId:String(certificate.ID||''),comunicacaoId:id,modeloId:modelId,diasCalculados:days,destino:destination}},client||{});
+    return {id:id,status:'ENVIADO',destino:destination,assunto:subject,diasCalculados:days,regra:label,modeloId:modelId,vencimento:expiryText};
   } catch(error) {
     updateRow_('COMUNICACOES',id,{STATUS_ENVIO:'ERRO',ERRO:String(error.message||error)},actor);
     throw apiError_('EMAIL_SEND_FAILED','Nao foi possivel enviar o e-mail: '+String(error.message||error));
