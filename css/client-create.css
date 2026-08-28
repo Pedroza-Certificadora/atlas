@@ -1,0 +1,65 @@
+/*
+  Pedroza Certificadora
+  Atlas - Cadastro Operacional de Cliente e Certificado
+  Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
+*/
+
+.atlas-create-backdrop{
+  position:fixed;inset:0;background:rgba(4,18,38,.58);backdrop-filter:blur(3px);
+  z-index:9997
+}
+.atlas-create-modal{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(820px,calc(100vw - 32px));max-height:calc(100vh - 40px);overflow:auto;
+  background:#fff;border:1px solid #dfe7f1;border-radius:22px;box-shadow:0 28px 80px rgba(7,27,54,.28);
+  z-index:9998;color:#0b2545
+}
+.atlas-create-modal[hidden],.atlas-create-backdrop[hidden]{display:none!important}
+.atlas-create-header{
+  display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:24px 26px 18px;
+  border-bottom:1px solid #e7edf5
+}
+.atlas-create-header span{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#1686df}
+.atlas-create-header h2{margin:5px 0 4px;font-size:1.55rem}
+.atlas-create-header p{margin:0;color:#64748b}
+.atlas-create-close{
+  width:38px;height:38px;border:0;border-radius:11px;background:#eef5fb;color:#0b2545;
+  font-size:1.45rem;cursor:pointer
+}
+.atlas-create-body{padding:22px 26px 26px}
+.atlas-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.atlas-create-grid .wide{grid-column:1/-1}
+.atlas-create-grid label{display:flex;flex-direction:column;gap:7px;font-weight:700;font-size:.86rem;color:#27415f}
+.atlas-create-grid input,.atlas-create-grid select,.atlas-create-grid textarea{
+  width:100%;box-sizing:border-box;border:1px solid #cbd8e7;border-radius:11px;padding:11px 12px;
+  background:#fff;color:#102a49;font:inherit;outline:none
+}
+.atlas-create-grid input:focus,.atlas-create-grid select:focus,.atlas-create-grid textarea:focus{
+  border-color:#1686df;box-shadow:0 0 0 3px rgba(22,134,223,.12)
+}
+.atlas-create-help{
+  margin:0 0 18px;padding:12px 14px;border-radius:12px;background:#f4f8fc;color:#51657d;font-size:.88rem
+}
+.atlas-create-actions{
+  display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid #e7edf5
+}
+.atlas-create-actions button{
+  border:0;border-radius:11px;padding:11px 17px;font:inherit;font-weight:800;cursor:pointer
+}
+.atlas-create-cancel{background:#eaf0f6;color:#163657}
+.atlas-create-submit{background:#0a7ce2;color:#fff}
+.atlas-create-submit:disabled{opacity:.55;cursor:not-allowed}
+.atlas-create-status{min-height:22px;margin-top:12px;font-weight:700;font-size:.9rem}
+.atlas-create-status.error{color:#b42318}.atlas-create-status.ok{color:#087443}
+.atlas-create-mode-switch{display:flex;gap:8px;margin-bottom:18px}
+.atlas-create-mode-switch button{
+  border:1px solid #cbd8e7;background:#f7faff;color:#24435f;border-radius:999px;padding:8px 12px;
+  font-weight:800;cursor:pointer
+}
+.atlas-create-mode-switch button.active{background:#0a7ce2;color:#fff;border-color:#0a7ce2}
+@media(max-width:680px){
+  .atlas-create-grid{grid-template-columns:1fr}
+  .atlas-create-grid .wide{grid-column:auto}
+  .atlas-create-modal{width:min(94vw,820px)}
+  .atlas-create-header,.atlas-create-body{padding-left:18px;padding-right:18px}
+}
