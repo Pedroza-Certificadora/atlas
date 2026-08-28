@@ -3,7 +3,7 @@
  * Atlas Data Foundation v1.0
  * Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
  */
-const ATLAS_VERSION = '5.0.10.7';
+const ATLAS_VERSION = '5.0.10.14';
 const SESSION_TTL_SECONDS = 28800;
 const SHEETS = Object.freeze({
   USUARIOS: ['ID','LOGIN','EMAIL','NOME','PERFIL','HASH_SENHA','CPF_CNPJ','TELEFONE','CHAVE_CERTIFICADO','PREFERENCIAS_JSON','STATUS','CRIADO_EM','CRIADO_POR','ALTERADO_EM','ALTERADO_POR'],
@@ -89,8 +89,8 @@ function route_(action,payload,client,authToken) {
     case 'sectors.list': return {setores:rows_('SETORES'),subsetores:rows_('SUBSETORES')};
     case 'tags.list': return rows_('TAGS');
     case 'agenda.list': return listAgenda_(payload);
-    case 'agenda.create': return createAgenda_(payload);
-    case 'agenda.update': return updateAgenda_(payload);
+    case 'agenda.create': requireAgendaManage_(authToken); return createAgenda_(payload,client);
+    case 'agenda.update': requireAgendaManage_(authToken); return updateAgenda_(payload,client);
     default: throw apiError_('ACTION_NOT_FOUND','Acao nao reconhecida pela Atlas API.');
   }
 }
@@ -246,19 +246,42 @@ function listAgenda_(p) {
   if(end) items=items.filter(r=>{const d=new Date(r.INICIO);return !isNaN(d.getTime())&&d<=end;});
   return items.sort((a,b)=>new Date(a.INICIO)-new Date(b.INICIO)).map(publicAgenda_);
 }
-function validateAgendaPayload_(p) {
+function isOperationalAgendaClient_(client) {
+  if(!client||String(client.STATUS||'').toUpperCase()!=='ATIVO') return false;
+  const situation=String(client.SITUACAO||'').trim().toUpperCase();
+  return ['INATIVO','ARQUIVADO','EXCLUIDO','INTEGRADO'].indexOf(situation)===-1;
+}
+function agendaConflict_(start,end,responsavel,excludeId) {
+  const owner=normalize_(responsavel);
+  if(!owner) return null;
+  return rows_('AGENDA').find(r=>{
+    if(String(r.STATUS||'').toUpperCase()!=='ATIVO') return false;
+    if(excludeId&&String(r.ID)===String(excludeId)) return false;
+    if(normalize_(r.RESPONSAVEL)!==owner) return false;
+    const situation=String(r.SITUACAO||'').toUpperCase();
+    if(['CANCELADO','NAO_COMPARECEU','CONCLUIDO'].indexOf(situation)>=0) return false;
+    const otherStart=parseAgendaDate_(r.INICIO,'inicio');
+    const otherEnd=parseAgendaDate_(r.FIM,'fim');
+    return start<otherEnd&&end>otherStart;
+  })||null;
+}
+function validateAgendaPayload_(p,excludeId) {
   const clientId=String(p.clienteId||'').trim();
   const title=String(p.titulo||'').trim();
-  if(!clientId||!findById_('CLIENTES',clientId)) throw apiError_('NOT_FOUND','Selecione um cliente valido.');
+  const client=clientId?findById_('CLIENTES',clientId):null;
+  if(!client) throw apiError_('NOT_FOUND','Selecione um cliente valido.');
+  if(!isOperationalAgendaClient_(client)) throw apiError_('CLIENT_INACTIVE','O cliente esta inativo ou arquivado e nao pode receber novo agendamento.');
   if(!title) throw apiError_('VALIDATION','Informe o titulo do agendamento.');
   const start=parseAgendaDate_(p.inicio,'inicio');
   const end=parseAgendaDate_(p.fim,'fim');
   if(end<=start) throw apiError_('VALIDATION','O fim deve ser posterior ao inicio.');
+  const conflict=agendaConflict_(start,end,String(p.responsavel||''),excludeId||'');
+  if(conflict) throw apiError_('AGENDA_CONFLICT','Ja existe atendimento para este responsavel no horario informado.');
   return {clientId:clientId,title:title,start:start,end:end};
 }
-function createAgenda_(p) {
+function createAgenda_(p,client) {
   ensureAgendaSchema_();
-  const valid=validateAgendaPayload_(p), now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('AGENDA','AGE');
+  const valid=validateAgendaPayload_(p,''), now=new Date(), actor=String(p.actor||'ATLAS'), id=nextId_('AGENDA','AGE');
   appendObject_('AGENDA',{
     ID:id,CLIENTE_ID:valid.clientId,TITULO:valid.title,INICIO:valid.start,FIM:valid.end,
     RESPONSAVEL:String(p.responsavel||''),SITUACAO:String(p.situacao||'SOLICITADO').toUpperCase(),
@@ -266,19 +289,21 @@ function createAgenda_(p) {
     ALTERADO_EM:now,ALTERADO_POR:actor,TIPO:String(p.tipo||'OUTRO').toUpperCase(),LOCAL_LINK:String(p.localLink||'')
   });
   addTimeline_({clienteId:valid.clientId,tipoEvento:'AGENDAMENTO_CRIADO',titulo:'Agendamento criado',descricao:valid.title,origem:'AGENDA',actor:actor,dados:{agendaId:id,inicio:valid.start.toISOString(),fim:valid.end.toISOString()}});
+  recordAudit_({action:'AGENDA_CREATED',details:{username:actor,agendaId:id,clientId:valid.clientId,inicio:valid.start.toISOString(),fim:valid.end.toISOString(),responsavel:String(p.responsavel||''),situacao:String(p.situacao||'SOLICITADO').toUpperCase()}},client||{});
   return publicAgenda_(findById_('AGENDA',id));
 }
-function updateAgenda_(p) {
+function updateAgenda_(p,client) {
   ensureAgendaSchema_();
   const id=String(p.id||'').trim();
   if(!id||!findById_('AGENDA',id)) throw apiError_('NOT_FOUND','Agendamento nao encontrado.');
-  const valid=validateAgendaPayload_(p), actor=String(p.actor||'ATLAS');
+  const valid=validateAgendaPayload_(p,id), actor=String(p.actor||'ATLAS');
   const updated=updateRow_('AGENDA',id,{
     CLIENTE_ID:valid.clientId,TITULO:valid.title,INICIO:valid.start,FIM:valid.end,
     RESPONSAVEL:String(p.responsavel||''),SITUACAO:String(p.situacao||'SOLICITADO').toUpperCase(),
     OBSERVACOES:String(p.observacoes||''),TIPO:String(p.tipo||'OUTRO').toUpperCase(),LOCAL_LINK:String(p.localLink||'')
   },actor,publicAgenda_);
   addTimeline_({clienteId:valid.clientId,tipoEvento:'AGENDAMENTO_ATUALIZADO',titulo:'Agendamento atualizado',descricao:valid.title,origem:'AGENDA',actor:actor,dados:{agendaId:id,inicio:valid.start.toISOString(),fim:valid.end.toISOString()}});
+  recordAudit_({action:'AGENDA_UPDATED',details:{username:actor,agendaId:id,clientId:valid.clientId,inicio:valid.start.toISOString(),fim:valid.end.toISOString(),responsavel:String(p.responsavel||''),situacao:String(p.situacao||'SOLICITADO').toUpperCase()}},client||{});
   return updated;
 }
 
@@ -646,6 +671,18 @@ function requireSession_(token) {
   const raw = token ? CacheService.getScriptCache().get('session:' + token) : null;
   if (!raw) throw apiError_('UNAUTHORIZED','Sessao da Atlas API ausente ou expirada. Entre novamente.');
   return parseJson_(raw,{});
+}
+function requireAgendaManage_(token) {
+  const session=requireSession_(token), role=String(session.role||'').toUpperCase();
+  if(role==='FULL'||role==='ADMIN') return session;
+  const permissions=rows_('PERMISSOES').filter(r=>String(r.PERFIL||'').toUpperCase()===role);
+  if(permissions.length){
+    const allowed=permissions.some(r=>String(r.PERMISSAO||'').toUpperCase()==='AGENDA_MANAGE'&&String(r.ATIVO||'').toUpperCase()!=='NAO'&&String(r.STATUS||'ATIVO').toUpperCase()==='ATIVO');
+    if(allowed) return session;
+    throw apiError_('FORBIDDEN','Seu perfil nao possui permissao para gerenciar a agenda.');
+  }
+  if(role==='AGR') return session;
+  throw apiError_('FORBIDDEN','Seu perfil nao possui permissao para gerenciar a agenda.');
 }
 function seedUsers_() {
   if (rows_('USUARIOS').length) return;

@@ -1,6 +1,6 @@
 /*
   Pedroza Certificadora
-  Atlas Agenda - Hotfix 5.0.10.3
+  Atlas Agenda - Hardening 5.0.10.14
   Concepcao, Design e Desenvolvimento: Marcos Henrique Pedroza
 */
 (function () {
@@ -12,6 +12,16 @@
   var reference = new Date();
 
   function id(value) { return document.getElementById(value); }
+  function actor() {
+    try {
+      var s = window.AtlasAuth && window.AtlasAuth.session ? window.AtlasAuth.session.read() : null;
+      return String(s && s.user && (s.user.displayName || s.user.username) || "ATLAS");
+    } catch (error) { return "ATLAS"; }
+  }
+  function operationalClient(client) {
+    var situation = String(client && client.situacao || "").toUpperCase();
+    return client && client.active !== false && ["INATIVO","ARQUIVADO","EXCLUIDO","INTEGRADO"].indexOf(situation) === -1;
+  }
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
@@ -73,7 +83,7 @@
       clients.length ? Promise.resolve(clients) : window.AtlasAPI.listClients()
     ]).then(function (output) {
       appointments = Array.isArray(output[0]) ? output[0] : [];
-      clients = Array.isArray(output[1]) ? output[1] : [];
+      clients = (Array.isArray(output[1]) ? output[1] : []).filter(operationalClient);
       id("agenda-client").innerHTML = '<option value="">Selecione...</option>' + clients.map(function (client) {
         return '<option value="' + esc(client.id) + '">' + esc(client.name || client.nome || client.company || client.empresa || client.id) + '</option>';
       }).join("");
@@ -145,7 +155,8 @@
       fim: end.toISOString(),
       responsavel: id("agenda-owner").value,
       localLink: id("agenda-location").value,
-      observacoes: id("agenda-notes").value
+      observacoes: id("agenda-notes").value,
+      actor: actor()
     };
     var button = event.currentTarget.querySelector('button[type="submit"]');
     button.disabled = true;
