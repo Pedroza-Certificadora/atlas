@@ -83,7 +83,7 @@
     ensureUi();
     var modal=byId("atlas-create-modal");
     modal.innerHTML=
-      '<header class="atlas-create-header"><div><span>Atlas â€¢ Cadastro operacional</span><h2 id="atlas-create-title">'+escapeHtml(title)+'</h2><p>'+escapeHtml(subtitle)+'</p></div><button class="atlas-create-close" id="atlas-create-close" type="button" aria-label="Fechar">Ã—</button></header>'+
+      '<header class="atlas-create-header"><div><span>Atlas &bull; Cadastro operacional</span><h2 id="atlas-create-title">'+escapeHtml(title)+'</h2><p>'+escapeHtml(subtitle)+'</p></div><button class="atlas-create-close" id="atlas-create-close" type="button" aria-label="Fechar">&times;</button></header>'+
       '<div class="atlas-create-body">'+body+'</div>';
     byId("atlas-create-close").addEventListener("click",close);
     byId("atlas-create-backdrop").hidden=false; modal.hidden=false; document.body.style.overflow="hidden";
