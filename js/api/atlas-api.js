@@ -72,6 +72,7 @@
     getPreferences: function (id) { return request("users.getPreferences", { id: id }); },
     setPreferences: function (id, preferences) { return request("users.setPreferences", { id: id, preferences: preferences }); },
     audit: function (action, details) { return request("audit.record", { action: action, details: details || {} }); },
+    listAudit: function (filters) { return request("audit.list", filters || {}); },
     listClients: function () { return request("clients.list"); },
     createClient: function (data) { return request("clients.create", data); },
     updateClient: function (id, data) { return request("clients.update", { id: id, data: data }); },

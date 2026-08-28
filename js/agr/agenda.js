@@ -114,6 +114,7 @@
       id("agenda-start").value = toLocalInput(start);
       id("agenda-end").value = toLocalInput(end);
       id("agenda-title").value = "Atendimento de certificado digital";
+      id("agenda-owner").value = actor();
     }
     id("agenda-modal").hidden = false;
   }

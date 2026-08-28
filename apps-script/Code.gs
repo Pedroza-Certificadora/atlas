@@ -52,7 +52,7 @@ function configurarAtlasDataFoundation() {
 }
 
 function route_(action,payload,client,authToken) {
-  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','timeline.list','timeline.add','communications.list','communications.create','communications.send','automation.run','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list','agenda.list','agenda.create','agenda.update'].indexOf(action) >= 0) {
+  if (['users.list','users.create','users.setActive','users.updateProfile','users.changePassword','users.getPreferences','users.setPreferences','clients.list','clients.get','clients.create','clients.update','certificates.list','certificates.create','certificates.update','dashboard.summary','audit.list','timeline.list','timeline.add','communications.list','communications.create','communications.send','automation.run','models.list','campaigns.list','campaigns.create','campaigns.preview','invites.generate','sectors.list','tags.list','agenda.list','agenda.create','agenda.update'].indexOf(action) >= 0) {
     requireSession_(authToken);
   }
   switch(action) {
@@ -72,6 +72,7 @@ function route_(action,payload,client,authToken) {
     case 'certificates.create': return createCertificate_(payload);
     case 'certificates.update': return updateCertificate_(payload);
     case 'audit.record': return recordAudit_(payload,client);
+    case 'audit.list': return listAudit_(payload);
     case 'dashboard.summary': return dashboardSummary_();
     case 'clients.get': return getClient_(payload);
     case 'timeline.list': return listTimeline_(payload);
@@ -171,6 +172,14 @@ function recordAudit_(p,client) {
   const d=p.details||{}, now=new Date(), id=nextId_('AUDITORIA','AUD');
   appendObject_('AUDITORIA',{ID:id,USUARIO_ID:String(d.userId||''),USUARIO_LOGIN:String(d.username||d.user||d.login||''),ACAO:String(p.action||'ATIVIDADE'),DETALHES_JSON:JSON.stringify(d),CAMINHO:String(client.path||''),USER_AGENT:String(client.userAgent||''),DATA_HORA:now,STATUS:'ATIVO',CRIADO_EM:now,CRIADO_POR:String(d.username||'ATLAS'),ALTERADO_EM:now,ALTERADO_POR:String(d.username||'ATLAS')});
   return {id:id};
+}
+
+function listAudit_(p) {
+  p=p||{};
+  const limit=Math.max(1,Math.min(Number(p.limit)||100,5000));
+  const rows=rows_('AUDITORIA').filter(r=>String(r.STATUS||'ATIVO').toUpperCase()!=='EXCLUIDO');
+  rows.sort((a,b)=>new Date(b.DATA_HORA||b.CRIADO_EM||0)-new Date(a.DATA_HORA||a.CRIADO_EM||0));
+  return rows.slice(0,limit);
 }
 function dashboardSummary_() {
   const users=rows_('USUARIOS'), clients=rows_('CLIENTES'), certs=rows_('CERTIFICADOS'), audit=rows_('AUDITORIA');
